@@ -1,70 +1,15 @@
-# Clara V3 - Configuration globale
-# Réglages généraux du système
+# Clara - Configuration principale
 
-application:
-  name: "Clara V3"
-  version: "0.1.0"
-  language: "fr"
-  timezone: "Europe/Paris"
+# LLM Settings
+model: gpt-5.1
+temperature: 0.7
+max_tokens: 4096
+language_policy: auto
 
-paths:
-  base_dir: "."
-  memory_db: "memory/clara_memory.db"
-  logs_dir: "logs/sessions"
-  ui_dir: "ui"
-  journal_dir: "journal/dev_notes"
+# Session Settings
+max_history_messages: 20
 
-logging:
-  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  session_logs:
-    enabled: true
-    format: "json"
-  debug_logs:
-    enabled: true
-    format: "json"
-    include_prompts: true
-    include_tool_calls: true
-    include_errors: true
-
-memory:
-  database: "sqlite"
-  vector_enabled: false  # Phase ultérieure
-  auto_save_important_facts: true
-  session_retention_days: 90
-
-api:
-  openai:
-    enabled: true
-    api_key_env: "OPENAI_API_KEY"
-    default_model: "gpt-4"
-    timeout: 30
-  
-  google:
-    enabled: false  # Phase ultérieure
-    credentials_path: "config/google_credentials.json"
-    scopes:
-      - "https://www.googleapis.com/auth/gmail.readonly"
-      - "https://www.googleapis.com/auth/calendar"
-
-ui:
-  chat:
-    enabled: true
-    host: "localhost"
-    port: 8000
-  
-  admin:
-    enabled: false  # Phase 3
-    host: "localhost"
-    port: 8001
-
-security:
-  require_authentication: false
-  allowed_file_extensions:
-    - ".txt"
-    - ".md"
-    - ".json"
-    - ".yaml"
-    - ".py"
-  max_file_size_mb: 10
-
+# Paths
+logs_sessions_dir: logs/sessions
+logs_debug_dir: logs/debug
+memory_db_path: memory/clara_memory.db

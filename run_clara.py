@@ -1,113 +1,96 @@
 #!/usr/bin/env python3
+# Clara - Point d'entrée principal
 """
-Clara V3 - Point d'entrée principal
-Lance Clara localement
+Point d'entrée de Clara
+Lance une session interactive avec l'utilisateur
 """
 
 import sys
-import logging
-from pathlib import Path
 import yaml
+from pathlib import Path
 from datetime import datetime
 
 # Ajouter le répertoire courant au path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from agents.orchestrator import ClaraOrchestrator
-from agents.fs_agent import FSAgent
-from drivers.fs_driver import FSDriver
-from memory.memory_core import MemoryCore
+from agents.orchestrator import Orchestrator
+from utils.logger import SessionLogger, DebugLogger
 
 
-def setup_logging(config: dict):
-    """Configure le système de logging"""
-    log_config = config.get('logging', {})
-    log_level = getattr(logging, log_config.get('level', 'INFO'))
-    log_format = log_config.get('format', '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    
-    logging.basicConfig(
-        level=log_level,
-        format=log_format,
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler(f"logs/clara_{datetime.now().strftime('%Y-%m-%d')}.log")
-        ]
-    )
-
-
-def load_config(config_path: str = "config/settings.yaml") -> dict:
-    """Charge la configuration depuis YAML"""
-    with open(config_path, 'r', encoding='utf-8') as f:
-        return yaml.safe_load(f)
+def generate_session_id():
+    """Génère un ID de session unique"""
+    return f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 
 def main():
     """Fonction principale"""
     print("=" * 60)
-    print("Clara V3 - Assistant IA Intelligent")
+    print("Clara - Assistant IA")
     print("=" * 60)
     print()
     
     try:
-        # Charger la configuration
-        config = load_config()
-        setup_logging(config)
-        logger = logging.getLogger(__name__)
-        
-        logger.info("Starting Clara V3...")
-        
-        # Initialiser la mémoire
-        memory = MemoryCore(db_path=config['paths']['memory_db'])
-        logger.info("Memory Core initialized")
-        
-        # Initialiser les drivers
-        fs_driver = FSDriver()
-        logger.info("FS Driver initialized")
-        
-        # Initialiser les agents
-        fs_agent = FSAgent(config={}, fs_driver=fs_driver)
-        logger.info("FS Agent initialized")
-        
-        # Initialiser l'orchestrateur
-        clara = ClaraOrchestrator(config=config)
-        clara.register_agent("fs_agent", fs_agent)
-        logger.info("Clara Orchestrator initialized")
-        
-        # Démarrer une session
-        session_id = clara.start_session()
-        print(f"\nSession démarrée : {session_id}")
-        print("\nClara V3 est prête !")
-        print("(Interface de chat à venir - Phase 1)")
-        print("\nPour l'instant, Clara est en mode construction.")
-        print("Consultez le README.md pour plus d'informations.")
+        # Générer un ID de session
+        session_id = generate_session_id()
+        print(f"Session ID: {session_id}")
         print()
         
-        # Mode interactif simple (temporaire)
-        print("Mode interactif basique (tapez 'quit' pour quitter):")
+        # Initialiser les loggers
+        session_logger = SessionLogger(session_id)
+        debug_logger = DebugLogger(session_id)
+        
+        # Initialiser l'orchestrateur
+        print("Initialisation de Clara...")
+        orchestrator = Orchestrator()
+        print("✓ Clara est prête !")
+        print()
+        print("Tapez 'quit' ou 'exit' pour quitter.")
+        print("-" * 60)
+        print()
+        
+        # Boucle de conversation
         while True:
             try:
-                user_input = input("\nVous: ")
+                # Lire l'input utilisateur
+                user_input = input("Vous: ")
+                
+                # Commandes de sortie
                 if user_input.lower() in ['quit', 'exit', 'q']:
+                    print("\nAu revoir ! 👋")
                     break
                 
-                response = clara.process_message(user_input)
-                print(f"Clara: {response}")
+                # Ignorer les inputs vides
+                if not user_input.strip():
+                    continue
+                
+                # Logger l'input
+                session_logger.log_user(user_input)
+                
+                # Traiter le message
+                response = orchestrator.handle_message(user_input, session_id, debug_logger)
+                
+                # Afficher la réponse
+                print(f"\nClara: {response}\n")
+                
+                # Logger la réponse
+                session_logger.log_clara(response)
                 
             except KeyboardInterrupt:
+                print("\n\nInterruption détectée.")
+                print("Au revoir ! 👋")
                 break
+            except Exception as e:
+                print(f"\nErreur: {str(e)}\n")
+                continue
         
-        # Terminer la session
-        clara.end_session()
-        memory.close()
-        logger.info("Clara V3 stopped")
-        print("\nAu revoir !")
+        print(f"\nSession terminée: {session_id}")
+        print(f"Logs sauvegardés dans logs/sessions/{session_id}.txt")
+        print(f"Debug sauvegardé dans logs/debug/{session_id}.json")
         
     except Exception as e:
         print(f"\nErreur lors du démarrage de Clara: {e}")
-        logging.error(f"Startup error: {e}", exc_info=True)
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
-

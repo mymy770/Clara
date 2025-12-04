@@ -1,34 +1,10 @@
-# Clara V3 - Dépendances Python
+# Clara - Dépendances Python
 
-# Core
-pyyaml>=6.0
+# Core dependencies
+pyyaml>=6.0.1
 python-dotenv>=1.0.0
 
 # OpenAI
 openai>=1.0.0
 
-# Database
-# SQLite est intégré à Python, pas de dépendance externe nécessaire
-
-# Google APIs (Phase ultérieure)
-# google-auth>=2.0.0
-# google-auth-oauthlib>=1.0.0
-# google-auth-httplib2>=0.1.0
-# google-api-python-client>=2.0.0
-
-# Testing
-pytest>=7.0.0
-pytest-cov>=4.0.0
-
-# Logging & Monitoring
-structlog>=23.0.0
-
-# Web UI (Phase ultérieure)
-# fastapi>=0.100.0
-# uvicorn>=0.23.0
-# websockets>=11.0
-
-# Vector database (Phase 2b/3)
-# sentence-transformers>=2.2.0
-# qdrant-client>=1.0.0
-
+# Database (SQLite is built-in, no external dependency needed)
