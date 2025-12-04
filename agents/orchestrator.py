@@ -7,7 +7,6 @@ Gère la conversation, l'historique et appelle le LLM
 import yaml
 from datetime import datetime
 from drivers.llm_driver import LLMDriver
-from memory.memory_core import MemoryCore
 from utils.logger import DebugLogger
 
 
@@ -21,9 +20,8 @@ class Orchestrator:
         
         # Initialiser les composants
         self.llm_driver = LLMDriver(config_path)
-        self.memory = MemoryCore(self.config.get('memory_db_path', 'memory/memory.sqlite'))
         
-        # Historique de conversation (en mémoire)
+        # Historique de conversation (en mémoire RAM uniquement pour Phase 2)
         self.conversation_history = []
         self.max_history = self.config.get('max_history_messages', 20)
         
@@ -90,8 +88,7 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 error=None
             )
             
-            # Sauvegarder dans la mémoire
-            self.memory.save_interaction(session_id, user_message, clara_response)
+            # Note: Sauvegarde mémoire sera ajoutée en Phase 3
             
             return clara_response
             
@@ -119,11 +116,3 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         messages.extend(self.conversation_history)
         
         return messages
-    
-    def load_session_context(self, session_id):
-        """Charge le contexte d'une session existante"""
-        context = self.memory.load_context(session_id, limit=self.max_history // 2)
-        
-        for user_msg, clara_msg in context:
-            self.conversation_history.append({'role': 'user', 'content': user_msg})
-            self.conversation_history.append({'role': 'assistant', 'content': clara_msg})
