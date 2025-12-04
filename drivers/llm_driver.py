@@ -5,8 +5,10 @@ Driver pour les appels au LLM (OpenAI)
 
 import os
 import yaml
+from dotenv import load_dotenv
 from openai import OpenAI
-from pathlib import Path
+
+load_dotenv()
 
 
 class LLMDriver:
@@ -18,15 +20,11 @@ class LLMDriver:
             self.config = yaml.safe_load(f)
         
         # Initialiser le client OpenAI
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY not found in environment variables")
+            raise RuntimeError("OPENAI_API_KEY not found in environment variables")
         
-        base_url = os.getenv('OPENAI_BASE_URL')
-        if base_url:
-            self.client = OpenAI(api_key=api_key, base_url=base_url)
-        else:
-            self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=api_key)
         
         # Paramètres du modèle
         self.model = self.config.get('model', 'gpt-4')
