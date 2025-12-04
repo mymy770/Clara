@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from drivers.llm_driver import LLMDriver
 from utils.logger import DebugLogger
-from memory.helpers import save_note
+from memory.helpers import save_note, save_todo, save_process, save_protocol
 from memory.memory_core import get_items, search_items, delete_item
 
 
@@ -42,32 +42,55 @@ Caractéristiques :
 - Tu adaptes ta langue à celle de l'utilisateur
 - Tu es honnête : si tu ne sais pas quelque chose, tu le dis
 
-Capacités mémoire (Phase 3) :
-Tu as maintenant accès à une mémoire persistante pour les notes.
+Capacités mémoire (Phase 3.5) :
+Tu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.
 
 Actions disponibles :
-1. memory_save_note : Sauvegarder une note
-2. memory_list_notes : Lister toutes les notes
-3. memory_search_notes : Chercher dans les notes
-4. memory_delete_item : Supprimer un élément par ID
 
-Quand l'utilisateur te demande de sauvegarder, lister, chercher ou supprimer des notes,
+NOTES :
+- memory_save_note : Sauvegarder une note
+- memory_list_notes : Lister toutes les notes
+- memory_search_notes : Chercher dans les notes
+
+TODOS :
+- memory_save_todo : Enregistrer un todo (chose à faire)
+- memory_list_todos : Lister tous les todos
+- memory_search_todos : Chercher dans les todos
+
+PROCESS :
+- memory_save_process : Enregistrer un processus/procédure détaillée
+- memory_list_processes : Lister tous les processus
+
+PROTOCOL :
+- memory_save_protocol : Enregistrer un protocole/règle générale
+- memory_list_protocols : Lister tous les protocoles
+
+GÉNÉRAL :
+- memory_delete_item : Supprimer un élément par ID (tous types)
+
+Quand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,
 tu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :
 
 ```json
-{"memory_action": "save_note", "content": "texte de la note", "tags": ["optionnel"]}
+{"memory_action": "save_note", "content": "texte", "tags": ["optionnel"]}
 ```
 
 ou
 
 ```json
-{"memory_action": "list_notes"}
+{"memory_action": "save_todo", "content": "chose à faire", "tags": ["optionnel"]}
 ```
 
 ou
 
 ```json
-{"memory_action": "search_notes", "query": "mot à chercher"}
+{"memory_action": "list_todos"}
+```
+
+ou
+
+```json
+{"memory_action": "search_notes", "query": "mot"}
 ```
 
 ou
@@ -79,8 +102,8 @@ ou
 IMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, 
 ET inclure le bloc JSON si une action mémoire est nécessaire.
 
-Pour l'instant, tu es en phase de construction (Phase 3).
-Tu peux converser et gérer des notes en mémoire.
+Pour l'instant, tu es en phase de construction (Phase 3.5).
+Tu peux converser et gérer des notes, todos, processus et protocoles en mémoire.
 Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
     
     def handle_message(self, user_message, session_id, debug_logger):
@@ -183,7 +206,7 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 if not items:
                     return "Aucune note en mémoire."
                 result = f"📝 {len(items)} note(s) trouvée(s) :\n"
-                for item in items[:10]:  # Limiter l'affichage à 10
+                for item in items[:10]:
                     result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
                 if len(items) > 10:
                     result += f"  ... et {len(items) - 10} autre(s)"
@@ -191,12 +214,75 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             
             elif action == 'search_notes':
                 query = intent.get('query', '')
-                items = search_items(type='note', query=query, limit=50)
+                items = search_items(query=query, type='note', limit=50)
                 if not items:
                     return f"Aucune note trouvée pour '{query}'."
                 result = f"🔍 {len(items)} note(s) trouvée(s) pour '{query}' :\n"
                 for item in items[:10]:
                     result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                if len(items) > 10:
+                    result += f"  ... et {len(items) - 10} autre(s)"
+                return result
+            
+            elif action == 'save_todo':
+                content = intent.get('content', '')
+                tags = intent.get('tags')
+                item_id = save_todo(content=content, tags=tags)
+                return f"✓ Todo sauvegardé (ID: {item_id})"
+            
+            elif action == 'list_todos':
+                items = get_items(type='todo', limit=50)
+                if not items:
+                    return "Aucun todo en mémoire."
+                result = f"✅ {len(items)} todo(s) trouvé(s) :\n"
+                for item in items[:10]:
+                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                if len(items) > 10:
+                    result += f"  ... et {len(items) - 10} autre(s)"
+                return result
+            
+            elif action == 'search_todos':
+                query = intent.get('query', '')
+                items = search_items(query=query, type='todo', limit=50)
+                if not items:
+                    return f"Aucun todo trouvé pour '{query}'."
+                result = f"🔍 {len(items)} todo(s) trouvé(s) pour '{query}' :\n"
+                for item in items[:10]:
+                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                if len(items) > 10:
+                    result += f"  ... et {len(items) - 10} autre(s)"
+                return result
+            
+            elif action == 'save_process':
+                content = intent.get('content', '')
+                tags = intent.get('tags')
+                item_id = save_process(content=content, tags=tags)
+                return f"✓ Processus sauvegardé (ID: {item_id})"
+            
+            elif action == 'list_processes':
+                items = get_items(type='process', limit=50)
+                if not items:
+                    return "Aucun processus en mémoire."
+                result = f"⚙️ {len(items)} processus trouvé(s) :\n"
+                for item in items[:10]:
+                    result += f"  - ID {item['id']}: {item['content'][:80]}...\n"
+                if len(items) > 10:
+                    result += f"  ... et {len(items) - 10} autre(s)"
+                return result
+            
+            elif action == 'save_protocol':
+                content = intent.get('content', '')
+                tags = intent.get('tags')
+                item_id = save_protocol(content=content, tags=tags)
+                return f"✓ Protocole sauvegardé (ID: {item_id})"
+            
+            elif action == 'list_protocols':
+                items = get_items(type='protocol', limit=50)
+                if not items:
+                    return "Aucun protocole en mémoire."
+                result = f"📋 {len(items)} protocole(s) trouvé(s) :\n"
+                for item in items[:10]:
+                    result += f"  - ID {item['id']}: {item['content'][:80]}...\n"
                 if len(items) > 10:
                     result += f"  ... et {len(items) - 10} autre(s)"
                 return result

@@ -1,0 +1,14 @@
+=== Clara Session session_20251205_001306 ===
+Date: 2025-12-05 00:13:06
+==================================================
+
+[00:13:10] Utilisateur:
+montre moi mes notes
+
+[00:13:12] Clara:
+Voici la liste de tes notes (je vais demander au système de les afficher).
+
+📝 1 note(s) trouvée(s) :
+  - ID 1: Clara Phase 3 test...
+
+
