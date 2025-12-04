@@ -1,11 +1,11 @@
-# Clara V3 - Assistant IA Intelligent
+# Clara - Assistant IA Intelligent
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Status](https://img.shields.io/badge/status-en%20développement-orange)
 
 ## 📋 Vue d'ensemble
 
-Clara V3 est une refonte complète de l'assistant IA Clara, construite sur une architecture propre et modulaire avec :
+Clara est une refonte complète de l'assistant IA Clara, construite sur une architecture propre et modulaire avec :
 - Un orchestrateur central coordonnant des agents spécialisés
 - Une mémoire structurée (SQLite) pour des capacités avancées
 - Une architecture testable et observable
@@ -63,7 +63,7 @@ python run_clara.py
 - [x] Configuration YAML
 - [ ] Tests unitaires de base
 
-### 🔄 Phase 1 - Fondation Clara V3
+### 🔄 Phase 1 - Fondation Clara
 - [ ] Orchestrateur Clara fonctionnel
 - [ ] FS-Agent robuste (lire/écrire/lister/reporter)
 - [ ] Logging structuré (2 fichiers par session)
@@ -105,7 +105,7 @@ python -m unittest tests.test_fs_agent
 
 ## 📝 Logs
 
-Clara V3 génère deux types de logs par session :
+Clara génère deux types de logs par session :
 
 1. **Session log** (`logs/sessions/<session_id>.session.json`) : Conversation humaine
 2. **Debug log** (`logs/sessions/<session_id>.debug.json`) : Log technique complet

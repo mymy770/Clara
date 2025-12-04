@@ -1,10 +1,10 @@
-# Clara V3 - Interface de Chat
+# Clara - Interface de Chat
 
 ## Status
 
-🚧 **En attente de reconnexion à Clara V3**
+🚧 **En attente de reconnexion à Clara**
 
-Cette interface de chat sera reconnectée à la nouvelle architecture Clara V3 durant la Phase 1.
+Cette interface de chat sera reconnectée à la nouvelle architecture Clara durant la Phase 1.
 
 ## Fonctionnalités prévues
 
@@ -21,7 +21,7 @@ Cette interface de chat sera reconnectée à la nouvelle architecture Clara V3 d
 
 ## Prochaines étapes
 
-1. Définir l'API de communication Clara V3 ↔ UI
+1. Définir l'API de communication Clara ↔ UI
 2. Reconnecter l'UI existante ou créer une nouvelle
 3. Tester avec le FS-Agent (Phase 1)
 

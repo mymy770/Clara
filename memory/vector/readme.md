@@ -2,7 +2,7 @@
 
 ## Objectif
 
-Cette section est prévue pour la **Phase 2b ou 3** du projet Clara V3.
+Cette section est prévue pour la **Phase 2b ou 3** du projet Clara.
 
 Elle contiendra un index vectoriel pour la recherche sémantique dans :
 - Les conversations longues

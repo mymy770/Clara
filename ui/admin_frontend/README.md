@@ -1,10 +1,10 @@
-# Clara V3 - Interface Admin
+# Clara - Interface Admin
 
 ## Status
 
 📅 **Prévue pour Phase 3**
 
-Interface d'administration et de monitoring pour Clara V3.
+Interface d'administration et de monitoring pour Clara.
 
 ## Fonctionnalités prévues
 

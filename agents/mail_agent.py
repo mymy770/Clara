@@ -1,5 +1,5 @@
 """
-Clara V3 - Agent Mail
+Clara - Agent Mail
 Agent spécialisé dans la gestion des emails (Phase ultérieure)
 """
 

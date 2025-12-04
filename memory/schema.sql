@@ -1,4 +1,4 @@
--- Clara V3 - Schéma SQLite v1
+-- Clara - Schéma SQLite
 -- Base de données structurée pour la mémoire de Clara
 -- Date: 2025-12-04
 

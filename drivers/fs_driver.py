@@ -1,5 +1,5 @@
 """
-Clara V3 - Driver Filesystem
+Clara - Driver Filesystem
 Driver bas niveau pour l'accès aux fichiers et dossiers
 """
 

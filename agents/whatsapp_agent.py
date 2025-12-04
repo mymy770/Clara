@@ -1,5 +1,5 @@
 """
-Clara V3 - Agent WhatsApp
+Clara - Agent WhatsApp
 Agent spécialisé dans la gestion WhatsApp
 """
 

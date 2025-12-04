@@ -1,5 +1,5 @@
 """
-Clara V3 - Agent Calendar
+Clara - Agent Calendar
 Agent spécialisé dans la gestion de l'agenda
 """
 

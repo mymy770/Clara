@@ -1,5 +1,5 @@
 """
-Clara V3 - Agent Filesystem
+Clara - Agent Filesystem
 Agent spécialisé dans la gestion des fichiers et dossiers (Phase 1)
 """
 
