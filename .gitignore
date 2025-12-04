@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.Python
+venv/
+env/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Environment
+.env
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Temporary
+*.tmp
+
