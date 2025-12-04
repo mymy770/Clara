@@ -12,4 +12,4 @@ max_history_messages: 20
 # Paths
 logs_sessions_dir: logs/sessions
 logs_debug_dir: logs/debug
-memory_db_path: memory/clara_memory.db
+memory_db_path: memory/memory.sqlite

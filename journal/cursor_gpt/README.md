@@ -31,3 +31,4 @@ cursor_gpt/
 
 → Séparation claire entre ce qui est demandé et ce qui est fait.
 
+

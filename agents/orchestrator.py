@@ -21,7 +21,7 @@ class Orchestrator:
         
         # Initialiser les composants
         self.llm_driver = LLMDriver(config_path)
-        self.memory = MemoryCore(self.config.get('memory_db_path', 'memory/clara_memory.db'))
+        self.memory = MemoryCore(self.config.get('memory_db_path', 'memory/memory.sqlite'))
         
         # Historique de conversation (en mémoire)
         self.conversation_history = []
