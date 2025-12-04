@@ -1,3 +1,75 @@
-# Clara - Configuration des agents
-# TODO: À compléter
+# Clara V3 - Configuration des agents
+# Définit les agents, leurs rôles, modèles et paramètres
+
+agents:
+  orchestrator:
+    name: "Clara"
+    role: "Orchestrateur central"
+    model: "gpt-4"
+    temperature: 0.7
+    max_tokens: 2000
+    system_prompt: |
+      Tu es Clara, une assistante IA intelligente et serviable.
+      Tu coordonnes plusieurs agents spécialisés pour accomplir les tâches.
+      Tu es courtoise, efficace et tu gardes toujours le contexte en mémoire.
+
+  fs_agent:
+    name: "FS-Agent"
+    role: "Gestion des fichiers et dossiers"
+    model: "gpt-3.5-turbo"
+    temperature: 0.3
+    max_tokens: 1500
+    capabilities:
+      - read_file
+      - write_file
+      - list_directory
+      - generate_report
+    system_prompt: |
+      Tu es l'agent spécialisé dans les opérations sur le système de fichiers.
+      Tu es précis, prudent et tu vérifies toujours les chemins avant d'agir.
+
+  mail_agent:
+    name: "Mail-Agent"
+    role: "Gestion des emails"
+    model: "gpt-3.5-turbo"
+    temperature: 0.5
+    max_tokens: 1500
+    capabilities:
+      - read_emails
+      - send_email
+      - search_emails
+    enabled: false  # Phase ultérieure
+    system_prompt: |
+      Tu es l'agent spécialisé dans la gestion des emails.
+      Tu es attentif aux détails et tu respectes l'étiquette email.
+
+  calendar_agent:
+    name: "Calendar-Agent"
+    role: "Gestion de l'agenda"
+    model: "gpt-3.5-turbo"
+    temperature: 0.3
+    max_tokens: 1000
+    capabilities:
+      - get_events
+      - create_event
+      - update_event
+      - delete_event
+    enabled: false  # Phase ultérieure
+    system_prompt: |
+      Tu es l'agent spécialisé dans la gestion de l'agenda.
+      Tu es rigoureux avec les dates et heures.
+
+  whatsapp_agent:
+    name: "WhatsApp-Agent"
+    role: "Gestion WhatsApp"
+    model: "gpt-3.5-turbo"
+    temperature: 0.5
+    max_tokens: 1000
+    capabilities:
+      - send_message
+      - read_messages
+    enabled: false  # Phase ultérieure
+    system_prompt: |
+      Tu es l'agent spécialisé dans WhatsApp.
+      Tu es concis et adaptes ton style aux conversations instantanées.
 
