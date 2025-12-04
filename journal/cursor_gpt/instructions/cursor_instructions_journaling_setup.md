@@ -75,26 +75,28 @@ Toutes les requêtes utilisateur destinées à Cursor seront placées dans :
 gpt_cursor/
 ```
 
-Pour chaque fichier d’instruction :
+Pour chaque fichier d'instruction :
 
 1. Cursor lit et exécute les instructions.
-2. Cursor crée un fichier d’archive dans :
+
+2. Cursor archive le fichier d'instructions original dans :
 ```
-journal/cursor_gpt/YYYY-MM-DD_nom_requete.md
+journal/cursor_gpt/instructions/
 ```
-3. Ce fichier doit contenir :
+
+3. Cursor crée un rapport séparé dans :
+```
+journal/cursor_gpt/reports/YYYY-MM-DD_nom_mission.md
+```
+
+4. Le rapport doit contenir :
    - Contexte  
    - Instructions reçues  
    - Actions effectuées  
    - Changements réalisés  
    - Prochaines étapes (si nécessaire)  
 
-4. Cursor déplace ensuite le fichier original depuis `gpt_cursor/` vers :
-```
-journal/cursor_gpt/
-```
-
-→ Ainsi, **chaque intervention de Cursor est historisée proprement**.
+→ **Séparation claire : instructions de l'utilisateur ≠ rapports de Cursor**
 
 
 ## 5. Rappel fondamental : aucune implémentation à cette phase
