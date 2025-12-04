@@ -36,8 +36,9 @@ ENV/
 
 # Environment variables
 .env
-.env.local
-.env.*.local
+.env.*
+config/env
+config/google_credentials.json
 
 # Logs
 *.log
@@ -50,10 +51,9 @@ logs/sessions/*.json
 *.sqlite
 *.sqlite3
 
-# Clara specific
-memory/clara_memory.db
-config/google_credentials.json
-config/.env
+# Clara memory DB
+memory/*.db
+memory/*.db-journal
 
 # UI build artifacts
 ui/*/node_modules/
