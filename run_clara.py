@@ -9,6 +9,10 @@ import sys
 import yaml
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement
+load_dotenv()
 
 # Ajouter le répertoire courant au path
 sys.path.insert(0, str(Path(__file__).parent))
