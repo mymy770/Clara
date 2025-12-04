@@ -1,5 +1,6 @@
+# Tests pour Memory Core
 """
-Tests pour Memory Core
+Tests unitaires pour l'API mémoire
 """
 
 import unittest
@@ -11,7 +12,7 @@ import sys
 # Ajouter le répertoire parent au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from memory.memory_core import MemoryCore
+from memory.memory_core import init_db, save_item, get_items, search_items, delete_item, update_item
 
 
 class TestMemoryCore(unittest.TestCase):
@@ -19,63 +20,92 @@ class TestMemoryCore(unittest.TestCase):
     
     def setUp(self):
         """Prépare l'environnement de test"""
+        # Créer un fichier DB temporaire
         self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
         self.temp_db.close()
+        self.db_path = self.temp_db.name
         
-        # Copier le schéma dans un dossier temporaire
+        # Créer un schéma temporaire
         self.temp_dir = tempfile.mkdtemp()
-        schema_src = Path(__file__).parent.parent / "memory" / "schema.sql"
-        schema_dst = Path(self.temp_dir) / "schema.sql"
+        schema_path = Path(self.temp_dir) / "schema.sql"
+        with open(schema_path, 'w') as f:
+            f.write("""
+CREATE TABLE IF NOT EXISTS memory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    content TEXT NOT NULL,
+    tags TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+            """)
         
-        if schema_src.exists():
-            import shutil
-            shutil.copy(schema_src, schema_dst)
-        
-        self.memory = MemoryCore(db_path=self.temp_db.name)
+        # Initialiser la DB
+        init_db(db_path=self.db_path, schema_path=str(schema_path))
     
     def tearDown(self):
         """Nettoie après les tests"""
-        self.memory.close()
-        os.unlink(self.temp_db.name)
+        os.unlink(self.db_path)
         import shutil
         shutil.rmtree(self.temp_dir)
     
-    def test_add_and_get_contact(self):
-        """Test ajout et récupération de contact"""
-        contact_id = self.memory.add_contact(
-            name="Jean Dupont",
-            phone="+33612345678",
-            email="jean@example.com",
-            relation="ami"
+    def test_save_and_get_item(self):
+        """Test sauvegarde et récupération d'item"""
+        # Sauvegarder
+        item_id = save_item(
+            type="note",
+            content="Test note",
+            tags=["test", "unittest"],
+            db_path=self.db_path
         )
+        self.assertIsInstance(item_id, int)
+        self.assertGreater(item_id, 0)
         
-        contact = self.memory.get_contact(contact_id)
-        self.assertIsNotNone(contact)
-        self.assertEqual(contact['name'], "Jean Dupont")
-        self.assertEqual(contact['phone'], "+33612345678")
+        # Récupérer
+        items = get_items(type="note", db_path=self.db_path)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['content'], "Test note")
+        self.assertEqual(items[0]['tags'], ["test", "unittest"])
     
-    def test_preferences(self):
-        """Test gestion des préférences"""
-        self.memory.set_preference("langue", "français", scope="global")
+    def test_search_items(self):
+        """Test recherche d'items"""
+        # Sauvegarder plusieurs items
+        save_item(type="note", content="Python is great", db_path=self.db_path)
+        save_item(type="note", content="JavaScript is cool", db_path=self.db_path)
+        save_item(type="note", content="Python for AI", db_path=self.db_path)
         
-        value = self.memory.get_preference("langue", scope="global")
-        self.assertEqual(value, "français")
+        # Rechercher
+        results = search_items(query="Python", type="note", db_path=self.db_path)
+        self.assertEqual(len(results), 2)
     
-    def test_memory_event(self):
-        """Test enregistrement d'événement mémoire"""
-        session_id = "test_session_001"
-        event_id = self.memory.add_memory_event(
-            session_id=session_id,
-            event_type="test",
-            content="Événement de test",
-            importance=7
-        )
+    def test_delete_item(self):
+        """Test suppression d'item"""
+        # Sauvegarder
+        item_id = save_item(type="note", content="To delete", db_path=self.db_path)
         
-        events = self.memory.get_session_events(session_id)
-        self.assertEqual(len(events), 1)
-        self.assertEqual(events[0]['content'], "Événement de test")
+        # Vérifier présence
+        items = get_items(db_path=self.db_path)
+        self.assertEqual(len(items), 1)
+        
+        # Supprimer
+        delete_item(item_id=item_id, db_path=self.db_path)
+        
+        # Vérifier suppression
+        items = get_items(db_path=self.db_path)
+        self.assertEqual(len(items), 0)
+    
+    def test_update_item(self):
+        """Test mise à jour d'item"""
+        # Sauvegarder
+        item_id = save_item(type="note", content="Original", db_path=self.db_path)
+        
+        # Mettre à jour
+        update_item(item_id=item_id, content="Updated", db_path=self.db_path)
+        
+        # Vérifier
+        items = get_items(db_path=self.db_path)
+        self.assertEqual(items[0]['content'], "Updated")
 
 
 if __name__ == '__main__':
     unittest.main()
-

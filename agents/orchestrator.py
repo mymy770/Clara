@@ -5,9 +5,13 @@ Gère la conversation, l'historique et appelle le LLM
 """
 
 import yaml
+import json
+import re
 from datetime import datetime
 from drivers.llm_driver import LLMDriver
 from utils.logger import DebugLogger
+from memory.helpers import save_note
+from memory.memory_core import get_items, search_items, delete_item
 
 
 class Orchestrator:
@@ -21,7 +25,7 @@ class Orchestrator:
         # Initialiser les composants
         self.llm_driver = LLMDriver(config_path)
         
-        # Historique de conversation (en mémoire RAM uniquement pour Phase 2)
+        # Historique de conversation (en mémoire RAM)
         self.conversation_history = []
         self.max_history = self.config.get('max_history_messages', 20)
         
@@ -38,8 +42,45 @@ Caractéristiques :
 - Tu adaptes ta langue à celle de l'utilisateur
 - Tu es honnête : si tu ne sais pas quelque chose, tu le dis
 
-Pour l'instant, tu es en phase de construction (Phase 1).
-Tu peux uniquement converser et répondre aux questions.
+Capacités mémoire (Phase 3) :
+Tu as maintenant accès à une mémoire persistante pour les notes.
+
+Actions disponibles :
+1. memory_save_note : Sauvegarder une note
+2. memory_list_notes : Lister toutes les notes
+3. memory_search_notes : Chercher dans les notes
+4. memory_delete_item : Supprimer un élément par ID
+
+Quand l'utilisateur te demande de sauvegarder, lister, chercher ou supprimer des notes,
+tu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :
+
+```json
+{"memory_action": "save_note", "content": "texte de la note", "tags": ["optionnel"]}
+```
+
+ou
+
+```json
+{"memory_action": "list_notes"}
+```
+
+ou
+
+```json
+{"memory_action": "search_notes", "query": "mot à chercher"}
+```
+
+ou
+
+```json
+{"memory_action": "delete_item", "item_id": 123}
+```
+
+IMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, 
+ET inclure le bloc JSON si une action mémoire est nécessaire.
+
+Pour l'instant, tu es en phase de construction (Phase 3).
+Tu peux converser et gérer des notes en mémoire.
 Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
     
     def handle_message(self, user_message, session_id, debug_logger):
@@ -68,6 +109,13 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             response = self.llm_driver.generate(messages)
             clara_response = response['text']
             
+            # Chercher une intention mémoire dans la réponse
+            memory_result = self._process_memory_action(clara_response)
+            
+            # Si une action mémoire a été exécutée, ajouter le résultat à la réponse
+            if memory_result:
+                clara_response = self._clean_response(clara_response) + f"\n\n{memory_result}"
+            
             # Ajouter la réponse à l'historique
             self.conversation_history.append({
                 'role': 'assistant',
@@ -76,7 +124,6 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             
             # Limiter la taille de l'historique
             if len(self.conversation_history) > self.max_history:
-                # Garder le system prompt et les N derniers messages
                 self.conversation_history = self.conversation_history[-self.max_history:]
             
             # Logger le debug
@@ -87,8 +134,6 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 usage=response['usage'],
                 error=None
             )
-            
-            # Note: Sauvegarde mémoire sera ajoutée en Phase 3
             
             return clara_response
             
@@ -105,6 +150,73 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             )
             
             return f"Désolée, j'ai rencontré une erreur : {str(e)}"
+    
+    def _process_memory_action(self, response_text):
+        """
+        Extrait et exécute une action mémoire depuis la réponse du LLM
+        
+        Returns:
+            str: Message de résultat de l'action, ou None
+        """
+        try:
+            # Chercher un bloc JSON dans la réponse
+            json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_text, re.DOTALL)
+            if not json_match:
+                return None
+            
+            # Parser le JSON
+            intent = json.loads(json_match.group(1))
+            action = intent.get('memory_action')
+            
+            if not action:
+                return None
+            
+            # Exécuter l'action correspondante
+            if action == 'save_note':
+                content = intent.get('content', '')
+                tags = intent.get('tags')
+                item_id = save_note(content=content, tags=tags)
+                return f"✓ Note sauvegardée (ID: {item_id})"
+            
+            elif action == 'list_notes':
+                items = get_items(type='note', limit=50)
+                if not items:
+                    return "Aucune note en mémoire."
+                result = f"📝 {len(items)} note(s) trouvée(s) :\n"
+                for item in items[:10]:  # Limiter l'affichage à 10
+                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                if len(items) > 10:
+                    result += f"  ... et {len(items) - 10} autre(s)"
+                return result
+            
+            elif action == 'search_notes':
+                query = intent.get('query', '')
+                items = search_items(type='note', query=query, limit=50)
+                if not items:
+                    return f"Aucune note trouvée pour '{query}'."
+                result = f"🔍 {len(items)} note(s) trouvée(s) pour '{query}' :\n"
+                for item in items[:10]:
+                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                if len(items) > 10:
+                    result += f"  ... et {len(items) - 10} autre(s)"
+                return result
+            
+            elif action == 'delete_item':
+                item_id = intent.get('item_id')
+                if item_id:
+                    delete_item(item_id=item_id)
+                    return f"✓ Élément {item_id} supprimé"
+                return "⚠ ID manquant pour la suppression"
+            
+            return None
+            
+        except (json.JSONDecodeError, Exception) as e:
+            # En cas d'erreur de parsing ou d'exécution, ne pas planter
+            return None
+    
+    def _clean_response(self, response_text):
+        """Nettoie la réponse en enlevant le bloc JSON"""
+        return re.sub(r'```json\s*\{.*?\}\s*```', '', response_text, flags=re.DOTALL).strip()
     
     def _build_prompt(self):
         """Construit le prompt complet avec system + historique"""
