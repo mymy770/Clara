@@ -1,0 +1,7 @@
+{
+  "allow_write": ["./**"],
+  "allow_read": ["./**"],
+  "allow_exec": ["./run_clara.py"],
+  "trust_project": true
+}
+
