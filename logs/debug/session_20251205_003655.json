@@ -1,0 +1,177 @@
+{
+  "session_id": "session_20251205_003655",
+  "interactions": [
+    {
+      "timestamp": "2025-12-05T00:37:05.214062",
+      "user_input": "Montre-moi mes protocoles",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 3.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 3.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes protocoles"
+        }
+      ],
+      "llm_response": "Voici la liste de tes protocoles enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun protocole n’a encore été créé).\n\n📋 1 protocole(s) trouvé(s) :\n  - ID 6: Toujours répondre aux mails fournisseurs en moins de 24h...\n",
+      "usage": {
+        "completion_tokens": 54,
+        "prompt_tokens": 512,
+        "total_tokens": 566,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T00:37:18.543911",
+      "user_input": "Montre-moi mes todos",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 3.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 3.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes protocoles"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici la liste de tes protocoles enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun protocole n’a encore été créé).\n\n📋 1 protocole(s) trouvé(s) :\n  - ID 6: Toujours répondre aux mails fournisseurs en moins de 24h...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes todos"
+        }
+      ],
+      "llm_response": "Voici la liste de tes todos enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun todo n’a encore été créé).\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 4: vérifier les stocks de LED...\n",
+      "usage": {
+        "completion_tokens": 52,
+        "prompt_tokens": 589,
+        "total_tokens": 641,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T00:37:27.015105",
+      "user_input": "Montre-moi toutes mes notes",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 3.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 3.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes protocoles"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici la liste de tes protocoles enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun protocole n’a encore été créé).\n\n📋 1 protocole(s) trouvé(s) :\n  - ID 6: Toujours répondre aux mails fournisseurs en moins de 24h...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes todos"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici la liste de tes todos enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun todo n’a encore été créé).\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 4: vérifier les stocks de LED...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        }
+      ],
+      "llm_response": "Voici la liste de toutes tes notes enregistrées (si la mémoire ne renvoie rien, c’est qu’aucune note n’a encore été créée).\n\nPour que je puisse effectivement les afficher, ton système de mémoire doit exécuter l’intention suivante :\n\n📝 2 note(s) trouvée(s) :\n  - ID 7: Je dois appeler ma femme...\n  - ID 1: Clara Phase 3 test...\n",
+      "usage": {
+        "completion_tokens": 73,
+        "prompt_tokens": 657,
+        "total_tokens": 730,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T00:37:38.358644",
+      "user_input": "Montre-moi mes process",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 3.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 3.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes protocoles"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici la liste de tes protocoles enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun protocole n’a encore été créé).\n\n📋 1 protocole(s) trouvé(s) :\n  - ID 6: Toujours répondre aux mails fournisseurs en moins de 24h...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes todos"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici la liste de tes todos enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun todo n’a encore été créé).\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 4: vérifier les stocks de LED...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici la liste de toutes tes notes enregistrées (si la mémoire ne renvoie rien, c’est qu’aucune note n’a encore été créée).\n\nPour que je puisse effectivement les afficher, ton système de mémoire doit exécuter l’intention suivante :\n\n📝 2 note(s) trouvée(s) :\n  - ID 7: Je dois appeler ma femme...\n  - ID 1: Clara Phase 3 test...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi mes process"
+        }
+      ],
+      "llm_response": "Voici la liste de tous tes process enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun process n’a encore été créé).\n\nPour que ton système de mémoire les affiche réellement, il doit exécuter l’intention suivante :\n\n⚙️ 1 processus trouvé(s) :\n  - ID 5: Processus : Vérifier un fournisseur\n1) Vérifier le certificat\n2) Vérifier les pr...\n",
+      "usage": {
+        "completion_tokens": 73,
+        "prompt_tokens": 760,
+        "total_tokens": 833,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    }
+  ]
+}

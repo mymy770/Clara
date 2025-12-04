@@ -119,6 +119,9 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             str: Réponse de Clara
         """
         try:
+            # PRÉ-VÉRIFICATION : Détecter si c'est une demande de lecture mémoire
+            memory_context = self._check_memory_read_intent(user_message)
+            
             # Ajouter le message utilisateur à l'historique
             self.conversation_history.append({
                 'role': 'user',
@@ -128,11 +131,18 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             # Construire les messages pour le LLM
             messages = self._build_prompt()
             
+            # Si on a un contexte mémoire, l'ajouter au prompt
+            if memory_context:
+                messages.append({
+                    'role': 'system',
+                    'content': f"DONNÉES MÉMOIRE RÉELLES :\n{memory_context}"
+                })
+            
             # Appeler le LLM
             response = self.llm_driver.generate(messages)
             clara_response = response['text']
             
-            # Chercher une intention mémoire dans la réponse
+            # Chercher une intention mémoire dans la réponse (pour les actions d'écriture)
             memory_result = self._process_memory_action(clara_response)
             
             # Si une action mémoire a été exécutée, ajouter le résultat à la réponse
@@ -299,6 +309,66 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         except (json.JSONDecodeError, Exception) as e:
             # En cas d'erreur de parsing ou d'exécution, ne pas planter
             return None
+    
+    def _check_memory_read_intent(self, user_message):
+        """
+        Pré-vérifie si le message demande une lecture mémoire
+        Si oui, interroge la DB AVANT l'appel LLM pour éviter hallucinations
+        
+        Returns:
+            str: Contexte mémoire formaté, ou None
+        """
+        msg_lower = user_message.lower()
+        
+        # Détection basique d'intentions de lecture
+        keywords_list = ['montre', 'liste', 'affiche', 'voir', 'consulte', 'lis']
+        keywords_search = ['cherche', 'trouve', 'recherche']
+        
+        is_list_intent = any(kw in msg_lower for kw in keywords_list)
+        is_search_intent = any(kw in msg_lower for kw in keywords_search)
+        
+        if not (is_list_intent or is_search_intent):
+            return None
+        
+        # Détecter le type demandé
+        result_parts = []
+        
+        if 'note' in msg_lower:
+            if is_search_intent:
+                # Extraire le mot-clé de recherche (simpliste)
+                words = msg_lower.split()
+                query = ' '.join(words[-3:])  # Derniers mots comme approximation
+                items = search_items(query=query, type='note', limit=20)
+                result_parts.append(f"NOTES (recherche '{query}'): {len(items)} trouvée(s)")
+            else:
+                items = get_items(type='note', limit=20)
+                result_parts.append(f"NOTES: {len(items)} en mémoire")
+            
+            for item in items[:5]:
+                result_parts.append(f"  - ID {item['id']}: {item['content'][:60]}")
+        
+        if 'todo' in msg_lower:
+            items = get_items(type='todo', limit=20)
+            result_parts.append(f"TODOS: {len(items)} en mémoire")
+            for item in items[:5]:
+                result_parts.append(f"  - ID {item['id']}: {item['content'][:60]}")
+        
+        if 'process' in msg_lower or 'processus' in msg_lower or 'procédure' in msg_lower:
+            items = get_items(type='process', limit=20)
+            result_parts.append(f"PROCESSUS: {len(items)} en mémoire")
+            for item in items[:5]:
+                result_parts.append(f"  - ID {item['id']}: {item['content'][:60]}")
+        
+        if 'protocol' in msg_lower or 'protocole' in msg_lower:
+            items = get_items(type='protocol', limit=20)
+            result_parts.append(f"PROTOCOLES: {len(items)} en mémoire")
+            for item in items[:5]:
+                result_parts.append(f"  - ID {item['id']}: {item['content'][:60]}")
+        
+        if result_parts:
+            return '\n'.join(result_parts)
+        
+        return None
     
     def _clean_response(self, response_text):
         """Nettoie la réponse en enlevant le bloc JSON"""

@@ -1,0 +1,51 @@
+=== Clara Session session_20251205_003655 ===
+Date: 2025-12-05 00:36:55
+==================================================
+
+[00:37:03] Utilisateur:
+Montre-moi mes protocoles
+
+[00:37:05] Clara:
+Voici la liste de tes protocoles enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun protocole n’a encore été créé).
+
+📋 1 protocole(s) trouvé(s) :
+  - ID 6: Toujours répondre aux mails fournisseurs en moins de 24h...
+
+
+[00:37:16] Utilisateur:
+Montre-moi mes todos
+
+[00:37:18] Clara:
+Voici la liste de tes todos enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun todo n’a encore été créé).
+
+✅ 1 todo(s) trouvé(s) :
+  - ID 4: vérifier les stocks de LED...
+
+
+[00:37:25] Utilisateur:
+Montre-moi toutes mes notes
+
+[00:37:27] Clara:
+Voici la liste de toutes tes notes enregistrées (si la mémoire ne renvoie rien, c’est qu’aucune note n’a encore été créée).
+
+Pour que je puisse effectivement les afficher, ton système de mémoire doit exécuter l’intention suivante :
+
+📝 2 note(s) trouvée(s) :
+  - ID 7: Je dois appeler ma femme...
+  - ID 1: Clara Phase 3 test...
+
+
+[00:37:36] Utilisateur:
+Montre-moi mes process
+
+[00:37:38] Clara:
+Voici la liste de tous tes process enregistrés (si la mémoire ne renvoie rien, c’est qu’aucun process n’a encore été créé).
+
+Pour que ton système de mémoire les affiche réellement, il doit exécuter l’intention suivante :
+
+⚙️ 1 processus trouvé(s) :
+  - ID 5: Processus : Vérifier un fournisseur
+1) Vérifier le certificat
+2) Vérifier les pr...
+
+
