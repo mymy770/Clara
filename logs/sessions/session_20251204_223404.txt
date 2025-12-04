@@ -1,0 +1,28 @@
+=== Clara Session session_20251204_223404 ===
+Date: 2025-12-04 22:34:04
+==================================================
+
+[22:34:50] Utilisateur:
+repete exactement ce que je dis
+
+[22:34:52] Clara:
+D’accord, écris ce que tu veux que je répète exactement.
+
+[22:34:59] Utilisateur:
+si je dis 2+2
+
+[22:34:59] Clara:
+si je dis 2+2
+
+[22:35:08] Utilisateur:
+si je demande une action impossible
+
+[22:35:09] Clara:
+si je demande une action impossible
+
+[22:35:20] Utilisateur:
+si je te pose 3 questions a la suite
+
+[22:35:21] Clara:
+si je te pose 3 questions a la suite
+

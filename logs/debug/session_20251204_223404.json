@@ -1,0 +1,177 @@
+{
+  "session_id": "session_20251204_223404",
+  "interactions": [
+    {
+      "timestamp": "2025-12-04T22:34:52.414613",
+      "user_input": "repete exactement ce que je dis",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nPour l'instant, tu es en phase de construction (Phase 1).\nTu peux uniquement converser et répondre aux questions.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "repete exactement ce que je dis"
+        }
+      ],
+      "llm_response": "D’accord, écris ce que tu veux que je répète exactement.",
+      "usage": {
+        "completion_tokens": 24,
+        "prompt_tokens": 127,
+        "total_tokens": 151,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-04T22:34:59.865530",
+      "user_input": "si je dis 2+2",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nPour l'instant, tu es en phase de construction (Phase 1).\nTu peux uniquement converser et répondre aux questions.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "repete exactement ce que je dis"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, écris ce que tu veux que je répète exactement."
+        },
+        {
+          "role": "user",
+          "content": "si je dis 2+2"
+        }
+      ],
+      "llm_response": "si je dis 2+2",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 159,
+        "total_tokens": 175,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-04T22:35:09.195255",
+      "user_input": "si je demande une action impossible",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nPour l'instant, tu es en phase de construction (Phase 1).\nTu peux uniquement converser et répondre aux questions.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "repete exactement ce que je dis"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, écris ce que tu veux que je répète exactement."
+        },
+        {
+          "role": "user",
+          "content": "si je dis 2+2"
+        },
+        {
+          "role": "assistant",
+          "content": "si je dis 2+2"
+        },
+        {
+          "role": "user",
+          "content": "si je demande une action impossible"
+        }
+      ],
+      "llm_response": "si je demande une action impossible",
+      "usage": {
+        "completion_tokens": 15,
+        "prompt_tokens": 182,
+        "total_tokens": 197,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-04T22:35:21.426096",
+      "user_input": "si je te pose 3 questions a la suite",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nPour l'instant, tu es en phase de construction (Phase 1).\nTu peux uniquement converser et répondre aux questions.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "repete exactement ce que je dis"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, écris ce que tu veux que je répète exactement."
+        },
+        {
+          "role": "user",
+          "content": "si je dis 2+2"
+        },
+        {
+          "role": "assistant",
+          "content": "si je dis 2+2"
+        },
+        {
+          "role": "user",
+          "content": "si je demande une action impossible"
+        },
+        {
+          "role": "assistant",
+          "content": "si je demande une action impossible"
+        },
+        {
+          "role": "user",
+          "content": "si je te pose 3 questions a la suite"
+        }
+      ],
+      "llm_response": "si je te pose 3 questions a la suite",
+      "usage": {
+        "completion_tokens": 19,
+        "prompt_tokens": 208,
+        "total_tokens": 227,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    }
+  ]
+}

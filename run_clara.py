@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from agents.orchestrator import Orchestrator
 from utils.logger import SessionLogger, DebugLogger
+from memory.memory_core import init_db
 
 
 def generate_session_id():
@@ -34,6 +35,11 @@ def main():
     print()
     
     try:
+        # Initialiser la base de données mémoire
+        print("Initialisation de la mémoire...")
+        init_db()
+        print("✓ Mémoire initialisée")
+        
         # Générer un ID de session
         session_id = generate_session_id()
         print(f"Session ID: {session_id}")
