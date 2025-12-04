@@ -46,5 +46,5 @@ class LLMDriver:
 
         choice = resp.choices[0]
         text = choice.message.content or ""
-        usage = getattr(resp, "usage", None)
+        usage = resp.usage.model_dump() if resp.usage else None
         return {"text": text, "usage": usage}
