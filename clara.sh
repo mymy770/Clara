@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Obtenir le répertoire de base (où se trouve clara.sh)
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$BASE_DIR"
+
 API_PORT=8001
 UI_PORT=5173
 
@@ -8,11 +12,11 @@ UI_CMD="npm run dev"
 UI_DIR="ui/chat_frontend"
 
 LOG_DIR="logs/launcher"
-mkdir -p $LOG_DIR
+mkdir -p "$LOG_DIR"
 
-API_LOG="$LOG_DIR/api.log"
-UI_LOG="$LOG_DIR/ui.log"
-SUP_LOG="$LOG_DIR/supervisor.log"
+API_LOG="$BASE_DIR/$LOG_DIR/api.log"
+UI_LOG="$BASE_DIR/$LOG_DIR/ui.log"
+SUP_LOG="$BASE_DIR/$LOG_DIR/supervisor.log"
 
 # Variables globales pour les PIDs
 API_PID=""
@@ -20,26 +24,27 @@ UI_PID=""
 SUP_PID=""
 
 clean_ports() {
-    echo "🧹 Cleaning ports..." | tee -a $SUP_LOG
+    echo "🧹 Cleaning ports..." | tee -a "$SUP_LOG"
     lsof -ti tcp:$API_PORT | xargs kill -9 2>/dev/null
     lsof -ti tcp:$UI_PORT | xargs kill -9 2>/dev/null
 }
 
 start_api() {
-    echo "🚀 Starting API..." | tee -a $SUP_LOG
-    $API_CMD >> $API_LOG 2>&1 &
+    echo "🚀 Starting API..." | tee -a "$SUP_LOG"
+    cd "$BASE_DIR" || exit 1
+    $API_CMD >> "$API_LOG" 2>&1 &
     API_PID=$!
-    echo "API PID: $API_PID" | tee -a $SUP_LOG
+    echo "API PID: $API_PID" | tee -a "$SUP_LOG"
 }
 
 start_ui() {
-    echo "🚀 Starting UI..." | tee -a $SUP_LOG
-    cd $UI_DIR
+    echo "🚀 Starting UI..." | tee -a "$SUP_LOG"
+    cd "$BASE_DIR/$UI_DIR" || exit 1
     npm install >/dev/null 2>&1
-    $UI_CMD >> ../$UI_LOG 2>&1 &
+    $UI_CMD >> "$UI_LOG" 2>&1 &
     UI_PID=$!
-    echo "UI PID: $UI_PID" | tee -a $SUP_LOG
-    cd - >/dev/null
+    echo "UI PID: $UI_PID" | tee -a "$SUP_LOG"
+    cd "$BASE_DIR" || exit 1
 }
 
 health_check() {
@@ -47,12 +52,12 @@ health_check() {
         sleep 3
 
         if ! kill -0 $API_PID 2>/dev/null; then
-            echo "❌ API crashed — restarting..." | tee -a $SUP_LOG
+            echo "❌ API crashed — restarting..." | tee -a "$SUP_LOG"
             start_api
         fi
 
         if ! kill -0 $UI_PID 2>/dev/null; then
-            echo "❌ UI crashed — restarting..." | tee -a $SUP_LOG
+            echo "❌ UI crashed — restarting..." | tee -a "$SUP_LOG"
             start_ui
         fi
     done
