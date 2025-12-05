@@ -418,7 +418,8 @@ async def get_session_todos(session_id: str):
 @app.get("/sessions/{session_id}/logs")
 async def get_session_logs(session_id: str):
     """
-    Récupère les logs d'une session depuis le fichier de debug
+    Récupère les actions réelles (process) d'une session depuis le fichier de debug
+    Affiche les memory_ops (actions mémoire exécutées), pas le chat
     """
     debug_file = Path(f"logs/debug/{session_id}.json")
     
@@ -429,20 +430,21 @@ async def get_session_logs(session_id: str):
         with open(debug_file, 'r', encoding='utf-8') as f:
             debug_data = json.load(f)
         
-        # Extraire les logs depuis debug_data
+        # Extraire les memory_ops depuis debug_data
         logs = []
         if isinstance(debug_data, dict):
             # Format DebugLogger: {"session_id": "...", "interactions": [...]}
             if "interactions" in debug_data:
-                # Convertir les interactions en logs formatés
                 for interaction in debug_data["interactions"]:
-                    log_entry = {
-                        "timestamp": interaction.get("timestamp"),
-                        "text": f"User: {interaction.get('user_input', '')}\nClara: {interaction.get('llm_response', '')}",
-                    }
-                    if interaction.get("error"):
-                        log_entry["text"] += f"\nError: {interaction.get('error')}"
-                    logs.append(log_entry)
+                    memory_ops = interaction.get("memory_ops", [])
+                    for op in memory_ops:
+                        log_entry = {
+                            "timestamp": interaction.get("timestamp"),
+                            "text": f"[{op.get('action', 'unknown')}] {op.get('message', op.get('result', ''))}",
+                        }
+                        if op.get("error"):
+                            log_entry["text"] += f" - Error: {op.get('error')}"
+                        logs.append(log_entry)
             elif "logs" in debug_data:
                 logs = debug_data["logs"]
             elif isinstance(debug_data.get("entries"), list):
@@ -458,6 +460,7 @@ async def get_session_logs(session_id: str):
 async def get_session_thinking(session_id: str):
     """
     Récupère les pensées (thinking) d'une session depuis le fichier de debug
+    Format: thoughts (réflexion), todo (plan), steps (étapes avec résultats)
     """
     debug_file = Path(f"logs/debug/{session_id}.json")
     
@@ -473,27 +476,49 @@ async def get_session_thinking(session_id: str):
         if isinstance(debug_data, dict):
             # Format DebugLogger: {"session_id": "...", "interactions": [...]}
             if "interactions" in debug_data:
-                # Convertir les interactions en thinking entries
                 for interaction in debug_data["interactions"]:
-                    # Créer une entrée thinking depuis l'interaction
-                    # Phase "think" pour la réflexion initiale
-                    thinking.append({
-                        "phase": "think",
-                        "text": f"Analyse de: {interaction.get('user_input', '')[:100]}...",
-                        "ts": interaction.get("timestamp")
-                    })
+                    internal_data = interaction.get("internal_data", {})
+                    timestamp = interaction.get("timestamp")
                     
-                    # Phase "plan" si la réponse contient un plan
-                    llm_response = interaction.get('llm_response', '')
-                    if llm_response:
-                        # Extraire les premières lignes comme réflexion
-                        lines = llm_response.split('\n')[:3]
-                        if lines:
+                    # Phase "think" : réflexion (thoughts)
+                    thoughts = internal_data.get("thoughts")
+                    if thoughts:
+                        thinking.append({
+                            "phase": "think",
+                            "text": thoughts,
+                            "ts": timestamp
+                        })
+                    
+                    # Phase "plan" : plan d'action (todo)
+                    todo = internal_data.get("todo")
+                    if todo:
+                        thinking.append({
+                            "phase": "plan",
+                            "text": todo,
+                            "ts": timestamp
+                        })
+                    
+                    # Phase "observe" : étapes exécutées avec résultats (steps)
+                    steps = internal_data.get("steps")
+                    if steps:
+                        for step in steps:
                             thinking.append({
                                 "phase": "observe",
-                                "text": '\n'.join(lines),
-                                "ts": interaction.get("timestamp")
+                                "text": step if isinstance(step, str) else str(step),
+                                "ts": timestamp
                             })
+                    
+                    # Si pas de steps mais qu'il y a des memory_ops, les utiliser comme observe
+                    if not steps:
+                        memory_ops = interaction.get("memory_ops", [])
+                        for op in memory_ops:
+                            result_text = op.get("message", op.get("result", ""))
+                            if result_text:
+                                thinking.append({
+                                    "phase": "observe",
+                                    "text": f"{op.get('action', 'action')}: {result_text}",
+                                    "ts": timestamp
+                                })
             
             # Format alternatif (si thinking existe directement)
             elif "thinking" in debug_data:

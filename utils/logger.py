@@ -46,15 +46,29 @@ class DebugLogger:
         self.log_file = self.logs_dir / f"{session_id}.json"
         self.entries = []
     
-    def log_interaction(self, user_input, prompt_messages, llm_response, usage, error=None):
-        """Log une interaction complète"""
+    def log_interaction(self, user_input, prompt_messages, llm_response, usage, error=None, 
+                       internal_data=None, memory_ops=None):
+        """
+        Log une interaction complète
+        
+        Args:
+            user_input: Message de l'utilisateur
+            prompt_messages: Messages envoyés au LLM
+            llm_response: Réponse du LLM
+            usage: Usage tokens
+            error: Erreur éventuelle
+            internal_data: Dict avec thoughts, todo, steps
+            memory_ops: Liste des actions mémoire exécutées (ex: [{"action": "save_note", "result": "✓ Note sauvegardée"}])
+        """
         entry = {
             'timestamp': datetime.now().isoformat(),
             'user_input': user_input,
             'prompt_messages': prompt_messages,
             'llm_response': llm_response,
             'usage': usage,
-            'error': error
+            'error': error,
+            'internal_data': internal_data or {},
+            'memory_ops': memory_ops or []
         }
         self.entries.append(entry)
         self._write()

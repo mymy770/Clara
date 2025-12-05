@@ -178,7 +178,7 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             clara_response = response['text']
             
             # Chercher une intention mémoire dans la réponse (pour les actions d'écriture)
-            cleaned_response, memory_result = self._process_memory_action(clara_response)
+            cleaned_response, memory_result, memory_ops = self._process_memory_action(clara_response)
             
             # Si une action mémoire a été exécutée, utiliser la réponse nettoyée et ajouter le résultat
             if memory_result:
@@ -196,17 +196,19 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             if len(self.conversation_history) > self.max_history:
                 self.conversation_history = self.conversation_history[-self.max_history:]
             
-            # Logger le debug
+            # Extraire les données internes pour l'UI
+            internal_data = self._extract_internal_data(clara_response, memory_result, memory_context)
+            
+            # Logger le debug avec les données internes
             debug_logger.log_interaction(
                 user_input=user_message,
                 prompt_messages=messages,
                 llm_response=clara_response,
                 usage=response['usage'],
-                error=None
+                error=None,
+                internal_data=internal_data,
+                memory_ops=memory_ops
             )
-            
-            # Extraire les données internes pour l'UI
-            internal_data = self._extract_internal_data(clara_response, memory_result, memory_context)
             
             # Retourner la réponse avec les données internes
             return {
@@ -241,7 +243,10 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         Extrait et exécute une action mémoire depuis la réponse du LLM
         
         Returns:
-            tuple: (cleaned_response, result_message) ou (response_text, None) si pas d'action
+            tuple: (cleaned_response, result_message, memory_ops)
+                - cleaned_response: Réponse nettoyée (sans JSON)
+                - result_message: Message de résultat (ou None)
+                - memory_ops: Liste des actions mémoire exécutées [{"action": "...", "result": "..."}]
         """
         import logging
         logger = logging.getLogger(__name__)
@@ -268,22 +273,23 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             
             # Si on n'a toujours rien, on abandonne proprement
             if not raw_json:
-                return (response_text, None)
+                return (response_text, None, [])
             
             # Parser le JSON
             try:
                 intent = json.loads(raw_json)
             except json.JSONDecodeError as e:
                 logger.warning(f"Erreur parsing JSON: {e}, raw_json = {raw_json[:200]}")
-                return (response_text, None)
+                return (response_text, None, [])
             
             action = intent.get('memory_action')
             
             if not action:
-                return (response_text, None)
+                return (response_text, None, [])
             
             # Exécuter l'action correspondante
             result_message = None
+            memory_ops = []
             
             if action == 'save_note':
                 try:
@@ -291,14 +297,17 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                     tags = intent.get('tags')
                     item_id = save_note(content=content, tags=tags)
                     result_message = f"✓ Note sauvegardée (ID: {item_id})"
+                    memory_ops.append({"action": "save_note", "result": "success", "item_id": item_id})
                 except Exception as e:
                     logger.error(f"Erreur dans save_note: {e}", exc_info=True)
                     result_message = f"⚠ Erreur lors de la sauvegarde: {str(e)}"
+                    memory_ops.append({"action": "save_note", "result": "error", "error": str(e)})
             
             elif action == 'list_notes':
                 items = get_items(type='note', limit=50)
                 if not items:
                     result_message = "Aucune note en mémoire."
+                    memory_ops.append({"action": "list_notes", "result": "empty"})
                 else:
                     result = f"📝 {len(items)} note(s) trouvée(s) :\n"
                     for item in items[:10]:
@@ -306,6 +315,7 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                     if len(items) > 10:
                         result += f"  ... et {len(items) - 10} autre(s)"
                     result_message = result
+                    memory_ops.append({"action": "list_notes", "result": "success", "count": len(items)})
             
             elif action == 'search_notes':
                 query = intent.get('query', '')
@@ -471,11 +481,19 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 else:
                     result_message = "⚠ ID manquant pour la suppression"
             else:
-                return (response_text, None)
+                return (response_text, None, [])
             
             # Si aucune action n'a été exécutée, retourner la réponse originale
             if result_message is None:
-                return (response_text, None)
+                return (response_text, None, [])
+            
+            # Ajouter l'action à memory_ops si pas déjà fait
+            if not memory_ops:
+                memory_ops.append({
+                    "action": action,
+                    "result": "success" if "✓" in result_message or "trouvé" in result_message.lower() else ("error" if "⚠" in result_message else "info"),
+                    "message": result_message
+                })
             
             # Nettoyage : on retire le bloc JSON de la réponse utilisateur
             try:
@@ -495,7 +513,7 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             logger = logging.getLogger(__name__)
             logger.info(f"memory_action_executed: action={action}, raw_json={raw_json[:100] if len(raw_json) > 100 else raw_json}...")
             
-            return (cleaned or "C'est enregistré.", result_message)
+            return (cleaned or "C'est enregistré.", result_message, memory_ops)
             
         except (json.JSONDecodeError, Exception) as e:
             # En cas d'erreur de parsing ou d'exécution, ne pas planter
@@ -621,9 +639,9 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         
         Returns:
             dict: {
-                'thoughts': str ou None,
-                'todo': str ou None,
-                'steps': list ou None
+                'thoughts': str ou None,  # Réflexion : ce qu'elle a compris
+                'todo': str ou None,      # Plan d'action : étapes qu'elle va lancer
+                'steps': list ou None     # Étapes exécutées avec résultats
             }
         """
         internal = {
@@ -632,32 +650,42 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             'steps': None
         }
         
-        # Réflexion : utiliser le contexte mémoire pré-chargé comme "réflexion"
-        # ou les premières lignes de la réponse si pas de contexte
+        # Réflexion (thoughts) : ce qu'elle a compris de la demande
+        # Utiliser le contexte mémoire pré-chargé comme base de réflexion
         if memory_context:
-            # Limiter à 4 lignes max
-            lines = memory_context.split('\n')[:4]
-            internal['thoughts'] = '\n'.join(lines)
+            # Le contexte mémoire montre ce qu'elle a "vu" avant de répondre
+            # Extraire une synthèse courte
+            lines = memory_context.split('\n')[:3]
+            internal['thoughts'] = '\n'.join(lines).strip()
         elif clara_response:
-            # Extraire les premières lignes comme réflexion
-            lines = clara_response.split('\n')[:3]
-            internal['thoughts'] = '\n'.join(lines)
+            # Sinon, extraire les premières lignes comme réflexion initiale
+            # (avant l'action)
+            lines = clara_response.split('\n')[:2]
+            internal['thoughts'] = '\n'.join(lines).strip()
         
-        # Plan d'action : extraire depuis memory_result si c'est un plan/todo
+        # Plan d'action (todo) : étapes qu'elle va lancer
+        # Si memory_result contient un plan ou une liste d'actions
         if memory_result:
-            # Si memory_result contient des todos ou un plan
-            if 'todo' in memory_result.lower() or 'plan' in memory_result.lower() or 'sauvegardé' in memory_result.lower():
+            if any(keyword in memory_result.lower() for keyword in ['plan', 'étapes', 'va', 'vais', 'dois']):
                 internal['todo'] = memory_result
+            # Si c'est une liste/lecture, c'est plutôt un plan d'observation
+            elif any(keyword in memory_result.lower() for keyword in ['trouvé', 'liste', 'note', 'todo', 'contact']):
+                internal['todo'] = f"Consultation: {memory_result[:100]}"
         
-        # Étapes exécutées : extraire depuis memory_result les actions mémoire
+        # Étapes exécutées (steps) : résultats positifs/négatifs/erreurs
         if memory_result:
             steps = []
-            # Détecter les actions exécutées
-            if 'sauvegardé' in memory_result.lower() or 'enregistré' in memory_result.lower():
-                steps.append(memory_result)
+            # Détecter le type de résultat
+            if '✓' in memory_result or 'sauvegardé' in memory_result.lower() or 'enregistré' in memory_result.lower():
+                steps.append(f"✓ {memory_result}")
+            elif '⚠' in memory_result or 'erreur' in memory_result.lower():
+                steps.append(f"⚠ {memory_result}")
             elif 'trouvé' in memory_result.lower() or 'liste' in memory_result.lower():
-                steps.append(memory_result)
+                steps.append(f"✓ {memory_result}")
             elif 'supprimé' in memory_result.lower():
+                steps.append(f"✓ {memory_result}")
+            else:
+                # Résultat neutre/informatif
                 steps.append(memory_result)
             
             if steps:

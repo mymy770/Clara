@@ -2,8 +2,8 @@
   "session_id": "session_20251206_005042",
   "interactions": [
     {
-      "timestamp": "2025-12-06T00:50:55.029550",
-      "user_input": "list emoi le snotes",
+      "timestamp": "2025-12-06T00:56:45.856733",
+      "user_input": "liste de snnotes",
       "prompt_messages": [
         {
           "role": "system",
@@ -11,26 +11,26 @@
         },
         {
           "role": "user",
-          "content": "Salu"
+          "content": "aujourte une note test 1"
         },
         {
           "role": "assistant",
-          "content": "Salut 🙂  \nComment puis-je t’aider aujourd’hui ?"
+          "content": "J’ajoute ta note.\n\n✓ Note sauvegardée (ID: 1)"
         },
         {
           "role": "user",
-          "content": "list emoi le snotes"
+          "content": "liste de snnotes"
         },
         {
           "role": "system",
-          "content": "DONNÉES MÉMOIRE RÉELLES :\nNOTES: 0 en mémoire"
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nNOTES: 1 en mémoire\n  - ID 1: test 1"
         }
       ],
-      "llm_response": "Je ne trouve aucune note pour l’instant : ta liste de notes est vide.\n\nTu peux me dicter une note à enregistrer, par exemple :  \n« Ajoute une note : idées de voyage pour cet été ».\n\nAucune note en mémoire.",
+      "llm_response": "Voici tes notes enregistrées :\n\n1. ID 1 : « test 1 »\n\nSi tu veux, je peux en ajouter d’autres ou en chercher une précise.",
       "usage": {
-        "completion_tokens": 66,
-        "prompt_tokens": 851,
-        "total_tokens": 917,
+        "completion_tokens": 42,
+        "prompt_tokens": 871,
+        "total_tokens": 913,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
