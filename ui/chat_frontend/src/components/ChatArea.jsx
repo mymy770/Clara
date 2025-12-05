@@ -40,13 +40,15 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             }
           }
 
-          if (finalTranscript) {
-            setInput(prev => prev + finalTranscript)
-          } else {
-            // Afficher temporairement le texte en cours
-            const currentInput = input.replace(interimTranscript, '')
-            setInput(currentInput + interimTranscript)
-          }
+          setInput(prev => {
+            // Retirer l'ancien interimTranscript s'il existe
+            let base = prev
+            if (base.includes(interimTranscript)) {
+              base = base.replace(interimTranscript, '')
+            }
+            // Ajouter le nouveau texte
+            return base + finalTranscript + interimTranscript
+          })
         }
 
         recognition.onerror = (event) => {
