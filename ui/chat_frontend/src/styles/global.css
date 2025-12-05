@@ -37,6 +37,7 @@
   --input-bg: #ffffff;
   --input-text: #000000;
   --input-border: #dddddd;
+  --input-focus-border: #007AFF;
 
   /* Bouton Envoyer */
   --send-btn-bg: #007AFF;

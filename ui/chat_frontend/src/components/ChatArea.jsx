@@ -318,6 +318,14 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             borderRadius: '6px',
             background: 'var(--input-bg)',
             color: 'var(--input-text)',
+            outline: 'none',
+            transition: 'border-color 0.2s',
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'var(--input-focus-border)'
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'var(--input-border)'
           }}
         />
         <button

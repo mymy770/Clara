@@ -126,6 +126,7 @@ export default function AppearanceSettings({ isOpen, onClose }) {
         { key: 'inputBg', label: 'Fond textarea' },
         { key: 'inputText', label: 'Texte' },
         { key: 'inputBorder', label: 'Bordure' },
+        { key: 'inputFocusBorder', label: 'Bordure (focus)' },
       ]
     },
     {
