@@ -1,0 +1,15 @@
+=== Clara Session session_20251206_005042 ===
+Date: 2025-12-06 00:50:52
+==================================================
+
+[00:50:52] Utilisateur:
+list emoi le snotes
+
+[00:50:55] Clara:
+Je ne trouve aucune note pour l’instant : ta liste de notes est vide.
+
+Tu peux me dicter une note à enregistrer, par exemple :  
+« Ajoute une note : idées de voyage pour cet été ».
+
+Aucune note en mémoire.
+

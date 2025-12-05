@@ -367,10 +367,51 @@ async def create_session():
 @app.get("/sessions/{session_id}/todos")
 async def get_session_todos(session_id: str):
     """
-    Récupère les todos d'une session
-    Pour l'instant, retourne une liste vide (à implémenter avec le système de todos)
+    Récupère les todos d'une session depuis la mémoire ou les logs
     """
-    # TODO: Implémenter avec le système de todos de Clara
+    # D'abord, essayer de récupérer depuis la mémoire
+    try:
+        from memory.memory_core import get_items
+        todos = get_items(type='todo', limit=50)
+        if todos:
+            formatted_todos = []
+            for todo in todos:
+                formatted_todos.append({
+                    "text": todo.get('content', ''),
+                    "timestamp": todo.get('created_at', ''),
+                    "done": False  # Pour l'instant, pas de champ done dans la DB
+                })
+            return {"todos": formatted_todos}
+    except Exception as e:
+        logging.exception(f"Erreur récupération todos depuis mémoire: {e}")
+    
+    # Fallback: extraire depuis les logs
+    debug_file = Path(f"logs/debug/{session_id}.json")
+    if debug_file.exists():
+        try:
+            with open(debug_file, 'r', encoding='utf-8') as f:
+                debug_data = json.load(f)
+            
+            todos = []
+            if isinstance(debug_data, dict) and "interactions" in debug_data:
+                for interaction in debug_data["interactions"]:
+                    llm_response = interaction.get('llm_response', '')
+                    # Chercher des todos dans la réponse
+                    if 'todo' in llm_response.lower() or 'tâche' in llm_response.lower():
+                        # Extraire les lignes qui ressemblent à des todos
+                        lines = llm_response.split('\n')
+                        for line in lines:
+                            if any(keyword in line.lower() for keyword in ['-', '•', 'todo', 'tâche', 'faire']):
+                                todos.append({
+                                    "text": line.strip(),
+                                    "timestamp": interaction.get('timestamp', ''),
+                                    "done": 'fait' in line.lower() or 'done' in line.lower()
+                                })
+            
+            return {"todos": todos[:20]}  # Limiter à 20
+        except Exception as e:
+            logging.exception(f"Erreur extraction todos depuis logs: {e}")
+    
     return {"todos": []}
 
 
@@ -391,8 +432,18 @@ async def get_session_logs(session_id: str):
         # Extraire les logs depuis debug_data
         logs = []
         if isinstance(debug_data, dict):
-            # Format attendu: {"logs": [...]} ou directement une liste
-            if "logs" in debug_data:
+            # Format DebugLogger: {"session_id": "...", "interactions": [...]}
+            if "interactions" in debug_data:
+                # Convertir les interactions en logs formatés
+                for interaction in debug_data["interactions"]:
+                    log_entry = {
+                        "timestamp": interaction.get("timestamp"),
+                        "text": f"User: {interaction.get('user_input', '')}\nClara: {interaction.get('llm_response', '')}",
+                    }
+                    if interaction.get("error"):
+                        log_entry["text"] += f"\nError: {interaction.get('error')}"
+                    logs.append(log_entry)
+            elif "logs" in debug_data:
                 logs = debug_data["logs"]
             elif isinstance(debug_data.get("entries"), list):
                 logs = debug_data["entries"]
@@ -420,7 +471,32 @@ async def get_session_thinking(session_id: str):
         # Extraire les thinking depuis debug_data
         thinking = []
         if isinstance(debug_data, dict):
-            if "thinking" in debug_data:
+            # Format DebugLogger: {"session_id": "...", "interactions": [...]}
+            if "interactions" in debug_data:
+                # Convertir les interactions en thinking entries
+                for interaction in debug_data["interactions"]:
+                    # Créer une entrée thinking depuis l'interaction
+                    # Phase "think" pour la réflexion initiale
+                    thinking.append({
+                        "phase": "think",
+                        "text": f"Analyse de: {interaction.get('user_input', '')[:100]}...",
+                        "ts": interaction.get("timestamp")
+                    })
+                    
+                    # Phase "plan" si la réponse contient un plan
+                    llm_response = interaction.get('llm_response', '')
+                    if llm_response:
+                        # Extraire les premières lignes comme réflexion
+                        lines = llm_response.split('\n')[:3]
+                        if lines:
+                            thinking.append({
+                                "phase": "observe",
+                                "text": '\n'.join(lines),
+                                "ts": interaction.get("timestamp")
+                            })
+            
+            # Format alternatif (si thinking existe directement)
+            elif "thinking" in debug_data:
                 thinking = debug_data["thinking"]
             elif "thoughts" in debug_data:
                 thinking = debug_data["thoughts"]
