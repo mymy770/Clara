@@ -85,14 +85,14 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
 
         recognition.onend = () => {
           // Ne pas arrêter automatiquement, seulement si l'utilisateur clique
-          // Si onend est appelé sans clic utilisateur, relancer (sauf si shouldContinue est false)
-          if (shouldContinue && recognition._shouldContinue !== false) {
+          // Si onend est appelé sans clic utilisateur, relancer (sauf si shouldContinueRef est false)
+          if (shouldContinueRef.current) {
             // Relancer automatiquement pour continuer l'enregistrement
             try {
               recognition.start()
             } catch (e) {
               // Si erreur, arrêter proprement
-              shouldContinue = false
+              shouldContinueRef.current = false
               setIsListening(false)
             }
           }
