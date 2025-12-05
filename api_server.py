@@ -418,8 +418,8 @@ async def get_session_todos(session_id: str):
 @app.get("/sessions/{session_id}/logs")
 async def get_session_logs(session_id: str):
     """
-    Récupère les actions réelles (process) d'une session depuis le fichier de debug
-    Affiche les memory_ops (actions mémoire exécutées), pas le chat
+    Récupère les commandes de code (process) d'une session depuis le fichier de debug
+    Affiche les lignes de code pures qu'elle va exécuter
     """
     debug_file = Path(f"logs/debug/{session_id}.json")
     
@@ -430,7 +430,7 @@ async def get_session_logs(session_id: str):
         with open(debug_file, 'r', encoding='utf-8') as f:
             debug_data = json.load(f)
         
-        # Extraire les memory_ops depuis debug_data
+        # Extraire les commandes de code depuis memory_ops
         logs = []
         if isinstance(debug_data, dict):
             # Format DebugLogger: {"session_id": "...", "interactions": [...]}
@@ -438,12 +438,47 @@ async def get_session_logs(session_id: str):
                 for interaction in debug_data["interactions"]:
                     memory_ops = interaction.get("memory_ops", [])
                     for op in memory_ops:
+                        action = op.get('action', 'unknown')
+                        # Convertir l'action en ligne de code
+                        if action == 'save_note':
+                            code = "save_note(content=..., tags=...)"
+                        elif action == 'list_notes':
+                            code = "get_items(type='note', limit=50)"
+                        elif action == 'search_notes':
+                            code = "search_items(query=..., type='note', limit=50)"
+                        elif action == 'save_todo':
+                            code = "save_todo(content=..., tags=...)"
+                        elif action == 'list_todos':
+                            code = "get_items(type='todo', limit=50)"
+                        elif action == 'search_todos':
+                            code = "search_items(query=..., type='todo', limit=50)"
+                        elif action == 'save_process':
+                            code = "save_process(content=..., tags=...)"
+                        elif action == 'list_processes':
+                            code = "get_items(type='process', limit=50)"
+                        elif action == 'save_protocol':
+                            code = "save_protocol(content=..., tags=...)"
+                        elif action == 'list_protocols':
+                            code = "get_items(type='protocol', limit=50)"
+                        elif action == 'save_contact':
+                            code = "save_contact(contact={...})"
+                        elif action == 'update_contact':
+                            code = "update_contact(contact_id=..., updates={...})"
+                        elif action == 'list_contacts':
+                            code = "get_all_contacts(limit=50)"
+                        elif action == 'search_contacts':
+                            code = "find_contacts(query=...)"
+                        elif action == 'set_preference':
+                            code = "save_preference({scope, key, value, ...})"
+                        elif action == 'delete_item':
+                            code = "delete_item(item_id=...)"
+                        else:
+                            code = f"{action}(...)"
+                        
                         log_entry = {
                             "timestamp": interaction.get("timestamp"),
-                            "text": f"[{op.get('action', 'unknown')}] {op.get('message', op.get('result', ''))}",
+                            "text": code,
                         }
-                        if op.get("error"):
-                            log_entry["text"] += f" - Error: {op.get('error')}"
                         logs.append(log_entry)
             elif "logs" in debug_data:
                 logs = debug_data["logs"]

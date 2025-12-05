@@ -197,7 +197,13 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 self.conversation_history = self.conversation_history[-self.max_history:]
             
             # Extraire les données internes pour l'UI
-            internal_data = self._extract_internal_data(clara_response, memory_result, memory_context)
+            internal_data = self._extract_internal_data(
+                user_message=user_message,
+                clara_response=clara_response, 
+                memory_result=memory_result, 
+                memory_context=memory_context,
+                memory_ops=memory_ops
+            )
             
             # Logger le debug avec les données internes
             debug_logger.log_interaction(
@@ -628,20 +634,22 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         """Nettoie la réponse en enlevant le bloc JSON"""
         return re.sub(r'```json\s*\{.*?\}\s*```', '', response_text, flags=re.DOTALL).strip()
     
-    def _extract_internal_data(self, clara_response, memory_result, memory_context):
+    def _extract_internal_data(self, user_message, clara_response, memory_result, memory_context, memory_ops):
         """
         Extrait les données internes pour l'UI (réflexion, plan, étapes)
         
         Args:
+            user_message: Message de l'utilisateur
             clara_response: Réponse finale de Clara
             memory_result: Résultat de l'action mémoire (si exécutée)
             memory_context: Contexte mémoire pré-chargé (si lecture)
+            memory_ops: Liste des actions mémoire exécutées
         
         Returns:
             dict: {
                 'thoughts': str ou None,  # Réflexion : ce qu'elle a compris
-                'todo': str ou None,      # Plan d'action : étapes qu'elle va lancer
-                'steps': list ou None     # Étapes exécutées avec résultats
+                'todo': str ou None,      # Plan d'action : nombre d'étapes
+                'steps': list ou None     # Observe : résultat final
             }
         """
         internal = {
@@ -650,46 +658,77 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             'steps': None
         }
         
-        # Réflexion (thoughts) : ce qu'elle a compris de la demande
-        # Utiliser le contexte mémoire pré-chargé comme base de réflexion
-        if memory_context:
-            # Le contexte mémoire montre ce qu'elle a "vu" avant de répondre
-            # Extraire une synthèse courte
-            lines = memory_context.split('\n')[:3]
-            internal['thoughts'] = '\n'.join(lines).strip()
-        elif clara_response:
-            # Sinon, extraire les premières lignes comme réflexion initiale
-            # (avant l'action)
-            lines = clara_response.split('\n')[:2]
-            internal['thoughts'] = '\n'.join(lines).strip()
-        
-        # Plan d'action (todo) : étapes qu'elle va lancer
-        # Si memory_result contient un plan ou une liste d'actions
-        if memory_result:
-            if any(keyword in memory_result.lower() for keyword in ['plan', 'étapes', 'va', 'vais', 'dois']):
-                internal['todo'] = memory_result
-            # Si c'est une liste/lecture, c'est plutôt un plan d'observation
-            elif any(keyword in memory_result.lower() for keyword in ['trouvé', 'liste', 'note', 'todo', 'contact']):
-                internal['todo'] = f"Consultation: {memory_result[:100]}"
-        
-        # Étapes exécutées (steps) : résultats positifs/négatifs/erreurs
-        if memory_result:
-            steps = []
-            # Détecter le type de résultat
-            if '✓' in memory_result or 'sauvegardé' in memory_result.lower() or 'enregistré' in memory_result.lower():
-                steps.append(f"✓ {memory_result}")
-            elif '⚠' in memory_result or 'erreur' in memory_result.lower():
-                steps.append(f"⚠ {memory_result}")
-            elif 'trouvé' in memory_result.lower() or 'liste' in memory_result.lower():
-                steps.append(f"✓ {memory_result}")
-            elif 'supprimé' in memory_result.lower():
-                steps.append(f"✓ {memory_result}")
-            else:
-                # Résultat neutre/informatif
-                steps.append(memory_result)
+        # THINK : Réflexion - ce qu'elle a compris de la demande utilisateur
+        # Générer une phrase de réflexion depuis le message utilisateur
+        if user_message:
+            # Analyser la demande pour générer une réflexion
+            msg_lower = user_message.lower()
             
-            if steps:
-                internal['steps'] = steps
+            # Détecter le type de demande
+            if any(kw in msg_lower for kw in ['rendez-vous', 'rdv', 'calendrier', 'événement', 'agenda']):
+                if 'aujourd\'hui' in msg_lower or 'aujourd hui' in msg_lower or 'ce jour' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur demande quels sont ses rendez-vous prévus pour aujourd'hui. Il s'agit de consulter les événements du calendrier à la date du jour."
+                elif 'demain' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur demande ses rendez-vous pour demain. Il faut consulter le calendrier pour la date du lendemain."
+                else:
+                    internal['thoughts'] = "L'utilisateur demande des informations sur ses rendez-vous ou événements. Il s'agit de consulter le calendrier."
+            
+            elif any(kw in msg_lower for kw in ['sauvegard', 'enregistr', 'note', 'mémoris']):
+                if 'note' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur souhaite sauvegarder une note. Je dois extraire le contenu et l'enregistrer en mémoire avec des tags appropriés."
+                elif 'todo' in msg_lower or 'tâche' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur souhaite créer une tâche à faire. Je dois enregistrer ce todo en mémoire."
+                elif 'contact' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur souhaite enregistrer un contact. Je dois extraire les informations (nom, téléphone, email) et les structurer."
+                else:
+                    internal['thoughts'] = "L'utilisateur souhaite sauvegarder des informations en mémoire. Je dois identifier le type et extraire le contenu."
+            
+            elif any(kw in msg_lower for kw in ['liste', 'montre', 'affiche', 'voir', 'consulte']):
+                if 'note' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur demande à voir la liste de ses notes. Je dois récupérer toutes les notes en mémoire et les présenter."
+                elif 'todo' in msg_lower or 'tâche' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur demande à voir ses tâches. Je dois récupérer tous les todos en mémoire."
+                elif 'contact' in msg_lower:
+                    internal['thoughts'] = "L'utilisateur demande à voir ses contacts. Je dois récupérer tous les contacts enregistrés."
+                else:
+                    internal['thoughts'] = "L'utilisateur demande à consulter des informations en mémoire. Je dois identifier le type et récupérer les données."
+            
+            elif any(kw in msg_lower for kw in ['cherche', 'trouve', 'recherche']):
+                internal['thoughts'] = f"L'utilisateur effectue une recherche. Je dois identifier le type d'élément recherché et exécuter une recherche dans la mémoire."
+            
+            else:
+                # Réflexion générique
+                internal['thoughts'] = f"L'utilisateur demande : {user_message[:100]}. Je dois analyser la demande et déterminer l'action appropriée."
+        
+        # PLAN/TODO : Nombre d'étapes du plan
+        if memory_ops:
+            # Compter les étapes
+            step_count = len(memory_ops)
+            if step_count > 0:
+                internal['todo'] = f"{step_count} étape(s) : " + ", ".join([op.get('action', 'action') for op in memory_ops[:3]])
+                if step_count > 3:
+                    internal['todo'] += f" ... (+{step_count - 3} autres)"
+        elif memory_result:
+            # Si pas de memory_ops mais un résultat, estimer le nombre d'étapes
+            if 'sauvegardé' in memory_result.lower() or 'enregistré' in memory_result.lower():
+                internal['todo'] = "1 étape : sauvegarde en mémoire"
+            elif 'trouvé' in memory_result.lower() or 'liste' in memory_result.lower():
+                internal['todo'] = "1 étape : consultation mémoire"
+        
+        # OBSERVE : Résultat final (réponse envoyée, erreur, complément d'info)
+        if memory_result:
+            # Analyser le résultat
+            if '✓' in memory_result or 'sauvegardé' in memory_result.lower() or 'enregistré' in memory_result.lower():
+                internal['steps'] = [f"✓ Réponse envoyée : {memory_result}"]
+            elif '⚠' in memory_result or 'erreur' in memory_result.lower():
+                internal['steps'] = [f"⚠ Erreur : {memory_result}"]
+            elif 'trouvé' in memory_result.lower() or 'liste' in memory_result.lower():
+                internal['steps'] = [f"✓ Complément d'information : {memory_result[:150]}"]
+            else:
+                internal['steps'] = [f"✓ Réponse envoyée : {memory_result[:150]}"]
+        elif clara_response and not memory_result:
+            # Si pas d'action mémoire, la réponse a été envoyée directement
+            internal['steps'] = ["✓ Réponse envoyée à l'utilisateur"]
         
         return internal
     

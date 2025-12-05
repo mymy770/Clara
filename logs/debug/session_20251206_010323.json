@@ -1,9 +1,9 @@
 {
-  "session_id": "session_20251206_005042",
+  "session_id": "session_20251206_010323",
   "interactions": [
     {
-      "timestamp": "2025-12-06T00:56:45.856733",
-      "user_input": "liste de snnotes",
+      "timestamp": "2025-12-06T01:03:39.658067",
+      "user_input": "liste de snotes",
       "prompt_messages": [
         {
           "role": "system",
@@ -11,26 +11,26 @@
         },
         {
           "role": "user",
-          "content": "aujourte une note test 1"
+          "content": "Salut"
         },
         {
           "role": "assistant",
-          "content": "J’ajoute ta note.\n\n✓ Note sauvegardée (ID: 1)"
+          "content": "Salut 🙂  \nComment puis-je t’aider aujourd’hui ?"
         },
         {
           "role": "user",
-          "content": "liste de snnotes"
+          "content": "liste de snotes"
         },
         {
           "role": "system",
           "content": "DONNÉES MÉMOIRE RÉELLES :\nNOTES: 1 en mémoire\n  - ID 1: test 1"
         }
       ],
-      "llm_response": "Voici tes notes enregistrées :\n\n1. ID 1 : « test 1 »\n\nSi tu veux, je peux en ajouter d’autres ou en chercher une précise.",
+      "llm_response": "Voici tes notes actuellement enregistrées :\n\n1. (ID 1) test 1\n\n📝 1 note(s) trouvée(s) :\n  - ID 1: test 1...\n",
       "usage": {
-        "completion_tokens": 42,
-        "prompt_tokens": 871,
-        "total_tokens": 913,
+        "completion_tokens": 39,
+        "prompt_tokens": 858,
+        "total_tokens": 897,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
@@ -42,7 +42,21 @@
           "cached_tokens": 0
         }
       },
-      "error": null
+      "error": null,
+      "internal_data": {
+        "thoughts": "NOTES: 1 en mémoire\n  - ID 1: test 1",
+        "todo": "Consultation: 📝 1 note(s) trouvée(s) :\n  - ID 1: test 1...\n",
+        "steps": [
+          "✓ 📝 1 note(s) trouvée(s) :\n  - ID 1: test 1...\n"
+        ]
+      },
+      "memory_ops": [
+        {
+          "action": "list_notes",
+          "result": "success",
+          "count": 1
+        }
+      ]
     }
   ]
 }
