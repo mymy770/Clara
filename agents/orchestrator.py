@@ -677,15 +677,17 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 internal['todo'] = f"{step_count} étape(s)"
         
         # OBSERVE : Résultat final
-        if memory_result:
-            if '✓' in memory_result:
-                internal['steps'] = [f"✓ Réponse envoyée"]
-            elif '⚠' in memory_result:
-                internal['steps'] = [f"⚠ Erreur"]
+        # Si Clara a répondu (même avec une action mémoire), c'est toujours une "Réponse envoyée"
+        if llm_raw_response:
+            if memory_result:
+                # Il y a eu une action mémoire + réponse
+                if '⚠' in memory_result or 'erreur' in memory_result.lower():
+                    internal['steps'] = [f"⚠ Erreur"]
+                else:
+                    internal['steps'] = [f"✓ Réponse envoyée"]
             else:
-                internal['steps'] = [f"✓ Complément d'information"]
-        elif llm_raw_response and not memory_result:
-            internal['steps'] = ["✓ Réponse envoyée"]
+                # Pas d'action mémoire, juste une réponse
+                internal['steps'] = ["✓ Réponse envoyée"]
         
         return internal
     

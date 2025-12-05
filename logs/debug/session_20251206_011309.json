@@ -1,9 +1,9 @@
 {
-  "session_id": "session_20251206_011024",
+  "session_id": "session_20251206_011309",
   "interactions": [
     {
-      "timestamp": "2025-12-06T01:11:07.673423",
-      "user_input": "combine j ai de notes ?",
+      "timestamp": "2025-12-06T01:17:27.351423",
+      "user_input": "verifi",
       "prompt_messages": [
         {
           "role": "system",
@@ -11,30 +11,46 @@
         },
         {
           "role": "user",
-          "content": "Salut"
-        },
-        {
-          "role": "assistant",
-          "content": "Salut 🙂  \nComment puis-je t’aider aujourd’hui ?"
-        },
-        {
-          "role": "user",
-          "content": "combien d enotes"
-        },
-        {
-          "role": "assistant",
-          "content": "Je ne suis pas sûre de comprendre ta question.  \nTu veux dire :\n\n- Combien de **notes** tu as enregistrées avec moi ?  \n- Ou le nombre de **notes de musique** (do, ré, mi, etc.) ?  \n- Ou autre chose (par exemple des billets, des annotations…) ?\n\nPrécise juste ce que tu entends par \"notes\" et je te réponds."
-        },
-        {
-          "role": "user",
           "content": "combine j ai de notes ?"
+        },
+        {
+          "role": "assistant",
+          "content": "Tu veux savoir combien de notes tu as enregistrées.\n\nJe peux demander la liste de toutes tes notes, mais je n’ai pas encore la réponse du système de mémoire.  \nVoici l’action que je vais déclencher :\n\n\n\nDès que le système me renvoie la liste, je pourrai te dire combien de notes il y a et éventuellement te les résumer si tu veux.\n\n📝 1 note(s) trouvée(s) :\n  - ID 1: test 1...\n"
+        },
+        {
+          "role": "user",
+          "content": "donne moi la note"
+        },
+        {
+          "role": "assistant",
+          "content": "Tu as actuellement une note enregistrée :\n\n- **ID 1** : `test 1...`\n\nSi tu veux, je peux :\n- te la reformuler ou la compléter,\n- en créer une nouvelle,\n- ou en supprimer une (en me disant l’ID)."
+        },
+        {
+          "role": "user",
+          "content": "suprimes cette note"
+        },
+        {
+          "role": "assistant",
+          "content": "Je vais supprimer cette note.\n\n\n\nLa note avec l’ID 1 est maintenant supprimée (ou en tout cas marquée pour suppression par le système de mémoire).  \nTu veux que l’on ajoute une nouvelle note à la place ?\n\n✓ Élément 1 supprimé"
+        },
+        {
+          "role": "user",
+          "content": "combien j ai de note maintenant ?"
+        },
+        {
+          "role": "assistant",
+          "content": "Tu n’as plus aucune note enregistrée pour l’instant.  \n\nTu veux que j’en crée une nouvelle ?"
+        },
+        {
+          "role": "user",
+          "content": "verifi"
         }
       ],
-      "llm_response": "Pour l’instant, tu n’as encore **aucune note enregistrée** avec moi.\n\nSi tu veux, tu peux commencer en me disant par exemple :\n- « Note : penser à appeler le dentiste »\n- « Ajoute une note : idées de cadeaux pour ma sœur »\n\nJe l’enregistrerai et je pourrai ensuite te dire combien tu en as, les rechercher, etc.",
+      "llm_response": "Je vais vérifier en listant toutes tes notes :\n\n\n\nD’après l’état actuel : tu n’as **aucune note enregistrée**.  \nOn peut en créer une nouvelle si tu veux : dicte-moi simplement le texte de la note.\n\nAucune note en mémoire.",
       "usage": {
-        "completion_tokens": 88,
-        "prompt_tokens": 926,
-        "total_tokens": 1014,
+        "completion_tokens": 70,
+        "prompt_tokens": 1097,
+        "total_tokens": 1167,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
@@ -48,13 +64,18 @@
       },
       "error": null,
       "internal_data": {
-        "thoughts": "L'utilisateur souhaite sauvegarder une note. Je dois extraire le contenu et l'enregistrer en mémoire avec des tags appropriés.",
-        "todo": null,
+        "thoughts": "Je vais vérifier en listant toutes tes notes :",
+        "todo": "1 étape(s)",
         "steps": [
-          "✓ Réponse envoyée à l'utilisateur"
+          "✓ Complément d'information"
         ]
       },
-      "memory_ops": []
+      "memory_ops": [
+        {
+          "action": "list_notes",
+          "result": "empty"
+        }
+      ]
     }
   ]
 }
