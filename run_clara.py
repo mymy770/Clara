@@ -16,10 +16,10 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
-# Configurer le logging pour DEBUG
-log_level = os.getenv('CLARA_LOG_LEVEL', 'DEBUG').upper()
+# Configurer le logging
+log_level = os.getenv('CLARA_LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(
-    level=getattr(logging, log_level, logging.DEBUG),
+    level=getattr(logging, log_level, logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
