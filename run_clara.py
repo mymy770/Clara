@@ -92,7 +92,10 @@ def main():
                 print(f"\nClara: {response}\n")
                 
                 # Logger la réponse
-                session_logger.log_clara(response)
+                if isinstance(orchestrator_response, dict):
+                    session_logger.log_clara(orchestrator_response.get('response', ''))
+                else:
+                    session_logger.log_clara(orchestrator_response)
                 
             except KeyboardInterrupt:
                 print("\n\nInterruption détectée.")

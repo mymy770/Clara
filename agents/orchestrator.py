@@ -205,7 +205,14 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 error=None
             )
             
-            return clara_response
+            # Extraire les données internes pour l'UI
+            internal_data = self._extract_internal_data(clara_response, memory_result, memory_context)
+            
+            # Retourner la réponse avec les données internes
+            return {
+                'response': clara_response,
+                'internal': internal_data
+            }
             
         except Exception as e:
             error_msg = f"Erreur : {str(e)}"
@@ -219,7 +226,15 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 error=error_msg
             )
             
-            return f"Désolée, j'ai rencontré une erreur : {str(e)}"
+            # En cas d'erreur, retourner un dict aussi pour la cohérence
+            return {
+                'response': f"Désolée, j'ai rencontré une erreur : {str(e)}",
+                'internal': {
+                    'thoughts': None,
+                    'todo': None,
+                    'steps': None
+                }
+            }
     
     def _process_memory_action(self, response_text):
         """
@@ -594,6 +609,61 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
     def _clean_response(self, response_text):
         """Nettoie la réponse en enlevant le bloc JSON"""
         return re.sub(r'```json\s*\{.*?\}\s*```', '', response_text, flags=re.DOTALL).strip()
+    
+    def _extract_internal_data(self, clara_response, memory_result, memory_context):
+        """
+        Extrait les données internes pour l'UI (réflexion, plan, étapes)
+        
+        Args:
+            clara_response: Réponse finale de Clara
+            memory_result: Résultat de l'action mémoire (si exécutée)
+            memory_context: Contexte mémoire pré-chargé (si lecture)
+        
+        Returns:
+            dict: {
+                'thoughts': str ou None,
+                'todo': str ou None,
+                'steps': list ou None
+            }
+        """
+        internal = {
+            'thoughts': None,
+            'todo': None,
+            'steps': None
+        }
+        
+        # Réflexion : utiliser le contexte mémoire pré-chargé comme "réflexion"
+        # ou les premières lignes de la réponse si pas de contexte
+        if memory_context:
+            # Limiter à 4 lignes max
+            lines = memory_context.split('\n')[:4]
+            internal['thoughts'] = '\n'.join(lines)
+        elif clara_response:
+            # Extraire les premières lignes comme réflexion
+            lines = clara_response.split('\n')[:3]
+            internal['thoughts'] = '\n'.join(lines)
+        
+        # Plan d'action : extraire depuis memory_result si c'est un plan/todo
+        if memory_result:
+            # Si memory_result contient des todos ou un plan
+            if 'todo' in memory_result.lower() or 'plan' in memory_result.lower() or 'sauvegardé' in memory_result.lower():
+                internal['todo'] = memory_result
+        
+        # Étapes exécutées : extraire depuis memory_result les actions mémoire
+        if memory_result:
+            steps = []
+            # Détecter les actions exécutées
+            if 'sauvegardé' in memory_result.lower() or 'enregistré' in memory_result.lower():
+                steps.append(memory_result)
+            elif 'trouvé' in memory_result.lower() or 'liste' in memory_result.lower():
+                steps.append(memory_result)
+            elif 'supprimé' in memory_result.lower():
+                steps.append(memory_result)
+            
+            if steps:
+                internal['steps'] = steps
+        
+        return internal
     
     def _build_prompt(self):
         """Construit le prompt complet avec system + historique"""

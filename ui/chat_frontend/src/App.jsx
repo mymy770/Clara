@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import SessionSidebarV2 from './components/SessionSidebarV2'
 import ChatArea from './components/ChatArea'
 import RightPanel from './components/RightPanel'
+import InternalPanel from './components/InternalPanel'
 import { loadSession, sendMessage } from './api'
 import { loadThemeFromLocalStorage, applyThemeToDocument } from './config/themeManager'
 
@@ -10,6 +11,10 @@ export default function App() {
   const [messages, setMessages] = useState([])
   const [isThinking, setIsThinking] = useState(false)
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
+  const [internalPanelOpen, setInternalPanelOpen] = useState(false)
+  const [internalThoughts, setInternalThoughts] = useState(null)
+  const [internalTodo, setInternalTodo] = useState(null)
+  const [internalSteps, setInternalSteps] = useState(null)
 
   // Charger le thème au démarrage
   useEffect(() => {
@@ -71,6 +76,12 @@ export default function App() {
 
     try {
       const response = await sendMessage(message, sessionId, false)
+      
+      // Extraire les données internes
+      const internal = response.internal || {}
+      setInternalThoughts(internal.thoughts || null)
+      setInternalTodo(internal.todo || null)
+      setInternalSteps(internal.steps || null)
       
       // Le backend peut retourner tous les messages ou juste la réponse
       if (response.messages && Array.isArray(response.messages)) {
@@ -170,6 +181,25 @@ export default function App() {
             >
               Todo
             </button>
+            {!rightPanelOpen && (
+              <button
+                onClick={() => setInternalPanelOpen(!internalPanelOpen)}
+                title="Afficher/Masquer Détails internes"
+                style={{
+                  padding: '4px 10px',
+                  background: 'var(--todo-btn-bg)',
+                  color: 'var(--todo-btn-text)',
+                  border: '1px solid var(--todo-btn-border)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                Détails
+              </button>
+            )}
           </div>
         </div>
 
@@ -189,6 +219,17 @@ export default function App() {
         isOpen={rightPanelOpen}
         onToggle={() => setRightPanelOpen(!rightPanelOpen)}
       />
+
+      {/* Panneau Détails internes (visible si RightPanel fermé) */}
+      {!rightPanelOpen && (
+        <InternalPanel
+          thoughts={internalThoughts}
+          todo={internalTodo}
+          steps={internalSteps}
+          open={internalPanelOpen}
+          onToggle={() => setInternalPanelOpen(!internalPanelOpen)}
+        />
+      )}
     </div>
   )
 }

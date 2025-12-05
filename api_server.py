@@ -72,6 +72,7 @@ class ChatResponse(BaseModel):
     reply: str
     session_id: str
     debug: Optional[dict] = None
+    internal: Optional[dict] = None
 
 
 class SessionInfo(BaseModel):
@@ -117,25 +118,36 @@ async def chat(request: ChatRequest):
         session_logger.log_user(request.message)
         
         # Appeler l'orchestrateur (même logique que run_clara.py)
-        response = orchestrator.handle_message(request.message, session_id, debug_logger)
+        orchestrator_response = orchestrator.handle_message(request.message, session_id, debug_logger)
+        
+        # L'orchestrator retourne maintenant un dict avec 'response' et 'internal'
+        if isinstance(orchestrator_response, dict):
+            clara_response_text = orchestrator_response.get('response', '')
+            internal_data = orchestrator_response.get('internal', {})
+        else:
+            # Compatibilité avec l'ancien format (string)
+            clara_response_text = orchestrator_response
+            internal_data = {}
         
         # Logger la réponse
-        session_logger.log_clara(response)
+        session_logger.log_clara(clara_response_text)
         
         # Préparer la réponse
         result = ChatResponse(
-            reply=response,
+            reply=clara_response_text,
             session_id=session_id
         )
         
+        # Ajouter les données internes
+        result.internal = internal_data
+        
         # Ajouter debug si demandé
         if request.debug:
-            # Pour l'instant, on peut extraire des infos basiques
-            # Plus tard, on pourra enrichir avec intents, actions mémoire, etc.
             result.debug = {
                 "session_id": session_id,
                 "message_length": len(request.message),
-                "response_length": len(response)
+                "response_length": len(clara_response_text),
+                "internal": internal_data
             }
         
         return result
