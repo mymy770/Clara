@@ -47,3 +47,43 @@ export async function checkHealth() {
   return await response.json()
 }
 
+export async function renameSession(sessionId, newTitle) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}/rename`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ title: newTitle }),
+  })
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function deleteSession(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}`, {
+    method: 'DELETE',
+  })
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function deleteAllSessions() {
+  const response = await fetch(`${API_BASE}/sessions`, {
+    method: 'DELETE',
+  })
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+

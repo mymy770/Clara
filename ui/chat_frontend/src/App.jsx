@@ -2,30 +2,25 @@ import React, { useState, useEffect } from 'react'
 import HeaderBar from './components/HeaderBar'
 import SessionSidebar from './components/SessionSidebar'
 import ChatPanel from './components/ChatPanel'
-import DebugPanel from './components/DebugPanel'
-import MemoryToolsPanel from './components/MemoryToolsPanel'
 import { loadSession, sendMessage } from './api'
 import layoutConfig from './config/layout.json'
+import { useTheme } from './styles/useTheme'
 
 export default function App() {
   const [sessionId, setSessionId] = useState(null)
   const [messages, setMessages] = useState([])
   const [debugEnabled, setDebugEnabled] = useState(false)
   const [debugData, setDebugData] = useState(null)
-  const [theme, setTheme] = useState('dark')
+  const { theme, setTheme } = useTheme()
   const [layout, setLayout] = useState(layoutConfig)
   const [isThinking, setIsThinking] = useState(false)
-  const [showRightPanel, setShowRightPanel] = useState(layoutConfig.layout?.showRightPanel || true)
 
   // Appliquer le layout depuis la config
   useEffect(() => {
     const sidebarLeftWidth = layout.layout?.sidebarLeftWidth || 280
-    const sidebarRightWidth = layout.layout?.sidebarRightWidth || 320
     document.documentElement.style.setProperty('--left-sidebar-width', `${sidebarLeftWidth}px`)
-    document.documentElement.style.setProperty('--right-sidebar-width', `${sidebarRightWidth}px`)
     document.documentElement.style.setProperty('--chat-min-width', layout.chatMinWidth || '480px')
-    document.documentElement.className = `theme-${theme}`
-  }, [layout, theme])
+  }, [layout])
 
   function handleNewSession() {
     setSessionId(null)
@@ -88,22 +83,22 @@ export default function App() {
     }
   }
 
-  function handleToggleTheme() {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
-
   // Classes CSS pour le layout
   const showLeft = layout.layout?.showSessions !== false
-  const showRight = showRightPanel && (layout.layout?.showMemoryPanel !== false)
   
   const appClasses = [
     'app-root',
     showLeft ? 'with-left-sidebar' : '',
-    showRight ? 'with-right-sidebar' : '',
   ].filter(Boolean).join(' ')
 
   return (
-    <div className={appClasses}>
+    <div className={appClasses} style={{
+      display: 'flex',
+      height: '100vh',
+      background: 'var(--background)',
+      color: 'var(--textPrimary)',
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+    }}>
       {showLeft && (
         <SessionSidebar
           currentSessionId={sessionId}
@@ -112,12 +107,17 @@ export default function App() {
         />
       )}
       
-      <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden',
+        flex: 1,
+      }}>
         <HeaderBar
           onToggleDebug={handleToggleDebug}
           debugEnabled={debugEnabled}
-          onToggleTheme={handleToggleTheme}
           theme={theme}
+          setTheme={setTheme}
           isThinking={isThinking}
         />
         <ChatPanel
@@ -126,20 +126,9 @@ export default function App() {
           onNewMessage={handleNewMessage}
           debugEnabled={debugEnabled}
           onSendMessage={handleSendMessage}
+          isThinking={isThinking}
         />
       </div>
-      
-      {showRight && !debugEnabled && (
-        <MemoryToolsPanel
-          sessionId={sessionId}
-          onSendMessage={handleSendMessage}
-          onNewMessage={handleNewMessage}
-        />
-      )}
-      
-      {debugEnabled && (
-        <DebugPanel debugData={debugData} />
-      )}
     </div>
   )
 }

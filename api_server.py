@@ -32,6 +32,7 @@ from pydantic import BaseModel
 from agents.orchestrator import Orchestrator
 from utils.logger import SessionLogger, DebugLogger
 from memory.memory_core import init_db
+import json
 
 # Initialiser la base de données au démarrage
 init_db()
@@ -77,6 +78,10 @@ class SessionInfo(BaseModel):
     session_id: str
     started_at: str
     title: Optional[str] = None
+
+
+class RenamePayload(BaseModel):
+    title: str
 
 
 # ============================================
@@ -140,6 +145,26 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def load_session_titles():
+    """Charge les titres des sessions depuis un fichier JSON"""
+    titles_file = Path("logs/sessions/_titles.json")
+    if titles_file.exists():
+        try:
+            with open(titles_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+
+def save_session_titles(titles):
+    """Sauvegarde les titres des sessions dans un fichier JSON"""
+    titles_file = Path("logs/sessions/_titles.json")
+    titles_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(titles_file, 'w', encoding='utf-8') as f:
+        json.dump(titles, f, indent=2, ensure_ascii=False)
+
+
 @app.get("/sessions", response_model=list[SessionInfo])
 async def list_sessions():
     """
@@ -148,6 +173,7 @@ async def list_sessions():
     """
     sessions = []
     sessions_dir = Path("logs/sessions")
+    titles = load_session_titles()
     
     if not sessions_dir.exists():
         return sessions
@@ -163,20 +189,21 @@ async def list_sessions():
         except Exception:
             started_at = datetime.now().isoformat()
         
-        # Essayer d'extraire un titre depuis le premier message (optionnel)
-        title = None
-        try:
-            with open(session_file, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                # Chercher le premier message utilisateur
-                for i, line in enumerate(lines):
-                    if "Utilisateur:" in line and i + 1 < len(lines):
-                        first_msg = lines[i + 1].strip()
-                        if first_msg:
-                            title = first_msg[:50]  # Limiter à 50 caractères
-                            break
-        except Exception:
-            pass
+        # Titre depuis le fichier de métadonnées ou depuis le premier message
+        title = titles.get(session_id)
+        if not title:
+            try:
+                with open(session_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    # Chercher le premier message utilisateur
+                    for i, line in enumerate(lines):
+                        if "Utilisateur:" in line and i + 1 < len(lines):
+                            first_msg = lines[i + 1].strip()
+                            if first_msg:
+                                title = first_msg[:50]  # Limiter à 50 caractères
+                                break
+            except Exception:
+                pass
         
         sessions.append(SessionInfo(
             session_id=session_id,
@@ -229,6 +256,80 @@ async def get_session(session_id: str):
         "session_id": session_id,
         "messages": messages
     }
+
+
+@app.post("/sessions/{session_id}/rename")
+async def rename_session(session_id: str, payload: RenamePayload):
+    """
+    Renomme une session
+    """
+    session_file = Path(f"logs/sessions/{session_id}.txt")
+    
+    if not session_file.exists():
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Charger et mettre à jour les titres
+    titles = load_session_titles()
+    titles[session_id] = payload.title
+    save_session_titles(titles)
+    
+    return {"success": True, "session_id": session_id, "title": payload.title}
+
+
+@app.delete("/sessions/{session_id}")
+async def delete_session(session_id: str):
+    """
+    Supprime une session
+    """
+    session_file = Path(f"logs/sessions/{session_id}.txt")
+    debug_file = Path(f"logs/debug/{session_id}.json")
+    titles = load_session_titles()
+    
+    deleted = False
+    
+    if session_file.exists():
+        session_file.unlink()
+        deleted = True
+    
+    if debug_file.exists():
+        debug_file.unlink()
+    
+    # Supprimer le titre de la liste
+    if session_id in titles:
+        del titles[session_id]
+        save_session_titles(titles)
+    
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    return {"success": True, "session_id": session_id}
+
+
+@app.delete("/sessions")
+async def delete_all_sessions():
+    """
+    Supprime toutes les sessions
+    """
+    sessions_dir = Path("logs/sessions")
+    debug_dir = Path("logs/debug")
+    
+    deleted_count = 0
+    
+    if sessions_dir.exists():
+        for session_file in sessions_dir.glob("session_*.txt"):
+            session_file.unlink()
+            deleted_count += 1
+    
+    if debug_dir.exists():
+        for debug_file in debug_dir.glob("session_*.json"):
+            debug_file.unlink()
+    
+    # Supprimer le fichier de titres
+    titles_file = Path("logs/sessions/_titles.json")
+    if titles_file.exists():
+        titles_file.unlink()
+    
+    return {"success": True, "deleted_count": deleted_count}
 
 
 if __name__ == "__main__":

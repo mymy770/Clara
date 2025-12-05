@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { sendMessage } from '../api'
+import DetailsPanel from './DetailsPanel'
 
-export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnabled, onQuickAction }) {
+export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnabled, onSendMessage, isThinking }) {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef(null)
@@ -89,8 +90,9 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--text-muted)',
+            color: 'var(--textSecondary)',
             fontSize: '16px',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
           }}>
             Commencez une conversation avec Clara...
           </div>
@@ -105,23 +107,24 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
               }}
             >
               <div
-                style={{
-                  maxWidth: '70%',
-                  padding: '12px 16px',
-                  background: msg.role === 'user' ? 'var(--accent)' : 'var(--bg-elevated)',
-                  borderRadius: msg.role === 'user' ? 'var(--radius-md) var(--radius-md) var(--radius-md) 0' : 'var(--radius-md) var(--radius-md) 0 var(--radius-md)',
-                  color: 'var(--text-main)',
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap',
-                  wordWrap: 'break-word',
-                }}
+              style={{
+                maxWidth: '70%',
+                padding: '12px 16px',
+                background: msg.role === 'user' ? 'var(--messageUserBg)' : 'var(--messageClaraBg)',
+                borderRadius: '18px',
+                color: msg.role === 'user' ? 'var(--messageUserText)' : 'var(--messageClaraText)',
+                fontSize: '14px',
+                lineHeight: '1.5',
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              }}
               >
                 {msg.content}
                 {msg.timestamp && (
                   <div style={{
                     fontSize: '11px',
-                    color: 'var(--text-muted)',
+                    color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--textSecondary)',
                     marginTop: '8px',
                   }}>
                     {msg.timestamp}
@@ -134,41 +137,15 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Panneau Détails (visible uniquement si debugEnabled) */}
+      {debugEnabled && (
+        <DetailsPanel 
+          debugData={messages[messages.length - 1]?.debug || null}
+          isThinking={isThinking}
+        />
+      )}
+
       <div className="message-input-area">
-        {/* Quick action buttons */}
-        <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
-          {['note', 'todo', 'process', 'protocol'].map((type) => (
-            <button
-              key={type}
-              onClick={() => handleQuickActionButton(type)}
-              style={{
-                padding: '6px 12px',
-                background: 'var(--bg-soft)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-sm)',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontFamily: 'var(--font-sans)',
-                textTransform: 'capitalize',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'var(--accent-soft)'
-                e.target.style.color = 'var(--text-primary)'
-                e.target.style.borderColor = 'var(--accent)'
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'var(--bg-soft)'
-                e.target.style.color = 'var(--text-secondary)'
-                e.target.style.borderColor = 'var(--border-subtle)'
-              }}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-        
         <div style={{ display: 'flex', gap: '8px' }}>
           <textarea
             value={input}
@@ -178,16 +155,17 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
             disabled={sending}
             style={{
               flex: 1,
-              padding: '12px',
-              background: 'var(--bg-soft)',
-              color: 'var(--text-main)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-sm)',
+              padding: '12px 16px',
+              background: 'var(--inputBg)',
+              color: 'var(--textPrimary)',
+              border: '1px solid var(--borderSubtle)',
+              borderRadius: '18px',
               fontSize: '14px',
-              fontFamily: 'var(--font-sans)',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
               resize: 'none',
               minHeight: '50px',
               maxHeight: '150px',
+              transition: 'all 0.2s',
             }}
             rows={1}
           />
@@ -196,14 +174,15 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
             disabled={!input.trim() || sending}
             style={{
               padding: '12px 24px',
-              background: sending || !input.trim() ? 'var(--bg-soft)' : 'var(--accent)',
-              color: 'var(--text-main)',
+              background: sending || !input.trim() ? 'var(--borderSubtle)' : 'var(--accent)',
+              color: sending || !input.trim() ? 'var(--textSecondary)' : 'var(--textPrimary)',
               border: 'none',
-              borderRadius: 'var(--radius-sm)',
+              borderRadius: '18px',
               cursor: sending || !input.trim() ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: '500',
-              fontFamily: 'var(--font-sans)',
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+              transition: 'all 0.2s',
             }}
           >
             {sending ? '...' : 'Envoyer'}
