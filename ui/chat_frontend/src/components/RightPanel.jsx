@@ -194,7 +194,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
               fontWeight: activeTab === 'todo' ? '600' : '400',
             }}
           >
-            <span style={{ opacity: 0.5, marginRight: '4px' }}>📝</span> Todo
+            Todo
           </button>
           <button
             className={`right-tab-btn ${activeTab === 'process' ? 'active' : ''}`}
@@ -211,7 +211,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
               fontWeight: activeTab === 'process' ? '600' : '400',
             }}
           >
-            <span style={{ opacity: 0.5, marginRight: '4px' }}>⚡</span> Process
+            Process
           </button>
         </div>
 
@@ -335,6 +335,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
         flexDirection: 'column',
         minHeight: 0,
         border: '1px solid var(--think-border)',
+        borderBottom: '1px solid var(--think-border)',
         borderRadius: '6px',
         margin: '4px',
         overflow: 'hidden',
@@ -350,7 +351,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
           color: 'var(--think-header-text)',
           flexShrink: 0,
         }}>
-          <span><span style={{ opacity: 0.5, marginRight: '4px' }}>🧠</span> Think</span>
+          <span><span style={{ color: '#999999', marginRight: '4px' }}>🧠</span> Think</span>
         </div>
         <div
           ref={thinkContentRef}
@@ -360,7 +361,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
             overflowY: 'auto',
             overflowX: 'hidden',
             padding: '10px',
-            paddingBottom: '80px',
+            paddingBottom: '10px',
             minHeight: 0,
             wordWrap: 'break-word',
             overflowWrap: 'break-word',
