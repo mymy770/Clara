@@ -334,22 +334,43 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
           disabled={sending}
           title={isListening ? 'Arrêter l\'enregistrement' : 'Parler'}
           style={{
-            padding: '8px 12px',
-            fontSize: '18px',
+            padding: '8px',
             cursor: sending ? 'not-allowed' : 'pointer',
-            border: `1px solid ${isListening ? 'var(--mic-btn-active-border)' : 'var(--mic-btn-border)'}`,
+            border: '1px solid var(--mic-btn-border)',
             borderRadius: '6px',
-            background: isListening ? 'var(--mic-btn-active-bg)' : 'var(--mic-btn-bg)',
-            color: isListening ? 'var(--mic-btn-active-text)' : 'var(--mic-btn-text)',
+            background: 'var(--mic-btn-bg)',
+            color: 'var(--mic-btn-text)',
             transition: 'all 0.2s',
             opacity: sending ? 0.5 : 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minWidth: '44px',
+            minWidth: '36px',
+            minHeight: '36px',
+            ...(isListening && {
+              border: '1px solid var(--mic-btn-active-border)',
+              background: 'var(--mic-btn-active-bg)',
+              color: 'var(--mic-btn-active-text)',
+            }),
           }}
         >
-          🎤
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: 'block' }}
+          >
+            <path
+              d="M8 1C7.17157 1 6.5 1.67157 6.5 2.5V8C6.5 8.82843 7.17157 9.5 8 9.5C8.82843 9.5 9.5 8.82843 9.5 8V2.5C9.5 1.67157 8.82843 1 8 1Z"
+              fill="currentColor"
+            />
+            <path
+              d="M4 7C4 6.44772 3.55228 6 3 6C2.44772 6 2 6.44772 2 7C2 9.76142 4.23858 12 7 12V13H5C4.44772 13 4 13.4477 4 14C4 14.5523 4.44772 15 5 15H11C11.5523 15 12 14.5523 12 14C12 13.4477 11.5523 13 11 13H9V12C11.7614 12 14 9.76142 14 7C14 6.44772 13.5523 6 13 6C12.4477 6 12 6.44772 12 7C12 9.20914 10.2091 11 8 11C5.79086 11 4 9.20914 4 7Z"
+              fill="currentColor"
+            />
+          </svg>
         </button>
         <button
           id="send-btn"
