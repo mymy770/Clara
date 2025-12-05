@@ -87,3 +87,45 @@ export async function deleteAllSessions() {
   return await response.json()
 }
 
+export async function getSessionTodos(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}/todos`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function getSessionLogs(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}/logs`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function getSessionThinking(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}/thinking`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function createSession() {
+  const response = await fetch(`${API_BASE}/sessions`, {
+    method: 'POST',
+  })
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+

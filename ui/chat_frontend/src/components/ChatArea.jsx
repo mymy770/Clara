@@ -1,0 +1,225 @@
+import React, { useState, useRef, useEffect } from 'react'
+import { sendMessage } from '../api'
+
+export default function ChatArea({ sessionId, messages, onNewMessage, onSendMessage, isThinking }) {
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const messagesEndRef = useRef(null)
+  const textareaRef = useRef(null)
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  function scrollToBottom() {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  function formatTime(ts) {
+    try {
+      if (!ts) return ""
+      const d = new Date(ts)
+      if (isNaN(d.getTime())) return ""
+      return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+    } catch (e) {
+      return ""
+    }
+  }
+
+  async function handleSend() {
+    if (!input.trim() || sending) return
+
+    const userMessage = input.trim()
+    setInput('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '40px'
+    }
+
+    // Si onSendMessage est fourni (depuis App), l'utiliser
+    if (onSendMessage) {
+      onSendMessage(userMessage)
+      return
+    }
+
+    // Sinon, utiliser la logique interne
+    setSending(true)
+    onNewMessage({ role: 'user', content: userMessage, timestamp: new Date().toISOString() })
+
+    try {
+      const response = await sendMessage(userMessage, sessionId, false)
+      onNewMessage({
+        role: 'assistant',
+        content: response.reply,
+        timestamp: new Date().toISOString(),
+      })
+    } catch (error) {
+      console.error('Error sending message:', error)
+      onNewMessage({
+        role: 'assistant',
+        content: `Erreur: ${error.message}`,
+        timestamp: new Date().toISOString(),
+      })
+    } finally {
+      setSending(false)
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  function handleInputChange(e) {
+    setInput(e.target.value)
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
+    }
+  }
+
+  return (
+    <div className="main" style={{
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      position: 'relative',
+      overflow: 'hidden',
+      background: 'var(--main-bg)',
+    }}>
+      <div id="chat" className="chat" style={{
+        flex: 1,
+        padding: '10px',
+        overflowY: 'auto',
+        background: 'var(--chat-bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+      }}>
+        {messages.length === 0 ? (
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--text-color)',
+            fontSize: '16px',
+          }}>
+            Commencez une conversation avec Clara...
+          </div>
+        ) : (
+          messages.map((msg, idx) => {
+            const roleKey = (msg.role === 'user' || msg.role === 'jeremy') ? 'jeremy' : 'clara'
+            return (
+              <div
+                key={idx}
+                className={`msg ${roleKey === 'jeremy' ? 'user' : 'clara'}`}
+                style={{
+                  display: 'flex',
+                  margin: '6px 0',
+                  width: '100%',
+                  justifyContent: roleKey === 'jeremy' ? 'flex-end' : 'flex-start',
+                }}
+              >
+                <div
+                  className={`bubble ${roleKey === 'jeremy' ? 'bubble-jeremy' : 'bubble-clara'}`}
+                  style={{
+                    display: 'inline-block',
+                    maxWidth: '65%',
+                    padding: '8px 12px',
+                    margin: 0,
+                    borderRadius: '12px',
+                    fontSize: 'var(--chat-font-size, 14px)',
+                    lineHeight: '1.4',
+                    wordWrap: 'break-word',
+                    whiteSpace: 'pre-line',
+                    border: '1px solid transparent',
+                    background: roleKey === 'jeremy' ? 'var(--jeremy-bubble-bg)' : 'var(--clara-bubble-bg)',
+                    borderColor: roleKey === 'jeremy' ? 'var(--jeremy-bubble-border)' : 'var(--clara-bubble-border)',
+                    color: roleKey === 'jeremy' ? 'var(--jeremy-bubble-text)' : 'var(--clara-bubble-text)',
+                  }}
+                >
+                  <div>{msg.content || ''}</div>
+                  {msg.timestamp && (
+                    <span className="time" style={{
+                      display: 'block',
+                      fontSize: '11px',
+                      color: 'var(--time-color)',
+                      marginTop: '3px',
+                      textAlign: 'right',
+                    }}>
+                      {formatTime(msg.timestamp)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="typing" style={{
+        fontSize: '11px',
+        color: 'var(--time-color)',
+        padding: '0 10px 4px',
+        fontStyle: 'italic',
+        display: isThinking ? 'block' : 'none',
+      }}>
+        Clara écrit...
+      </div>
+
+      <div className="input-area" style={{
+        borderTop: '1px solid var(--input-border)',
+        padding: '12px 8px',
+        display: 'flex',
+        gap: '8px',
+        background: 'var(--input-area-bg)',
+      }}>
+        <textarea
+          ref={textareaRef}
+          id="message-input"
+          value={input}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Écris à Clara..."
+          disabled={sending}
+          style={{
+            flex: 1,
+            resize: 'none',
+            minHeight: '40px',
+            maxHeight: '120px',
+            padding: '8px',
+            fontFamily: 'inherit',
+            fontSize: '13px',
+            border: '1px solid var(--input-border)',
+            borderRadius: '6px',
+            background: 'var(--input-bg)',
+            color: 'var(--input-text)',
+          }}
+        />
+        <button
+          id="send-btn"
+          onClick={handleSend}
+          disabled={!input.trim() || sending}
+          style={{
+            padding: '8px 16px',
+            fontSize: '13px',
+            cursor: sending || !input.trim() ? 'not-allowed' : 'pointer',
+            border: '1px solid var(--send-btn-border)',
+            borderRadius: '6px',
+            background: 'var(--send-btn-bg)',
+            color: 'var(--send-btn-text)',
+            transition: 'all 0.2s',
+            opacity: sending || !input.trim() ? 0.5 : 1,
+          }}
+        >
+          Envoyer
+        </button>
+      </div>
+    </div>
+  )
+}
+

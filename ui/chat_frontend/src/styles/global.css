@@ -1,0 +1,93 @@
+/* Clara UI v2 - Global CSS Variables (basé sur legacy index.html) */
+
+:root {
+  /* Sidebar */
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #000000;
+  --sidebar-border: #dddddd;
+  --sidebar-header-bg: #ffffff;
+  --sidebar-footer-bg: #ffffff;
+  --sidebar-footer-border: #dddddd;
+
+  /* Header */
+  --header-bg: #ffffff;
+  --header-text: #000000;
+  --header-border: #eeeeee;
+
+  /* Chat */
+  --chat-bg: #fafafa;
+  --text-color: #000000;
+  --time-color: #666666;
+  --main-bg: #fafafa;
+
+  /* Bulles */
+  --jeremy-bubble-bg: #d5f9c5;
+  --jeremy-bubble-border: #c7e8b5;
+  --jeremy-bubble-text: #000000;
+  --clara-bubble-bg: #ffffff;
+  --clara-bubble-border: #dddddd;
+  --clara-bubble-text: #000000;
+
+  /* Input */
+  --input-area-bg: #ffffff;
+  --input-bg: #ffffff;
+  --input-text: #000000;
+  --input-border: #dddddd;
+
+  /* Bouton Envoyer */
+  --send-btn-bg: #007AFF;
+  --send-btn-text: #ffffff;
+  --send-btn-border: #007AFF;
+
+  /* Panneau droit */
+  --right-panel-bg: #ffffff;
+  --right-panel-header-bg: #ffffff;
+  --right-panel-header-text: #000000;
+  --right-panel-border: #dddddd;
+
+  /* Bouton Todo */
+  --todo-btn-bg: #ffffff;
+  --todo-btn-text: #000000;
+  --todo-btn-border: #dddddd;
+
+  /* Bouton Settings */
+  --settings-btn-bg: #ffffff;
+  --settings-btn-text: #000000;
+  --settings-btn-border: #dddddd;
+
+  /* Think */
+  --think-bg: #ffffff;
+  --think-header-bg: #ffffff;
+  --think-header-text: #000000;
+  --think-border: #dddddd;
+  --think-text: #000000;
+
+  /* Bouton Supprimer Tout */
+  --delete-all-btn-bg: #ffffff;
+  --delete-all-btn-text: #000000;
+  --delete-all-btn-border: #dddddd;
+
+  /* Taille police */
+  --chat-font-size: 14px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background: var(--main-bg);
+  color: var(--text-color);
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+

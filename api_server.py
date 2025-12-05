@@ -332,6 +332,93 @@ async def delete_all_sessions():
     return {"success": True, "deleted_count": deleted_count}
 
 
+@app.post("/sessions")
+async def create_session():
+    """
+    Crée une nouvelle session
+    """
+    session_id = generate_session_id()
+    session_file = Path(f"logs/sessions/{session_id}.txt")
+    session_file.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Créer un fichier vide
+    with open(session_file, 'w', encoding='utf-8') as f:
+        f.write(f"Session créée le {datetime.now().isoformat()}\n")
+    
+    return {
+        "session_id": session_id,
+        "title": None,
+        "started_at": datetime.now().isoformat()
+    }
+
+
+@app.get("/sessions/{session_id}/todos")
+async def get_session_todos(session_id: str):
+    """
+    Récupère les todos d'une session
+    Pour l'instant, retourne une liste vide (à implémenter avec le système de todos)
+    """
+    # TODO: Implémenter avec le système de todos de Clara
+    return {"todos": []}
+
+
+@app.get("/sessions/{session_id}/logs")
+async def get_session_logs(session_id: str):
+    """
+    Récupère les logs d'une session depuis le fichier de debug
+    """
+    debug_file = Path(f"logs/debug/{session_id}.json")
+    
+    if not debug_file.exists():
+        return {"logs": []}
+    
+    try:
+        with open(debug_file, 'r', encoding='utf-8') as f:
+            debug_data = json.load(f)
+        
+        # Extraire les logs depuis debug_data
+        logs = []
+        if isinstance(debug_data, dict):
+            # Format attendu: {"logs": [...]} ou directement une liste
+            if "logs" in debug_data:
+                logs = debug_data["logs"]
+            elif isinstance(debug_data.get("entries"), list):
+                logs = debug_data["entries"]
+        
+        return {"logs": logs}
+    except Exception as e:
+        logging.exception(f"Erreur lecture logs {session_id}: {e}")
+        return {"logs": []}
+
+
+@app.get("/sessions/{session_id}/thinking")
+async def get_session_thinking(session_id: str):
+    """
+    Récupère les pensées (thinking) d'une session depuis le fichier de debug
+    """
+    debug_file = Path(f"logs/debug/{session_id}.json")
+    
+    if not debug_file.exists():
+        return {"thinking": []}
+    
+    try:
+        with open(debug_file, 'r', encoding='utf-8') as f:
+            debug_data = json.load(f)
+        
+        # Extraire les thinking depuis debug_data
+        thinking = []
+        if isinstance(debug_data, dict):
+            if "thinking" in debug_data:
+                thinking = debug_data["thinking"]
+            elif "thoughts" in debug_data:
+                thinking = debug_data["thoughts"]
+        
+        return {"thinking": thinking}
+    except Exception as e:
+        logging.exception(f"Erreur lecture thinking {session_id}: {e}")
+        return {"thinking": []}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=True)

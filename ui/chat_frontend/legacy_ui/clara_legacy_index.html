@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Clara UI</title>
+  <script>
+    // Charger les couleurs IMMÉDIATEMENT avant le rendu (évite le flash)
+    (function() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('clara_colors') || '{}');
+        if (Object.keys(saved).length > 0) {
+          const style = document.createElement('style');
+          let css = ':root {';
+          const colorMap = {
+            'sidebarBg': '--sidebar-bg',
+            'sidebarText': '--sidebar-text',
+            'sidebarBorder': '--sidebar-border',
+            'headerBg': '--header-bg',
+            'headerText': '--header-text',
+            'headerBorder': '--header-border',
+            'chatBg': '--chat-bg',
+            'textColor': '--text-color',
+            'timeColor': '--time-color',
+            'jeremyBg': '--jeremy-bubble-bg',
+            'jeremyBorder': '--jeremy-bubble-border',
+            'jeremyText': '--jeremy-bubble-text',
+            'claraBg': '--clara-bubble-bg',
+            'claraBorder': '--clara-bubble-border',
+            'claraText': '--clara-bubble-text',
+            'inputAreaBg': '--input-area-bg',
+            'inputBg': '--input-bg',
+            'inputText': '--input-text',
+            'inputBorder': '--input-border',
+            'sendBtnBg': '--send-btn-bg',
+            'sendBtnText': '--send-btn-text',
+            'sendBtnBorder': '--send-btn-border',
+            'rightPanelBg': '--right-panel-bg',
+            'rightPanelHeaderBg': '--right-panel-header-bg',
+            'rightPanelHeaderText': '--right-panel-header-text',
+            'rightPanelBorder': '--right-panel-border',
+            'todoBtnBg': '--todo-btn-bg',
+            'todoBtnText': '--todo-btn-text',
+            'todoBtnBorder': '--todo-btn-border',
+            'settingsBtnBg': '--settings-btn-bg',
+            'settingsBtnText': '--settings-btn-text',
+            'settingsBtnBorder': '--settings-btn-border',
+            'thinkBg': '--think-bg',
+            'thinkHeaderBg': '--think-header-bg',
+            'thinkHeaderText': '--think-header-text',
+            'thinkBorder': '--think-border',
+            'thinkText': '--think-text',
+            'sidebarFooterBg': '--sidebar-footer-bg',
+            'sidebarFooterBorder': '--sidebar-footer-border',
+            'deleteAllBtnBg': '--delete-all-btn-bg',
+            'deleteAllBtnText': '--delete-all-btn-text',
+            'deleteAllBtnBorder': '--delete-all-btn-border',
+          };
+          for (let key in saved) {
+            if (colorMap[key]) {
+              css += colorMap[key] + ': ' + saved[key] + ';';
+            }
+          }
+          css += '}';
+          style.textContent = css;
+          document.head.appendChild(style);
+        }
+      } catch (e) {
+        console.error('Erreur chargement couleurs:', e);
+      }
+    })();
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --sidebar-bg: #ffffff;
+      --sidebar-text: #000000;
+      --sidebar-header-bg: #ffffff;
+      --sidebar-border: #dddddd;
+      --main-bg: #fafafa;
+      --header-bg: #ffffff;
+      --header-text: #000000;
+      --header-border: #eeeeee;
+      --chat-bg: #fafafa;
+      --input-area-bg: #ffffff;
+      --input-bg: #ffffff;
+      --input-text: #000000;
+      --input-border: #dddddd;
+      --send-btn-bg: #ffffff;
+      --send-btn-text: #000000;
+      --send-btn-border: #dddddd;
+      --jeremy-bubble-bg: #d5f9c5;
+      --jeremy-bubble-border: #c7e8b5;
+      --jeremy-bubble-text: #000000;
+      --clara-bubble-bg: #ffffff;
+      --clara-bubble-border: #dddddd;
+      --clara-bubble-text: #000000;
+      --text-color: #000000;
+      --time-color: #666666;
+      --right-panel-bg: #ffffff;
+      --right-panel-header-bg: #ffffff;
+      --right-panel-header-text: #000000;
+      --right-panel-border: #dddddd;
+      --todo-btn-bg: #ffffff;
+      --todo-btn-text: #000000;
+      --todo-btn-border: #dddddd;
+      --settings-btn-bg: #ffffff;
+      --settings-btn-text: #000000;
+      --settings-btn-border: #dddddd;
+      --think-bg: #ffffff;
+      --think-header-bg: #ffffff;
+      --think-header-text: #000000;
+      --think-border: #dddddd;
+      --think-text: #000000;
+      --sidebar-footer-bg: #ffffff;
+      --sidebar-footer-border: #dddddd;
+      --delete-all-btn-bg: #ffffff;
+      --delete-all-btn-text: #000000;
+      --delete-all-btn-border: #dddddd;
+    }
+    
+    body { 
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; 
+      height: 100vh; 
+      display: flex; 
+      overflow: hidden;
+    }
+
+    /* Variables CSS pour toutes les couleurs - appliquées dynamiquement */
+    .sidebar {
+      width: 260px;
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+    }
+    .sidebar-header {
+      padding: 10px;
+      border-bottom: 1px solid var(--sidebar-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      background: var(--sidebar-header-bg);
+    }
+    .sidebar-header button {
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid var(--sidebar-border);
+      border-radius: 4px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+    }
+    .session-list { flex: 1; overflow-y: auto; }
+    
+    .sidebar-footer {
+      padding: 10px;
+      border-top: 1px solid var(--sidebar-footer-border);
+      background: var(--sidebar-footer-bg);
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .sidebar-footer button {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 11px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      font-weight: 400;
+    }
+    .delete-all-btn {
+      background: var(--delete-all-btn-bg);
+      color: var(--delete-all-btn-text);
+      border: 1px solid var(--delete-all-btn-border);
+    }
+    .delete-all-btn:hover {
+      opacity: 0.85;
+      filter: brightness(0.95);
+    }
+    .sidebar-settings-btn {
+      background: var(--settings-btn-bg);
+      color: var(--settings-btn-text);
+      border: 1px solid var(--settings-btn-border);
+    }
+    .sidebar-settings-btn:hover {
+      opacity: 0.85;
+      filter: brightness(0.95);
+    }
+    .session-item {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--sidebar-border);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      color: var(--sidebar-text);
+    }
+    .session-item.active { 
+      background: rgba(0, 0, 0, 0.05); 
+      font-weight: 600; 
+    }
+    .session-item:hover { 
+      background: rgba(0, 0, 0, 0.03); 
+    }
+    .session-title { 
+      flex: 1; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      white-space: nowrap; 
+      color: var(--sidebar-text);
+    }
+    .session-actions { 
+      display: flex; 
+      gap: 4px; 
+      flex-shrink: 0; 
+    }
+    .session-actions { 
+      display: flex; 
+      gap: 4px; 
+      flex-shrink: 0; 
+    }
+    .session-actions button { 
+      border: none; 
+      background: transparent; 
+      cursor: pointer; 
+      font-size: 13px; 
+      padding: 4px 6px; 
+      color: var(--sidebar-text);
+      opacity: 0.5;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .session-actions button:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .session-actions .rename-btn:hover {
+      color: #007AFF;
+    }
+    .session-actions .delete-btn:hover {
+      color: #ff3b30;
+    }
+
+    .main { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh; 
+      position: relative; 
+      overflow: hidden; 
+      background: var(--main-bg);
+    }
+    .chat-header {
+      padding: 10px;
+      border-bottom: 1px solid var(--header-border);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--header-bg);
+      color: var(--header-text);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .chat { 
+      flex: 1; 
+      padding: 10px; 
+      overflow-y: auto; 
+      background: var(--chat-bg); 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    .msg { display: flex; margin: 6px 0; width: 100%; }
+    .msg.user { justify-content: flex-end; }
+    .msg.clara { align-self: flex-start; }
+    .bubble {
+      display: inline-block;
+      max-width: 65%;
+      padding: 8px 12px;
+      margin: 0;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-line;
+      border: 1px solid transparent;
+    }
+    .bubble-jeremy { 
+      background: var(--jeremy-bubble-bg); 
+      border-color: var(--jeremy-bubble-border); 
+      color: var(--jeremy-bubble-text); 
+    }
+    .bubble-clara { 
+      background: var(--clara-bubble-bg); 
+      border-color: var(--clara-bubble-border); 
+      color: var(--clara-bubble-text); 
+    }
+    .time {
+      display: block;
+      font-size: 11px;
+      color: var(--time-color);
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    .typing { 
+      font-size: 11px; 
+      color: var(--time-color); 
+      padding: 0 10px 4px; 
+      font-style: italic; 
+      display: none; 
+    }
+
+    .input-area {
+      border-top: 1px solid var(--input-border);
+      padding: 12px 8px;
+      display: flex;
+      gap: 8px;
+      background: var(--input-area-bg);
+    }
+    .input-area textarea {
+      flex: 1; 
+      resize: none; 
+      min-height: 40px; 
+      max-height: 120px;
+      padding: 8px; 
+      font-family: inherit; 
+      font-size: 13px;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--input-text);
+    }
+    .input-area button {
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid var(--send-btn-border);
+      border-radius: 6px;
+      background: var(--send-btn-bg);
+      color: var(--send-btn-text);
+      transition: all 0.2s;
+    }
+    .input-area button:hover { 
+      opacity: 0.9;
+      filter: brightness(0.95);
+    }
+
+    /* Bande droite - Todo + Process + Think */
+    .right-panel {
+      width: 320px;
+      border-left: 1px solid var(--right-panel-border);
+      display: flex;
+      flex-direction: column;
+      background: var(--right-panel-bg);
+      transition: transform 0.3s ease;
+    }
+    .right-panel-top {
+      flex: 0 0 45%;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid var(--right-panel-border);
+      min-height: 0;
+    }
+    .right-panel-bottom {
+      flex: 0 0 55%;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border: 1px solid var(--think-border);
+      border-radius: 6px;
+      margin: 4px;
+      overflow: hidden;
+      background: var(--think-bg);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .right-panel.collapsed {
+      transform: translateX(100%);
+      position: absolute;
+      right: 0;
+      height: 100vh;
+    }
+    .right-panel-header {
+      padding: 10px;
+      border-bottom: 1px solid var(--right-panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--right-panel-header-bg);
+      color: var(--text-color);
+    }
+    .right-panel-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px 8px;
+      color: var(--text-color);
+    }
+    .right-panel-content {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .right-tab {
+      display: flex;
+      border-bottom: 1px solid var(--right-panel-border);
+    }
+    .right-tab button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: rgba(0, 0, 0, 0.03);
+      cursor: pointer;
+      font-size: 12px;
+      border-bottom: 2px solid transparent;
+      color: var(--text-color);
+    }
+    .right-tab button.active {
+      background: var(--right-panel-bg);
+      border-bottom-color: #007AFF;
+      font-weight: 600;
+    }
+    .right-tab-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px;
+      display: none;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .right-tab-content.active {
+      display: block;
+    }
+    .right-tab-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .right-tab-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .right-tab-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    /* Todo List */
+    .todo-section {
+      margin-bottom: 15px;
+    }
+    .todo-section h4 {
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: var(--text-color);
+    }
+    .todo-item {
+      padding: 8px;
+      border: 1px solid var(--right-panel-border);
+      border-radius: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: var(--right-panel-bg);
+    }
+    .todo-item.done {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+    .todo-checkbox {
+      margin-top: 2px;
+    }
+    .todo-content {
+      flex: 1;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text-color);
+    }
+    .todo-time {
+      font-size: 10px;
+      color: var(--time-color);
+      margin-top: 4px;
+    }
+
+    /* Process Live */
+    .process-entry {
+      padding: 8px;
+      border-left: 3px solid #007AFF;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--text-color);
+    }
+    .process-entry.error {
+      border-left-color: #ff3b30;
+      background: rgba(255, 59, 48, 0.1);
+    }
+    .process-entry.success {
+      border-left-color: #34c759;
+      background: rgba(52, 199, 89, 0.1);
+    }
+    .process-time {
+      font-size: 10px;
+      color: var(--time-color);
+      margin-bottom: 4px;
+    }
+    .process-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Think Panel */
+    .think-header {
+      padding: 8px 10px;
+      border-bottom: 2px solid var(--think-border);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--think-header-bg);
+      color: var(--think-header-text);
+      flex-shrink: 0;
+    }
+    .think-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px;
+      padding-bottom: 80px;
+      min-height: 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
+      position: relative;
+      max-height: 100%;
+    }
+    .think-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .think-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .think-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+    .think-entry {
+      padding: 8px;
+      margin-bottom: 8px;
+      padding-bottom: 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1.4;
+      border-left: 3px solid transparent;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .think-entry.phase-think {
+      border-left-color: #007AFF;
+      background: rgba(0, 122, 255, 0.05);
+    }
+    .think-entry.phase-plan {
+      border-left-color: #34c759;
+      background: rgba(52, 199, 89, 0.05);
+    }
+    .think-entry.phase-observe {
+      border-left-color: #FF9500;
+      background: rgba(255, 149, 0, 0.05);
+    }
+    .think-entry.phase-error_rethink {
+      border-left-color: #ff3b30;
+      background: rgba(255, 59, 48, 0.1);
+    }
+    .think-time {
+      font-size: 10px;
+      color: var(--time-color);
+      margin-bottom: 4px;
+    }
+    .think-phase {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+    .think-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--think-text);
+    }
+
+    /* Bouton bande droite - Design simple et joli */
+    .toggle-right-panel {
+      padding: 4px 10px;
+      background: var(--todo-btn-bg);
+      color: var(--todo-btn-text);
+      border: 1px solid var(--todo-btn-border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      min-width: 50px;
+    }
+    .toggle-right-panel:hover {
+      opacity: 0.8;
+      filter: brightness(1.1);
+    }
+
+    /* Popup de confirmation */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    .modal h3 {
+      margin-bottom: 12px;
+      font-size: 16px;
+      color: #000;
+    }
+    .modal p {
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .modal-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .modal-btn-cancel {
+      background: #f0f0f0;
+      color: #000;
+    }
+    .modal-btn-cancel:hover {
+      background: #e0e0e0;
+    }
+    .modal-btn-confirm {
+      background: #ff3b30;
+      color: #fff;
+    }
+    .modal-btn-confirm:hover {
+      background: #d32f2f;
+    }
+
+    /* Settings panel - Complet pour toutes les couleurs */
+    #settings-panel {
+      position: absolute;
+      top: 45px;
+      right: 12px;
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      width: 300px;
+      max-height: 80vh;
+      overflow-y: auto;
+      font-size: 12px;
+      z-index: 10;
+    }
+    #settings-panel.show {
+      display: block;
+    }
+    #settings-panel h4 {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #000;
+    }
+    .settings-section {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .settings-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .settings-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 6px 0;
+    }
+    .settings-item label {
+      flex: 1;
+      font-size: 12px;
+      color: #333;
+    }
+    .settings-item input[type="color"] {
+      width: 50px;
+      height: 30px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 2px;
+    }
+    .settings-item input[type="number"] {
+      width: 60px;
+      padding: 4px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .settings-reset {
+      margin-top: 15px;
+      padding: 8px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .settings-reset:hover {
+      background: #e8e8e8;
+    }
+    .settings-btn {
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--settings-btn-border);
+      border-radius: 4px;
+      background: var(--settings-btn-bg);
+      color: var(--settings-btn-text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .settings-btn:hover {
+      opacity: 0.8;
+      filter: brightness(0.95);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span>Conversations</span>
+      <button id="new-session-btn">+ Nouvelle</button>
+    </div>
+    <div id="session-list" class="session-list"></div>
+    <div class="sidebar-footer">
+      <button id="delete-all-sessions-btn" class="delete-all-btn" title="Supprimer toutes les conversations">🗑️ Tout supprimer</button>
+      <button id="sidebar-settings-btn" class="sidebar-settings-btn" title="Paramètres des couleurs">⚙️ Couleurs</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="chat-header" class="chat-header">
+      <span id="chat-title">Aucune session</span>
+      <div style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+        <button class="toggle-right-panel" id="toggle-right-panel" title="Afficher/Masquer Todo & Process">Todo</button>
+      </div>
+    </div>
+    
+    <!-- Panneau de paramètres complet -->
+    <div id="settings-panel">
+      <h4>Paramètres d'apparence</h4>
+      
+      <div class="settings-section">
+        <div class="settings-section-title">Sidebar</div>
+        <div class="settings-item">
+          <label>Fond sidebar</label>
+          <input type="color" id="color-sidebar-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte sidebar</label>
+          <input type="color" id="color-sidebar-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure sidebar</label>
+          <input type="color" id="color-sidebar-border" value="#dddddd">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Header</div>
+        <div class="settings-item">
+          <label>Fond header</label>
+          <input type="color" id="color-header-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte header</label>
+          <input type="color" id="color-header-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure header</label>
+          <input type="color" id="color-header-border" value="#eeeeee">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Chat</div>
+        <div class="settings-item">
+          <label>Fond chat</label>
+          <input type="color" id="color-chat-bg" value="#fafafa">
+        </div>
+        <div class="settings-item">
+          <label>Couleur texte</label>
+          <input type="color" id="color-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Couleur heure</label>
+          <input type="color" id="color-time" value="#666666">
+        </div>
+        <div class="settings-item">
+          <label>Taille police</label>
+          <input type="number" id="font-size-chat" min="10" max="20" value="14">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Bulle Jeremy</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-jeremy-bg" value="#d5f9c5">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-jeremy-border" value="#c7e8b5">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-jeremy-text" value="#000000">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Bulle Clara</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-clara-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-clara-border" value="#dddddd">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-clara-text" value="#000000">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Zone d'input - Texte</div>
+        <div class="settings-item">
+          <label>Fond zone</label>
+          <input type="color" id="color-input-area-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Fond textarea</label>
+          <input type="color" id="color-input-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-input-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-input-border" value="#dddddd">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Zone d'input - Bouton Envoyer</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-send-btn-bg" value="#007AFF">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-send-btn-text" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-send-btn-border" value="#007AFF">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Bande droite</div>
+        <div class="settings-item">
+          <label>Fond panel</label>
+          <input type="color" id="color-right-panel-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Fond header "Todo & Process"</label>
+          <input type="color" id="color-right-panel-header-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte header</label>
+          <input type="color" id="color-right-panel-header-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure panel</label>
+          <input type="color" id="color-right-panel-border" value="#dddddd">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Bouton Todo</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-todo-btn-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-todo-btn-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-todo-btn-border" value="#dddddd">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Bouton Paramètres (⚙️ Couleurs)</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-settings-btn-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-settings-btn-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-settings-btn-border" value="#dddddd">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <div class="settings-section-title">Bouton Supprimer Tout (🗑️)</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-delete-all-btn-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte</label>
+          <input type="color" id="color-delete-all-btn-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-delete-all-btn-border" value="#dddddd">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <div class="settings-section-title">Bas Sidebar (Footer)</div>
+        <div class="settings-item">
+          <label>Fond</label>
+          <input type="color" id="color-sidebar-footer-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-sidebar-footer-border" value="#dddddd">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Think</div>
+        <div class="settings-item">
+          <label>Fond panel</label>
+          <input type="color" id="color-think-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Fond header</label>
+          <input type="color" id="color-think-header-bg" value="#ffffff">
+        </div>
+        <div class="settings-item">
+          <label>Texte header</label>
+          <input type="color" id="color-think-header-text" value="#000000">
+        </div>
+        <div class="settings-item">
+          <label>Bordure</label>
+          <input type="color" id="color-think-border" value="#dddddd">
+        </div>
+        <div class="settings-item">
+          <label>Couleur texte</label>
+          <input type="color" id="color-think-text" value="#000000">
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+          <button class="settings-btn-apply" id="settings-apply" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: #007AFF; color: #fff; cursor: pointer; font-size: 12px; font-weight: 500;">✓ Appliquer</button>
+          <button class="settings-btn-cancel" id="settings-cancel" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #333; cursor: pointer; font-size: 12px;">✕ Annuler</button>
+        </div>
+        <button class="settings-reset" id="settings-reset">Réinitialiser par défaut</button>
+      </div>
+    </div>
+
+    <div id="chat" class="chat"></div>
+    <div id="typing" class="typing">Clara écrit...</div>
+    <div class="input-area" id="input-area">
+      <textarea id="message-input" placeholder="Écris à Clara..."></textarea>
+      <button id="send-btn">Envoyer</button>
+    </div>
+  </div>
+
+  <!-- Bande droite - Todo + Process + Think -->
+  <div class="right-panel" id="right-panel">
+    <div class="right-panel-header">
+      <span>Todo & Process</span>
+      <button class="right-panel-toggle" id="close-right-panel">✕</button>
+    </div>
+    <!-- TOP: TODO + PROCESS (~60%) -->
+    <div class="right-panel-top">
+      <div class="right-tab">
+        <button class="right-tab-btn active" data-tab="todo">📝 Todo</button>
+        <button class="right-tab-btn" data-tab="process">⚡ Process</button>
+      </div>
+      <div class="right-panel-content">
+        <div class="right-tab-content active" id="todo-content">
+          <div class="todo-section">
+            <h4>Tâches en cours</h4>
+            <div id="todo-list"></div>
+          </div>
+        </div>
+        <div class="right-tab-content" id="process-content">
+          <div id="process-list"></div>
+        </div>
+      </div>
+    </div>
+    <!-- BOTTOM: THINK (~40%) -->
+    <div class="right-panel-bottom">
+      <div class="think-header">
+        <span>🧠 Think</span>
+      </div>
+      <div class="think-content" id="think-content">
+        <div id="think-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmation -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+      <h3>Confirmer la suppression</h3>
+      <p id="confirm-message">Êtes-vous sûr de vouloir supprimer cette session ?</p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-cancel" id="confirm-cancel">Annuler</button>
+        <button class="modal-btn modal-btn-confirm" id="confirm-ok">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentSessionFile = null;
+    let rightPanelOpen = true;
+    let processPollInterval = null;
+    let confirmCallback = null;
+
+    function formatTime(ts) {
+      try {
+        if (!ts) return "";
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      } catch (e) {
+        return "";
+      }
+    }
+
+    // Modal de confirmation
+    function showConfirm(message, onConfirm) {
+      document.getElementById('confirm-message').textContent = message;
+      document.getElementById('confirm-modal').classList.add('show');
+      confirmCallback = onConfirm;
+    }
+
+    function hideConfirm() {
+      document.getElementById('confirm-modal').classList.remove('show');
+      confirmCallback = null;
+    }
+
+    document.getElementById('confirm-cancel').onclick = hideConfirm;
+    document.getElementById('confirm-ok').onclick = () => {
+      if (confirmCallback) {
+        confirmCallback();
+        hideConfirm();
+      }
+    };
+    document.getElementById('confirm-modal').onclick = (e) => {
+      if (e.target.id === 'confirm-modal') {
+        hideConfirm();
+      }
+    };
+
+    // Gestion bande droite
+    document.getElementById('toggle-right-panel').onclick = () => {
+      rightPanelOpen = !rightPanelOpen;
+      const panel = document.getElementById('right-panel');
+      const btn = document.getElementById('toggle-right-panel');
+      if (rightPanelOpen) {
+        panel.classList.remove('collapsed');
+        btn.textContent = 'Todo';
+      } else {
+        panel.classList.add('collapsed');
+        btn.textContent = 'Todo';
+      }
+    };
+
+    document.getElementById('close-right-panel').onclick = () => {
+      rightPanelOpen = false;
+      document.getElementById('right-panel').classList.add('collapsed');
+    };
+
+    // Tabs
+    document.querySelectorAll('.right-tab-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.right-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.right-tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + '-content').classList.add('active');
+      };
+    });
+
+    // Sessions
+    function renderSessions(sessions) {
+      const list = document.getElementById('session-list');
+      list.innerHTML = '';
+      sessions.forEach(s => {
+        const div = document.createElement('div');
+        const label = (s.title || s.id || '').replace(/\.txt$/,'');
+        div.className = 'session-item' + (s.id === currentSessionFile ? ' active' : '');
+        div.innerHTML = `
+          <span class="session-title">${label || 'Sans titre'}</span>
+          <div class="session-actions">
+            <button class="rename-btn" title="Renommer">✏</button>
+            <button class="delete-btn" title="Supprimer">🗑</button>
+          </div>
+        `;
+        div.onclick = () => {
+          currentSessionFile = s.id;
+          document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
+          div.classList.add('active');
+          loadSession(s.id);
+          loadTodos();
+          startProcessPolling();
+          loadThinking();
+        };
+        div.querySelector('.rename-btn').onclick = (e) => {
+          e.stopPropagation();
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = label;
+          input.style.width = '100%';
+          const titleSpan = div.querySelector('.session-title');
+          titleSpan.replaceWith(input);
+          input.focus();
+          input.select();
+          const finish = async (commit) => {
+            const newLabel = input.value.trim();
+            if (!commit || !newLabel || newLabel === label) {
+              input.replaceWith(titleSpan);
+              return;
+            }
+            const res = await fetch('/sessions/' + encodeURIComponent(s.id), {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title: newLabel + '.txt' })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              // Mettre à jour currentSessionFile si c'était la session active
+              if (currentSessionFile === s.id) {
+                currentSessionFile = data.id;
+                document.getElementById('chat-title').textContent = (data.title || data.id).replace(/\.txt$/, '');
+              }
+            }
+            await loadSessions();
+          };
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') { ev.preventDefault(); finish(true); }
+            else if (ev.key === 'Escape') { ev.preventDefault(); finish(false); }
+          });
+          input.addEventListener('blur', () => finish(true));
+        };
+        div.querySelector('.delete-btn').onclick = async (e) => {
+          e.stopPropagation();
+          showConfirm('Êtes-vous sûr de vouloir supprimer cette session ?', async () => {
+            const wasCurrentSession = (currentSessionFile === s.id);
+            await fetch('/sessions/' + encodeURIComponent(s.id), { method: 'DELETE' });
+            
+            if (wasCurrentSession) {
+              currentSessionFile = null;
+              document.getElementById('chat-title').textContent = 'Aucune session';
+              document.getElementById('chat').innerHTML = '';
+              document.getElementById('todo-list').innerHTML = '<p style="color: #888; padding: 1rem;">Aucune conversation sélectionnée</p>';
+              document.getElementById('process-list').innerHTML = '<p style="color: #888; padding: 1rem;">Aucune conversation sélectionnée</p>';
+              document.getElementById('think-list').innerHTML = '<p style="color: #888; padding: 1rem;">Aucune conversation sélectionnée</p>';
+            }
+            
+            await loadSessions();
+            
+            // Si c'était la session courante et il reste des sessions, charger la première
+            if (wasCurrentSession) {
+              const sessions = await fetch('/sessions').then(r => r.json());
+              if (sessions.length > 0) {
+                currentSessionFile = sessions[0].id;
+                loadSession(currentSessionFile);
+                loadTodos();
+                startProcessPolling();
+                loadThinking();
+              }
+            }
+          });
+        };
+        list.appendChild(div);
+      });
+    }
+
+    function buildMessageElement({ role, text, timestamp }) {
+      const ts = timestamp || new Date().toISOString();
+      const roleKey = (role === 'user' || role === 'jeremy') ? 'jeremy' : 'clara';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'msg ' + (roleKey === 'jeremy' ? 'user' : 'clara');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + (roleKey === 'jeremy' ? 'bubble-jeremy' : 'bubble-clara');
+      const content = document.createElement('div');
+      content.textContent = text || '';
+      bubble.appendChild(content);
+      const timeEl = document.createElement('span');
+      timeEl.className = 'time';
+      timeEl.textContent = formatTime(ts);
+      bubble.appendChild(timeEl);
+      wrapper.appendChild(bubble);
+      return wrapper;
+    }
+
+    function scrollToBottom() {
+      const chat = document.getElementById('chat');
+      setTimeout(() => {
+        chat.scrollTop = chat.scrollHeight;
+      }, 100);
+    }
+
+    function renderMessages(messages) {
+      const chat = document.getElementById('chat');
+      chat.innerHTML = '';
+      (messages || []).forEach(m => {
+        chat.appendChild(buildMessageElement({
+          role: m.role,
+          text: m.text || '',
+          timestamp: m.timestamp
+        }));
+      });
+      scrollToBottom();
+      applyColors();
+    }
+
+    async function loadSessions() {
+      const res = await fetch('/sessions');
+      const sessions = await res.json();
+      renderSessions(sessions);
+      if (!currentSessionFile && sessions.length > 0) {
+        currentSessionFile = sessions[0].id;
+        loadSession(currentSessionFile);
+        loadTodos();
+        startProcessPolling();
+        loadThinking();
+      }
+    }
+
+    async function loadSession(sessionId) {
+      const res = await fetch('/sessions/' + encodeURIComponent(sessionId));
+      if (!res.ok) return;
+      const data = await res.json();
+      currentSessionFile = data.id || sessionId;
+      document.getElementById('chat-title').textContent = (data.title || sessionId).replace(/\.txt$/,'');
+      renderMessages(data.messages || []);
+    }
+
+    async function createSession() {
+      const res = await fetch('/sessions', { method: 'POST' });
+      const data = await res.json();
+      currentSessionFile = data.id;
+      await loadSessions();
+      document.getElementById('chat-title').textContent = (data.title || data.id).replace(/\.txt$/,'');
+      document.getElementById('chat').innerHTML = '';
+      loadTodos();
+      startProcessPolling();
+      loadThinking();
+    }
+
+    function appendLocalMessage(role, text) {
+      const chat = document.getElementById('chat');
+      chat.appendChild(buildMessageElement({
+        role: role === 'jeremy' ? 'jeremy' : 'clara',
+        text,
+        timestamp: new Date().toISOString()
+      }));
+      scrollToBottom();
+      applyColors();
+    }
+
+    function showTyping() {
+      document.getElementById('typing').style.display = 'block';
+    }
+    function hideTyping() {
+      document.getElementById('typing').style.display = 'none';
+    }
+
+    async function sendMessage() {
+      const textarea = document.getElementById('message-input');
+      const text = textarea.value.trim();
+      if (!text) return;
+      if (!currentSessionFile) {
+        await createSession();
+      }
+      appendLocalMessage('jeremy', text);
+      textarea.value = '';
+      textarea.style.height = '40px';
+      showTyping();
+      try {
+        const res = await fetch('/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            session_id: currentSessionFile
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.detail || "Erreur");
+          return;
+        }
+        currentSessionFile = data.session_id || currentSessionFile;
+        renderMessages(data.messages || []);
+        loadTodos();
+        loadThinking();
+      } catch (e) {
+        alert("Erreur de connexion à l'API");
+      } finally {
+        hideTyping();
+      }
+    }
+
+    // Todo List
+    async function loadTodos() {
+      if (!currentSessionFile) {
+        document.getElementById('todo-list').innerHTML = '<p style="font-size:11px; color:#999;">Aucune session active</p>';
+        return;
+      }
+      try {
+        const res = await fetch('/sessions/' + encodeURIComponent(currentSessionFile) + '/todos');
+        if (res.ok) {
+          const data = await res.json();
+          renderTodos(data.todos || []);
+        } else {
+          // Fallback sur logs si endpoint todos n'existe pas
+          const logRes = await fetch('/sessions/' + encodeURIComponent(currentSessionFile) + '/logs');
+          if (logRes.ok) {
+            const logData = await logRes.json();
+            renderTodosFromLogs(logData.logs || []);
+          }
+        }
+      } catch (e) {
+        console.error('Error loading todos', e);
+      }
+    }
+
+    function renderTodos(todos) {
+      const container = document.getElementById('todo-list');
+      
+      if (!todos || todos.length === 0) {
+        container.innerHTML = '<p style="font-size:11px; color:#999;">Aucune tâche pour le moment</p>';
+        return;
+      }
+
+      container.innerHTML = todos.map(todo => `
+        <div class="todo-item ${todo.done ? 'done' : ''}">
+          <input type="checkbox" class="todo-checkbox" ${todo.done ? 'checked' : ''} disabled>
+          <div class="todo-content">
+            ${escapeHtml(todo.text || '')}
+            ${todo.created ? `<div class="todo-time">${formatTime(todo.created)}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+      
+      // Scroll automatique vers le bas
+      const todoContent = container.closest('.right-tab-content');
+      if (todoContent) {
+        todoContent.scrollTop = todoContent.scrollHeight;
+      }
+    }
+
+    function renderTodosFromLogs(logs) {
+      const container = document.getElementById('todo-list');
+      const todos = logs
+        .filter(log => log.text && (log.text.includes('TODO') || log.text.includes('STEP')))
+        .map(log => {
+          const text = log.text || '';
+          const isDone = text.includes('DONE') || text.includes('COMPLETED');
+          return { text, timestamp: log.timestamp, done: isDone };
+        });
+      
+      if (todos.length === 0) {
+        container.innerHTML = '<p style="font-size:11px; color:#999;">Aucune tâche pour le moment</p>';
+        return;
+      }
+
+      container.innerHTML = todos.map(todo => `
+        <div class="todo-item ${todo.done ? 'done' : ''}">
+          <input type="checkbox" class="todo-checkbox" ${todo.done ? 'checked' : ''} disabled>
+          <div class="todo-content">
+            ${escapeHtml(todo.text)}
+            ${todo.timestamp ? `<div class="todo-time">${formatTime(todo.timestamp)}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+      
+      // Scroll automatique vers le bas
+      const todoContent = container.closest('.right-tab-content');
+      if (todoContent) {
+        todoContent.scrollTop = todoContent.scrollHeight;
+      }
+    }
+
+    // Process Live
+    function startProcessPolling() {
+      if (processPollInterval) {
+        clearInterval(processPollInterval);
+      }
+      if (!currentSessionFile) return;
+      
+      processPollInterval = setInterval(async () => {
+        await loadProcess();
+        await loadThinking();
+      }, 2000);  // Polling toutes les 2s (réduit pour éviter que ça bouge tout seul)
+      loadProcess();
+      loadThinking();
+    }
+
+    async function loadProcess() {
+      if (!currentSessionFile) return;
+      try {
+        const res = await fetch('/sessions/' + encodeURIComponent(currentSessionFile) + '/logs');
+        if (res.ok) {
+          const data = await res.json();
+          renderProcess(data.logs || []);
+        }
+      } catch (e) {
+        console.error('Error loading process', e);
+      }
+    }
+
+    function renderProcess(logs) {
+      const container = document.getElementById('process-list');
+      if (logs.length === 0) {
+        container.innerHTML = '<p style="font-size:11px; color:#999;">Aucune action pour le moment</p>';
+        return;
+      }
+
+      container.innerHTML = logs.slice(-20).reverse().map(log => {
+        const text = log.text || '';
+        const isError = text.includes('ERROR') || text.includes('error');
+        const isSuccess = text.includes('sent:') || text.includes('created') || text.includes('success');
+        return `
+          <div class="process-entry ${isError ? 'error' : isSuccess ? 'success' : ''}">
+            ${log.timestamp ? `<div class="process-time">${formatTime(log.timestamp)}</div>` : ''}
+            <div class="process-text">${escapeHtml(text)}</div>
+          </div>
+        `;
+      }).join('');
+      
+      // Scroll automatique vers le bas sans couper le dernier bloc
+      setTimeout(() => {
+        container.scrollTop = container.scrollHeight;
+      }, 0);
+    }
+
+    // Think Live
+    async function loadThinking() {
+      if (!currentSessionFile) return;
+      try {
+        const res = await fetch('/sessions/' + encodeURIComponent(currentSessionFile) + '/thinking');
+        if (res.ok) {
+          const data = await res.json();
+          renderThinking(data.thinking || []);
+        }
+      } catch (e) {
+        console.error('Error loading thinking', e);
+      }
+    }
+
+    let lastThoughtCount = 0;
+    function renderThinking(thoughts) {
+      const container = document.getElementById('think-list');
+      if (!container) return;
+      
+      if (thoughts.length === 0) {
+        container.innerHTML = '<p style="font-size:11px; color:#999;">Aucune réflexion pour le moment</p>';
+        lastThoughtCount = 0;
+        return;
+      }
+
+      // Sauvegarder la position de scroll avant de rendre
+      const thinkContent = document.getElementById('think-content');
+      const wasNearBottom = thinkContent ? (thinkContent.scrollHeight - thinkContent.scrollTop - thinkContent.clientHeight < 50) : true;
+      const scrollTopBefore = thinkContent ? thinkContent.scrollTop : 0;
+      const scrollHeightBefore = thinkContent ? thinkContent.scrollHeight : 0;
+
+      container.innerHTML = thoughts.map(thought => {
+        const phase = thought.phase || 'think';
+        const phaseLabel = {
+          'think': 'THINK',
+          'plan': 'PLAN',
+          'observe': 'OBSERVE',
+          'error_rethink': 'ERROR'
+        }[phase] || 'THINK';
+        
+        let displayText = thought.text || '';
+        
+        // PLAN : Afficher détail des steps au lieu du texte générique
+        if (phase === 'plan' && displayText.includes('Plan généré avec')) {
+          // Essayer d'extraire le nombre de steps et afficher "Voir TODOs pour détails"
+          displayText = displayText + '\\n→ Détails dans TODO ci-dessus';
+        }
+        
+        return `
+          <div class="think-entry phase-${phase}">
+            ${thought.ts ? `<div class="think-time">${formatTime(thought.ts)}</div>` : ''}
+            <div class="think-phase">${phaseLabel}</div>
+            <div class="think-text">${escapeHtml(displayText)}</div>
+          </div>
+        `;
+      }).join('');
+      
+      // Auto-scroll SEULEMENT si :
+      // 1. Il y a de nouveaux pensées (compteur a augmenté)
+      // 2. ET on était déjà proche du bas
+      const hasNewThoughts = thoughts.length > lastThoughtCount;
+      lastThoughtCount = thoughts.length;
+      
+      setTimeout(() => {
+        if (thinkContent) {
+          if (hasNewThoughts && wasNearBottom) {
+            // Nouvelle pensée et on était en bas : auto-scroll pour voir le dernier texte
+            setTimeout(() => {
+              thinkContent.scrollTop = thinkContent.scrollHeight + 20;
+            }, 150);
+          } else if (!hasNewThoughts && scrollHeightBefore > 0) {
+            // Pas de nouvelles pensées : restaurer la position
+            const diff = thinkContent.scrollHeight - scrollHeightBefore;
+            thinkContent.scrollTop = scrollTopBefore + diff;
+          }
+        }
+      }, 50);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Gestion des couleurs - Preview en live + Validation
+    let originalColors = {}; // Pour annuler les changements
+    
+    function previewColors() {
+      const root = document.documentElement;
+      
+      // Récupérer toutes les valeurs
+      const sidebarBg = document.getElementById('color-sidebar-bg')?.value || '#ffffff';
+      const sidebarText = document.getElementById('color-sidebar-text')?.value || '#000000';
+      const sidebarBorder = document.getElementById('color-sidebar-border')?.value || '#dddddd';
+      const headerBg = document.getElementById('color-header-bg')?.value || '#ffffff';
+      const headerText = document.getElementById('color-header-text')?.value || '#000000';
+      const headerBorder = document.getElementById('color-header-border')?.value || '#eeeeee';
+      const chatBg = document.getElementById('color-chat-bg')?.value || '#fafafa';
+      const textColor = document.getElementById('color-text')?.value || '#000000';
+      const timeColor = document.getElementById('color-time')?.value || '#666666';
+      const jeremyBg = document.getElementById('color-jeremy-bg')?.value || '#d5f9c5';
+      const jeremyBorder = document.getElementById('color-jeremy-border')?.value || '#c7e8b5';
+      const jeremyText = document.getElementById('color-jeremy-text')?.value || '#000000';
+      const claraBg = document.getElementById('color-clara-bg')?.value || '#ffffff';
+      const claraBorder = document.getElementById('color-clara-border')?.value || '#dddddd';
+      const claraText = document.getElementById('color-clara-text')?.value || '#000000';
+      const inputAreaBg = document.getElementById('color-input-area-bg')?.value || '#ffffff';
+      const inputBg = document.getElementById('color-input-bg')?.value || '#ffffff';
+      const inputText = document.getElementById('color-input-text')?.value || '#000000';
+      const inputBorder = document.getElementById('color-input-border')?.value || '#dddddd';
+      const sendBtnBg = document.getElementById('color-send-btn-bg')?.value || '#007AFF';
+      const sendBtnText = document.getElementById('color-send-btn-text')?.value || '#ffffff';
+      const sendBtnBorder = document.getElementById('color-send-btn-border')?.value || '#007AFF';
+      const rightPanelBg = document.getElementById('color-right-panel-bg')?.value || '#ffffff';
+      const rightPanelHeaderBg = document.getElementById('color-right-panel-header-bg')?.value || '#ffffff';
+      const rightPanelHeaderText = document.getElementById('color-right-panel-header-text')?.value || '#000000';
+      const rightPanelBorder = document.getElementById('color-right-panel-border')?.value || '#dddddd';
+      const todoBtnBg = document.getElementById('color-todo-btn-bg')?.value || '#e8f4fd';
+      const todoBtnText = document.getElementById('color-todo-btn-text')?.value || '#007AFF';
+      const todoBtnBorder = document.getElementById('color-todo-btn-border')?.value || '#4da6ff';
+      const settingsBtnBg = document.getElementById('color-settings-btn-bg')?.value || '#ffffff';
+      const settingsBtnText = document.getElementById('color-settings-btn-text')?.value || '#000000';
+      const settingsBtnBorder = document.getElementById('color-settings-btn-border')?.value || '#dddddd';
+      const thinkBg = document.getElementById('color-think-bg')?.value || '#ffffff';
+      const thinkHeaderBg = document.getElementById('color-think-header-bg')?.value || '#ffffff';
+      const thinkHeaderText = document.getElementById('color-think-header-text')?.value || '#000000';
+      const thinkBorder = document.getElementById('color-think-border')?.value || '#dddddd';
+      const thinkText = document.getElementById('color-think-text')?.value || '#000000';
+      const sidebarFooterBg = document.getElementById('color-sidebar-footer-bg')?.value || '#ffffff';
+      const sidebarFooterBorder = document.getElementById('color-sidebar-footer-border')?.value || '#dddddd';
+      const deleteAllBtnBg = document.getElementById('color-delete-all-btn-bg')?.value || '#ffffff';
+      const deleteAllBtnText = document.getElementById('color-delete-all-btn-text')?.value || '#000000';
+      const deleteAllBtnBorder = document.getElementById('color-delete-all-btn-border')?.value || '#dddddd';
+      
+      // Appliquer toutes les variables sur :root
+      root.style.setProperty('--sidebar-bg', sidebarBg);
+      root.style.setProperty('--sidebar-text', sidebarText);
+      root.style.setProperty('--sidebar-border', sidebarBorder);
+      root.style.setProperty('--sidebar-header-bg', sidebarBg);
+      root.style.setProperty('--header-bg', headerBg);
+      root.style.setProperty('--header-text', headerText);
+      root.style.setProperty('--header-border', headerBorder);
+      root.style.setProperty('--chat-bg', chatBg);
+      root.style.setProperty('--text-color', textColor);
+      root.style.setProperty('--time-color', timeColor);
+      root.style.setProperty('--jeremy-bubble-bg', jeremyBg);
+      root.style.setProperty('--jeremy-bubble-border', jeremyBorder);
+      root.style.setProperty('--jeremy-bubble-text', jeremyText);
+      root.style.setProperty('--clara-bubble-bg', claraBg);
+      root.style.setProperty('--clara-bubble-border', claraBorder);
+      root.style.setProperty('--clara-bubble-text', claraText);
+      root.style.setProperty('--input-area-bg', inputAreaBg);
+      root.style.setProperty('--input-bg', inputBg);
+      root.style.setProperty('--input-text', inputText);
+      root.style.setProperty('--input-border', inputBorder);
+      root.style.setProperty('--send-btn-bg', sendBtnBg);
+      root.style.setProperty('--send-btn-text', sendBtnText);
+      root.style.setProperty('--send-btn-border', sendBtnBorder);
+      root.style.setProperty('--right-panel-bg', rightPanelBg);
+      root.style.setProperty('--right-panel-header-bg', rightPanelHeaderBg);
+      root.style.setProperty('--right-panel-header-text', rightPanelHeaderText);
+      root.style.setProperty('--right-panel-border', rightPanelBorder);
+      root.style.setProperty('--todo-btn-bg', todoBtnBg);
+      root.style.setProperty('--todo-btn-text', todoBtnText);
+      root.style.setProperty('--todo-btn-border', todoBtnBorder);
+      
+      // Boutons settings (utilisés pour sidebar-settings-btn)
+      root.style.setProperty('--settings-btn-bg', settingsBtnBg);
+      root.style.setProperty('--settings-btn-text', settingsBtnText);
+      root.style.setProperty('--settings-btn-border', settingsBtnBorder);
+      root.style.setProperty('--think-bg', thinkBg);
+      root.style.setProperty('--think-header-bg', thinkHeaderBg);
+      root.style.setProperty('--think-header-text', thinkHeaderText);
+      root.style.setProperty('--think-border', thinkBorder);
+      root.style.setProperty('--think-text', thinkText);
+      
+      // Sidebar footer et boutons
+      root.style.setProperty('--sidebar-footer-bg', sidebarFooterBg);
+      root.style.setProperty('--sidebar-footer-border', sidebarFooterBorder);
+      root.style.setProperty('--delete-all-btn-bg', deleteAllBtnBg);
+      root.style.setProperty('--delete-all-btn-text', deleteAllBtnText);
+      root.style.setProperty('--delete-all-btn-border', deleteAllBtnBorder);
+      
+      // Taille police
+      const fontSize = document.getElementById('font-size-chat')?.value || '14';
+      document.querySelectorAll('.bubble').forEach(b => {
+        b.style.fontSize = fontSize + 'px';
+      });
+    }
+    
+    function applyColors() {
+      previewColors(); // Même fonction mais on sauvegarde aussi
+    }
+    
+    function saveOriginalColors() {
+      originalColors = {
+        sidebarBg: document.getElementById('color-sidebar-bg').value,
+        sidebarText: document.getElementById('color-sidebar-text').value,
+        sidebarBorder: document.getElementById('color-sidebar-border').value,
+        headerBg: document.getElementById('color-header-bg').value,
+        headerText: document.getElementById('color-header-text').value,
+        headerBorder: document.getElementById('color-header-border').value,
+        chatBg: document.getElementById('color-chat-bg').value,
+        textColor: document.getElementById('color-text').value,
+        timeColor: document.getElementById('color-time').value,
+        jeremyBg: document.getElementById('color-jeremy-bg').value,
+        jeremyBorder: document.getElementById('color-jeremy-border').value,
+        jeremyText: document.getElementById('color-jeremy-text').value,
+        claraBg: document.getElementById('color-clara-bg').value,
+        claraBorder: document.getElementById('color-clara-border').value,
+        claraText: document.getElementById('color-clara-text').value,
+        inputAreaBg: document.getElementById('color-input-area-bg')?.value || '#ffffff',
+        inputBg: document.getElementById('color-input-bg').value,
+        inputText: document.getElementById('color-input-text').value,
+        inputBorder: document.getElementById('color-input-border').value,
+        sendBtnBg: document.getElementById('color-send-btn-bg')?.value || '#007AFF',
+        sendBtnText: document.getElementById('color-send-btn-text')?.value || '#ffffff',
+        sendBtnBorder: document.getElementById('color-send-btn-border')?.value || '#007AFF',
+        rightPanelBg: document.getElementById('color-right-panel-bg').value,
+        rightPanelHeaderBg: document.getElementById('color-right-panel-header-bg')?.value || '#ffffff',
+        rightPanelHeaderText: document.getElementById('color-right-panel-header-text')?.value || '#000000',
+        rightPanelBorder: document.getElementById('color-right-panel-border').value,
+        todoBtnBg: document.getElementById('color-todo-btn-bg')?.value || '#e8f4fd',
+        todoBtnText: document.getElementById('color-todo-btn-text')?.value || '#007AFF',
+        todoBtnBorder: document.getElementById('color-todo-btn-border')?.value || '#4da6ff',
+        settingsBtnBg: document.getElementById('color-settings-btn-bg')?.value || '#ffffff',
+        settingsBtnText: document.getElementById('color-settings-btn-text')?.value || '#000000',
+        settingsBtnBorder: document.getElementById('color-settings-btn-border')?.value || '#dddddd',
+        thinkBg: document.getElementById('color-think-bg')?.value || '#ffffff',
+        thinkHeaderBg: document.getElementById('color-think-header-bg')?.value || '#ffffff',
+        thinkHeaderText: document.getElementById('color-think-header-text')?.value || '#000000',
+        thinkBorder: document.getElementById('color-think-border')?.value || '#dddddd',
+        thinkText: document.getElementById('color-think-text')?.value || '#000000',
+        sidebarFooterBg: document.getElementById('color-sidebar-footer-bg')?.value || '#ffffff',
+        sidebarFooterBorder: document.getElementById('color-sidebar-footer-border')?.value || '#dddddd',
+        deleteAllBtnBg: document.getElementById('color-delete-all-btn-bg')?.value || '#ff3b30',
+        deleteAllBtnText: document.getElementById('color-delete-all-btn-text')?.value || '#ffffff',
+        deleteAllBtnBorder: document.getElementById('color-delete-all-btn-border')?.value || '#ff3b30',
+        fontSize: document.getElementById('font-size-chat').value,
+      };
+    }
+    
+    function restoreOriginalColors() {
+      if (!originalColors.sidebarBg) return;
+      document.getElementById('color-sidebar-bg').value = originalColors.sidebarBg;
+      document.getElementById('color-sidebar-text').value = originalColors.sidebarText;
+      document.getElementById('color-sidebar-border').value = originalColors.sidebarBorder;
+      document.getElementById('color-header-bg').value = originalColors.headerBg;
+      document.getElementById('color-header-text').value = originalColors.headerText;
+      document.getElementById('color-header-border').value = originalColors.headerBorder;
+      document.getElementById('color-chat-bg').value = originalColors.chatBg;
+      document.getElementById('color-text').value = originalColors.textColor;
+      document.getElementById('color-time').value = originalColors.timeColor;
+      document.getElementById('color-jeremy-bg').value = originalColors.jeremyBg;
+      document.getElementById('color-jeremy-border').value = originalColors.jeremyBorder;
+      document.getElementById('color-jeremy-text').value = originalColors.jeremyText;
+      document.getElementById('color-clara-bg').value = originalColors.claraBg;
+      document.getElementById('color-clara-border').value = originalColors.claraBorder;
+      document.getElementById('color-clara-text').value = originalColors.claraText;
+      document.getElementById('color-input-area-bg').value = originalColors.inputAreaBg || '#ffffff';
+      document.getElementById('color-input-bg').value = originalColors.inputBg;
+      document.getElementById('color-input-text').value = originalColors.inputText;
+      document.getElementById('color-input-border').value = originalColors.inputBorder;
+      if (document.getElementById('color-send-btn-bg')) document.getElementById('color-send-btn-bg').value = originalColors.sendBtnBg || '#007AFF';
+      if (document.getElementById('color-send-btn-text')) document.getElementById('color-send-btn-text').value = originalColors.sendBtnText || '#ffffff';
+      if (document.getElementById('color-send-btn-border')) document.getElementById('color-send-btn-border').value = originalColors.sendBtnBorder || '#007AFF';
+      document.getElementById('color-right-panel-bg').value = originalColors.rightPanelBg;
+      if (document.getElementById('color-right-panel-header-bg')) document.getElementById('color-right-panel-header-bg').value = originalColors.rightPanelHeaderBg || '#ffffff';
+      if (document.getElementById('color-right-panel-header-text')) document.getElementById('color-right-panel-header-text').value = originalColors.rightPanelHeaderText || '#000000';
+      document.getElementById('color-right-panel-border').value = originalColors.rightPanelBorder;
+      if (document.getElementById('color-todo-btn-bg')) document.getElementById('color-todo-btn-bg').value = originalColors.todoBtnBg || '#e8f4fd';
+      if (document.getElementById('color-todo-btn-text')) document.getElementById('color-todo-btn-text').value = originalColors.todoBtnText || '#007AFF';
+      if (document.getElementById('color-todo-btn-border')) document.getElementById('color-todo-btn-border').value = originalColors.todoBtnBorder || '#4da6ff';
+      if (document.getElementById('color-settings-btn-bg')) document.getElementById('color-settings-btn-bg').value = originalColors.settingsBtnBg || '#ffffff';
+      if (document.getElementById('color-settings-btn-text')) document.getElementById('color-settings-btn-text').value = originalColors.settingsBtnText || '#000000';
+      if (document.getElementById('color-settings-btn-border')) document.getElementById('color-settings-btn-border').value = originalColors.settingsBtnBorder || '#dddddd';
+      if (document.getElementById('color-think-bg')) document.getElementById('color-think-bg').value = originalColors.thinkBg || '#ffffff';
+      if (document.getElementById('color-think-header-bg')) document.getElementById('color-think-header-bg').value = originalColors.thinkHeaderBg || '#ffffff';
+      if (document.getElementById('color-think-header-text')) document.getElementById('color-think-header-text').value = originalColors.thinkHeaderText || '#000000';
+      if (document.getElementById('color-think-border')) document.getElementById('color-think-border').value = originalColors.thinkBorder || '#dddddd';
+      if (document.getElementById('color-think-text')) document.getElementById('color-think-text').value = originalColors.thinkText || '#000000';
+      if (document.getElementById('color-sidebar-footer-bg')) document.getElementById('color-sidebar-footer-bg').value = originalColors.sidebarFooterBg || '#ffffff';
+      if (document.getElementById('color-sidebar-footer-border')) document.getElementById('color-sidebar-footer-border').value = originalColors.sidebarFooterBorder || '#dddddd';
+      if (document.getElementById('color-delete-all-btn-bg')) document.getElementById('color-delete-all-btn-bg').value = originalColors.deleteAllBtnBg || '#ffffff';
+      if (document.getElementById('color-delete-all-btn-text')) document.getElementById('color-delete-all-btn-text').value = originalColors.deleteAllBtnText || '#000000';
+      if (document.getElementById('color-delete-all-btn-border')) document.getElementById('color-delete-all-btn-border').value = originalColors.deleteAllBtnBorder || '#dddddd';
+      document.getElementById('font-size-chat').value = originalColors.fontSize;
+      previewColors();
+    }
+
+    function saveColors() {
+      const colors = {
+        sidebarBg: document.getElementById('color-sidebar-bg').value,
+        sidebarText: document.getElementById('color-sidebar-text').value,
+        sidebarBorder: document.getElementById('color-sidebar-border').value,
+        headerBg: document.getElementById('color-header-bg').value,
+        headerText: document.getElementById('color-header-text').value,
+        headerBorder: document.getElementById('color-header-border').value,
+        chatBg: document.getElementById('color-chat-bg').value,
+        textColor: document.getElementById('color-text').value,
+        timeColor: document.getElementById('color-time').value,
+        jeremyBg: document.getElementById('color-jeremy-bg').value,
+        jeremyBorder: document.getElementById('color-jeremy-border').value,
+        jeremyText: document.getElementById('color-jeremy-text').value,
+        claraBg: document.getElementById('color-clara-bg').value,
+        claraBorder: document.getElementById('color-clara-border').value,
+        claraText: document.getElementById('color-clara-text').value,
+        inputAreaBg: document.getElementById('color-input-area-bg')?.value || '#ffffff',
+        inputBg: document.getElementById('color-input-bg').value,
+        inputText: document.getElementById('color-input-text').value,
+        inputBorder: document.getElementById('color-input-border').value,
+        sendBtnBg: document.getElementById('color-send-btn-bg')?.value || '#007AFF',
+        sendBtnText: document.getElementById('color-send-btn-text')?.value || '#ffffff',
+        sendBtnBorder: document.getElementById('color-send-btn-border')?.value || '#007AFF',
+        rightPanelBg: document.getElementById('color-right-panel-bg').value,
+        rightPanelHeaderBg: document.getElementById('color-right-panel-header-bg')?.value || '#ffffff',
+        rightPanelHeaderText: document.getElementById('color-right-panel-header-text')?.value || '#000000',
+        rightPanelBorder: document.getElementById('color-right-panel-border').value,
+        todoBtnBg: document.getElementById('color-todo-btn-bg')?.value || '#e8f4fd',
+        todoBtnText: document.getElementById('color-todo-btn-text')?.value || '#007AFF',
+        todoBtnBorder: document.getElementById('color-todo-btn-border')?.value || '#4da6ff',
+        settingsBtnBg: document.getElementById('color-settings-btn-bg')?.value || '#ffffff',
+        settingsBtnText: document.getElementById('color-settings-btn-text')?.value || '#000000',
+        settingsBtnBorder: document.getElementById('color-settings-btn-border')?.value || '#dddddd',
+        thinkBg: document.getElementById('color-think-bg')?.value || '#ffffff',
+        thinkHeaderBg: document.getElementById('color-think-header-bg')?.value || '#ffffff',
+        thinkHeaderText: document.getElementById('color-think-header-text')?.value || '#000000',
+        thinkBorder: document.getElementById('color-think-border')?.value || '#dddddd',
+        thinkText: document.getElementById('color-think-text')?.value || '#000000',
+        sidebarFooterBg: document.getElementById('color-sidebar-footer-bg')?.value || '#ffffff',
+        sidebarFooterBorder: document.getElementById('color-sidebar-footer-border')?.value || '#dddddd',
+        deleteAllBtnBg: document.getElementById('color-delete-all-btn-bg')?.value || '#ff3b30',
+        deleteAllBtnText: document.getElementById('color-delete-all-btn-text')?.value || '#ffffff',
+        deleteAllBtnBorder: document.getElementById('color-delete-all-btn-border')?.value || '#ff3b30',
+        fontSize: document.getElementById('font-size-chat').value,
+      };
+      localStorage.setItem('clara_colors', JSON.stringify(colors));
+    }
+
+    function loadColors() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('clara_colors') || '{}');
+        if (saved.sidebarBg) document.getElementById('color-sidebar-bg').value = saved.sidebarBg;
+        if (saved.sidebarText) document.getElementById('color-sidebar-text').value = saved.sidebarText;
+        if (saved.sidebarBorder) document.getElementById('color-sidebar-border').value = saved.sidebarBorder;
+        if (saved.headerBg) document.getElementById('color-header-bg').value = saved.headerBg;
+        if (saved.headerText) document.getElementById('color-header-text').value = saved.headerText;
+        if (saved.headerBorder) document.getElementById('color-header-border').value = saved.headerBorder;
+        if (saved.chatBg) document.getElementById('color-chat-bg').value = saved.chatBg;
+        if (saved.textColor) document.getElementById('color-text').value = saved.textColor;
+        if (saved.timeColor) document.getElementById('color-time').value = saved.timeColor;
+        if (saved.jeremyBg) document.getElementById('color-jeremy-bg').value = saved.jeremyBg;
+        if (saved.jeremyBorder) document.getElementById('color-jeremy-border').value = saved.jeremyBorder;
+        if (saved.jeremyText) document.getElementById('color-jeremy-text').value = saved.jeremyText;
+        if (saved.claraBg) document.getElementById('color-clara-bg').value = saved.claraBg;
+        if (saved.claraBorder) document.getElementById('color-clara-border').value = saved.claraBorder;
+        if (saved.claraText) document.getElementById('color-clara-text').value = saved.claraText;
+        if (saved.inputAreaBg) document.getElementById('color-input-area-bg').value = saved.inputAreaBg;
+        if (saved.inputBg) document.getElementById('color-input-bg').value = saved.inputBg;
+        if (saved.inputText) document.getElementById('color-input-text').value = saved.inputText;
+        if (saved.inputBorder) document.getElementById('color-input-border').value = saved.inputBorder;
+        if (saved.sendBtnBg) document.getElementById('color-send-btn-bg').value = saved.sendBtnBg;
+        if (saved.sendBtnText) document.getElementById('color-send-btn-text').value = saved.sendBtnText;
+        if (saved.sendBtnBorder) document.getElementById('color-send-btn-border').value = saved.sendBtnBorder;
+        if (saved.rightPanelBg) document.getElementById('color-right-panel-bg').value = saved.rightPanelBg;
+        if (saved.rightPanelHeaderBg) document.getElementById('color-right-panel-header-bg').value = saved.rightPanelHeaderBg;
+        if (saved.rightPanelHeaderText) document.getElementById('color-right-panel-header-text').value = saved.rightPanelHeaderText;
+        if (saved.rightPanelBorder) document.getElementById('color-right-panel-border').value = saved.rightPanelBorder;
+        if (saved.todoBtnBg) document.getElementById('color-todo-btn-bg').value = saved.todoBtnBg;
+        if (saved.todoBtnText) document.getElementById('color-todo-btn-text').value = saved.todoBtnText;
+        if (saved.todoBtnBorder) document.getElementById('color-todo-btn-border').value = saved.todoBtnBorder;
+        if (saved.settingsBtnBg) document.getElementById('color-settings-btn-bg').value = saved.settingsBtnBg;
+        if (saved.settingsBtnText) document.getElementById('color-settings-btn-text').value = saved.settingsBtnText;
+        if (saved.settingsBtnBorder) document.getElementById('color-settings-btn-border').value = saved.settingsBtnBorder;
+        if (saved.thinkBg) document.getElementById('color-think-bg').value = saved.thinkBg;
+        if (saved.thinkHeaderBg) document.getElementById('color-think-header-bg').value = saved.thinkHeaderBg;
+        if (saved.thinkHeaderText) document.getElementById('color-think-header-text').value = saved.thinkHeaderText;
+        if (saved.thinkBorder) document.getElementById('color-think-border').value = saved.thinkBorder;
+        if (saved.thinkText) document.getElementById('color-think-text').value = saved.thinkText;
+        if (saved.sidebarFooterBg) document.getElementById('color-sidebar-footer-bg').value = saved.sidebarFooterBg;
+        if (saved.sidebarFooterBorder) document.getElementById('color-sidebar-footer-border').value = saved.sidebarFooterBorder;
+        if (saved.deleteAllBtnBg) document.getElementById('color-delete-all-btn-bg').value = saved.deleteAllBtnBg;
+        if (saved.deleteAllBtnText) document.getElementById('color-delete-all-btn-text').value = saved.deleteAllBtnText;
+        if (saved.deleteAllBtnBorder) document.getElementById('color-delete-all-btn-border').value = saved.deleteAllBtnBorder;
+        if (saved.fontSize) document.getElementById('font-size-chat').value = saved.fontSize;
+      } catch (e) {
+        console.error('Error loading colors', e);
+      }
+      // Toujours appliquer les couleurs (sauvegardées ou par défaut)
+      applyColors();
+    }
+
+    function resetColors() {
+      document.getElementById('color-sidebar-bg').value = '#ffffff';
+      document.getElementById('color-sidebar-text').value = '#000000';
+      document.getElementById('color-sidebar-border').value = '#dddddd';
+      document.getElementById('color-header-bg').value = '#ffffff';
+      document.getElementById('color-header-text').value = '#000000';
+      document.getElementById('color-header-border').value = '#eeeeee';
+      document.getElementById('color-chat-bg').value = '#fafafa';
+      document.getElementById('color-text').value = '#000000';
+      document.getElementById('color-time').value = '#666666';
+      document.getElementById('color-jeremy-bg').value = '#d5f9c5';
+      document.getElementById('color-jeremy-border').value = '#c7e8b5';
+      document.getElementById('color-jeremy-text').value = '#000000';
+      document.getElementById('color-clara-bg').value = '#ffffff';
+      document.getElementById('color-clara-border').value = '#dddddd';
+      document.getElementById('color-clara-text').value = '#000000';
+      document.getElementById('color-input-area-bg').value = '#ffffff';
+      document.getElementById('color-input-bg').value = '#ffffff';
+      document.getElementById('color-input-text').value = '#000000';
+      document.getElementById('color-input-border').value = '#dddddd';
+      document.getElementById('color-send-btn-bg').value = '#ffffff';
+      document.getElementById('color-send-btn-text').value = '#000000';
+      document.getElementById('color-send-btn-border').value = '#dddddd';
+      document.getElementById('color-right-panel-bg').value = '#ffffff';
+      document.getElementById('color-right-panel-header-bg').value = '#ffffff';
+      document.getElementById('color-right-panel-header-text').value = '#000000';
+      document.getElementById('color-right-panel-border').value = '#dddddd';
+      document.getElementById('color-todo-btn-bg').value = '#ffffff';
+      document.getElementById('color-todo-btn-text').value = '#000000';
+      document.getElementById('color-todo-btn-border').value = '#dddddd';
+      document.getElementById('color-settings-btn-bg').value = '#ffffff';
+      document.getElementById('color-settings-btn-text').value = '#000000';
+      document.getElementById('color-settings-btn-border').value = '#dddddd';
+      document.getElementById('color-think-bg').value = '#ffffff';
+      document.getElementById('color-think-header-bg').value = '#ffffff';
+      document.getElementById('color-think-header-text').value = '#000000';
+      document.getElementById('color-think-border').value = '#dddddd';
+      document.getElementById('color-think-text').value = '#000000';
+      document.getElementById('color-sidebar-footer-bg').value = '#ffffff';
+      document.getElementById('color-sidebar-footer-border').value = '#dddddd';
+      document.getElementById('color-delete-all-btn-bg').value = '#ffffff';
+      document.getElementById('color-delete-all-btn-text').value = '#000000';
+      document.getElementById('color-delete-all-btn-border').value = '#dddddd';
+      document.getElementById('font-size-chat').value = '14';
+      applyColors();
+      saveColors();
+    }
+
+    // Event listeners
+    document.getElementById('new-session-btn').onclick = createSession;
+    document.getElementById('send-btn').onclick = sendMessage;
+    
+    // Gestion ouverture/fermeture settings panel
+    // Bouton paramètres en bas de la sidebar
+    document.getElementById('sidebar-settings-btn').onclick = () => {
+      const panel = document.getElementById('settings-panel');
+      const isOpen = panel.classList.contains('show');
+      if (!isOpen) {
+        saveOriginalColors();
+      }
+      panel.classList.toggle('show');
+    };
+    
+    // Bouton supprimer toutes les conversations - EXACTEMENT comme suppression unitaire
+    document.getElementById('delete-all-sessions-btn').onclick = async () => {
+      const sessions = await fetch('/sessions').then(r => r.json());
+      if (sessions.length === 0) {
+        return;
+      }
+      
+      // MÊME fonction showConfirm que pour suppression unitaire
+      showConfirm(`Supprimer toutes les ${sessions.length} conversation(s) ?`, async () => {
+        // Supprimer toutes les sessions
+        for (const session of sessions) {
+          try {
+            await fetch(`/sessions/${session.id}`, { method: 'DELETE' });
+          } catch (e) {
+            console.error('Erreur suppression:', e);
+          }
+        }
+        
+        // Réinitialiser complètement
+        currentSessionFile = null;
+        document.getElementById('chat-title').textContent = 'Aucune session';
+        document.getElementById('chat').innerHTML = '';
+        document.getElementById('todo-list').innerHTML = '<p style="color: #888; padding: 1rem;">Aucune conversation</p>';
+        document.getElementById('process-list').innerHTML = '<p style="color: #888; padding: 1rem;">Aucune conversation</p>';
+        document.getElementById('think-list').innerHTML = '<p style="color: #888; padding: 1rem;">Aucune conversation</p>';
+        
+        // Recharger la liste (elle sera vide)
+        await loadSessions();
+      });
+    };
+    
+    // Bouton Appliquer : sauvegarder les couleurs
+    document.getElementById('settings-apply').onclick = () => {
+      saveColors(); // Sauvegarder dans localStorage
+      saveOriginalColors(); // Mettre à jour les originales
+      const panel = document.getElementById('settings-panel');
+      panel.classList.remove('show');
+    };
+    
+    // Bouton Annuler : restaurer les valeurs originales
+    document.getElementById('settings-cancel').onclick = () => {
+      restoreOriginalColors();
+      const panel = document.getElementById('settings-panel');
+      panel.classList.remove('show');
+    };
+    
+    document.getElementById('settings-reset').onclick = () => {
+      resetColors();
+      saveOriginalColors(); // Mettre à jour les originales après reset
+    };
+
+    // Tous les inputs de couleur et taille - Preview en live (sans sauvegarder)
+    const colorInputs = [
+      'color-sidebar-bg', 'color-sidebar-text', 'color-sidebar-border',
+      'color-header-bg', 'color-header-text', 'color-header-border',
+      'color-chat-bg', 'color-text', 'color-time',
+      'color-jeremy-bg', 'color-jeremy-border', 'color-jeremy-text',
+      'color-clara-bg', 'color-clara-border', 'color-clara-text',
+      'color-input-area-bg', 'color-input-bg', 'color-input-text', 'color-input-border',
+      'color-send-btn-bg', 'color-send-btn-text', 'color-send-btn-border',
+      'color-right-panel-bg', 'color-right-panel-header-bg', 'color-right-panel-header-text', 'color-right-panel-border',
+      'color-todo-btn-bg', 'color-todo-btn-text', 'color-todo-btn-border',
+      'color-settings-btn-bg', 'color-settings-btn-text', 'color-settings-btn-border',
+      'color-think-bg', 'color-think-header-bg', 'color-think-header-text', 'color-think-border', 'color-think-text',
+      'color-sidebar-footer-bg', 'color-sidebar-footer-border',
+      'color-delete-all-btn-bg', 'color-delete-all-btn-text', 'color-delete-all-btn-border',
+      'font-size-chat'
+    ];
+
+    colorInputs.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          previewColors(); // Preview en live uniquement, pas de sauvegarde
+        });
+      }
+    });
+
+    const textarea = document.getElementById('message-input');
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    textarea.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    });
+
+    // Fermer settings panel en cliquant ailleurs (avec annulation)
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('settings-panel');
+      const btn = document.getElementById('sidebar-settings-btn');
+      if (panel.classList.contains('show') && !panel.contains(e.target) && !btn.contains(e.target)) {
+        restoreOriginalColors(); // Restaurer avant de fermer
+        panel.classList.remove('show');
+      }
+    });
+
+    // Initialisation
+    loadSessions();
+    
+    // Charger et appliquer les couleurs après un petit délai pour être sûr que le DOM est prêt
+    setTimeout(() => {
+      loadColors();
+      saveOriginalColors(); // Sauvegarder les valeurs initiales
+    }, 100);
+  </script>
+</body>
+</html>

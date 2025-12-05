@@ -1,38 +1,39 @@
 import React, { useState, useEffect } from 'react'
-import HeaderBar from './components/HeaderBar'
-import SessionSidebar from './components/SessionSidebar'
-import ChatPanel from './components/ChatPanel'
+import SessionSidebarV2 from './components/SessionSidebarV2'
+import ChatArea from './components/ChatArea'
+import RightPanel from './components/RightPanel'
 import { loadSession, sendMessage } from './api'
-import layoutConfig from './config/layout.json'
-import { useTheme } from './styles/useTheme'
+import { loadThemeFromLocalStorage, applyThemeToDocument } from './config/themeManager'
 
 export default function App() {
   const [sessionId, setSessionId] = useState(null)
   const [messages, setMessages] = useState([])
-  const [debugEnabled, setDebugEnabled] = useState(false)
-  const [debugData, setDebugData] = useState(null)
-  const { theme, setTheme } = useTheme()
-  const [layout, setLayout] = useState(layoutConfig)
   const [isThinking, setIsThinking] = useState(false)
+  const [rightPanelOpen, setRightPanelOpen] = useState(true)
 
-  // Appliquer le layout depuis la config
+  // Charger le thème au démarrage
   useEffect(() => {
-    const sidebarLeftWidth = layout.layout?.sidebarLeftWidth || 280
-    document.documentElement.style.setProperty('--left-sidebar-width', `${sidebarLeftWidth}px`)
-    document.documentElement.style.setProperty('--chat-min-width', layout.chatMinWidth || '480px')
-  }, [layout])
+    const theme = loadThemeFromLocalStorage()
+    applyThemeToDocument(theme)
+  }, [])
 
   function handleNewSession() {
     setSessionId(null)
     setMessages([])
-    setDebugData(null)
   }
 
   async function handleSelectSession(sessionIdToLoad) {
     try {
       const sessionData = await loadSession(sessionIdToLoad)
       setSessionId(sessionData.session_id)
-      setMessages(sessionData.messages || [])
+      
+      // Convertir les messages au format attendu
+      const formattedMessages = (sessionData.messages || []).map(msg => ({
+        role: msg.role,
+        content: msg.content || msg.text || '',
+        timestamp: msg.timestamp || new Date().toISOString(),
+      }))
+      setMessages(formattedMessages)
     } catch (error) {
       console.error('Error loading session:', error)
       alert(`Erreur lors du chargement de la session: ${error.message}`)
@@ -41,11 +42,6 @@ export default function App() {
 
   function handleNewMessage(message) {
     setMessages((prev) => [...prev, message])
-    
-    // Extraire les données de debug si présentes
-    if (message.debug) {
-      setDebugData(message.debug)
-    }
     
     // Mettre à jour l'état thinking
     if (message.role === 'user') {
@@ -57,79 +53,125 @@ export default function App() {
 
   async function handleSendMessage(message) {
     // Ajouter le message utilisateur immédiatement
-    handleNewMessage({ role: 'user', content: message })
+    handleNewMessage({ 
+      role: 'user', 
+      content: message,
+      timestamp: new Date().toISOString(),
+    })
     setIsThinking(true)
 
     try {
-      const response = await sendMessage(message, sessionId, debugEnabled)
-      handleNewMessage({
-        role: 'assistant',
-        content: response.reply,
-        debug: response.debug,
-      })
+      const response = await sendMessage(message, sessionId, false)
+      
+      // Le backend peut retourner tous les messages ou juste la réponse
+      if (response.messages && Array.isArray(response.messages)) {
+        // Format avec tous les messages
+        const formattedMessages = response.messages.map(msg => ({
+          role: msg.role,
+          content: msg.content || msg.text || '',
+          timestamp: msg.timestamp || new Date().toISOString(),
+        }))
+        setMessages(formattedMessages)
+      } else {
+        // Format avec juste la réponse
+        handleNewMessage({
+          role: 'assistant',
+          content: response.reply || response.content || '',
+          timestamp: new Date().toISOString(),
+        })
+      }
+      
+      // Mettre à jour sessionId si fourni
+      if (response.session_id) {
+        setSessionId(response.session_id)
+      }
     } catch (error) {
       console.error('Error:', error)
       handleNewMessage({
         role: 'assistant',
         content: `Erreur: ${error.message}`,
+        timestamp: new Date().toISOString(),
       })
     }
   }
 
-  function handleToggleDebug() {
-    setDebugEnabled(!debugEnabled)
-    if (!debugEnabled) {
-      setDebugData(null)
-    }
-  }
-
-  // Classes CSS pour le layout
-  const showLeft = layout.layout?.showSessions !== false
-  
-  const appClasses = [
-    'app-root',
-    showLeft ? 'with-left-sidebar' : '',
-  ].filter(Boolean).join(' ')
-
   return (
-    <div className={appClasses} style={{
+    <div style={{
       display: 'flex',
       height: '100vh',
-      background: 'var(--background)',
-      color: 'var(--textPrimary)',
-      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+      overflow: 'hidden',
+      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     }}>
-      {showLeft && (
-        <SessionSidebar
-          currentSessionId={sessionId}
-          onSelectSession={handleSelectSession}
-          onNewSession={handleNewSession}
-        />
-      )}
-      
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        overflow: 'hidden',
+      {/* Sidebar gauche */}
+      <SessionSidebarV2
+        currentSessionId={sessionId}
+        onSelectSession={handleSelectSession}
+        onNewSession={handleNewSession}
+      />
+
+      {/* Zone centrale (Chat) */}
+      <div style={{
         flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
       }}>
-        <HeaderBar
-          onToggleDebug={handleToggleDebug}
-          debugEnabled={debugEnabled}
-          theme={theme}
-          setTheme={setTheme}
-          isThinking={isThinking}
-        />
-        <ChatPanel
+        {/* Header avec bouton Todo */}
+        <div className="chat-header" style={{
+          padding: '10px',
+          borderBottom: '1px solid var(--header-border)',
+          fontSize: '14px',
+          fontWeight: '600',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: 'var(--header-bg)',
+          color: 'var(--header-text)',
+          flexShrink: 0,
+          zIndex: 1,
+        }}>
+          <span id="chat-title">
+            {sessionId ? (sessionId.replace(/\.txt$/, '') || 'Session') : 'Aucune session'}
+          </span>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <button
+              className="toggle-right-panel"
+              onClick={() => setRightPanelOpen(!rightPanelOpen)}
+              title="Afficher/Masquer Todo & Process"
+              style={{
+                padding: '4px 10px',
+                background: 'var(--todo-btn-bg)',
+                color: 'var(--todo-btn-text)',
+                border: '1px solid var(--todo-btn-border)',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                minWidth: '50px',
+              }}
+            >
+              Todo
+            </button>
+          </div>
+        </div>
+
+        {/* ChatArea */}
+        <ChatArea
           sessionId={sessionId}
           messages={messages}
           onNewMessage={handleNewMessage}
-          debugEnabled={debugEnabled}
           onSendMessage={handleSendMessage}
           isThinking={isThinking}
         />
       </div>
+
+      {/* Panneau droit (Todo/Process/Think) */}
+      <RightPanel
+        sessionId={sessionId}
+        isOpen={rightPanelOpen}
+        onToggle={() => setRightPanelOpen(!rightPanelOpen)}
+      />
     </div>
   )
 }
-
