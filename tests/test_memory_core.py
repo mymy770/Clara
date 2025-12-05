@@ -12,7 +12,10 @@ import sys
 # Ajouter le répertoire parent au path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from memory.memory_core import init_db, save_item, get_items, search_items, delete_item, update_item
+from memory.memory_core import (
+    init_db, save_item, get_items, search_items, delete_item, update_item,
+    save_preference, get_preference_by_key, list_preferences, search_preferences
+)
 
 
 class TestMemoryCore(unittest.TestCase):
@@ -37,6 +40,18 @@ CREATE TABLE IF NOT EXISTS memory (
     tags TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS preferences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scope TEXT,
+    agent TEXT,
+    domain TEXT,
+    key TEXT UNIQUE,
+    value TEXT,
+    source TEXT,
+    confidence REAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
             """)
         
@@ -105,6 +120,47 @@ CREATE TABLE IF NOT EXISTS memory (
         # Vérifier
         items = get_items(db_path=self.db_path)
         self.assertEqual(items[0]['content'], "Updated")
+    
+    def test_preference_write_read(self):
+        """Test sauvegarde et lecture de préférence"""
+        # Créer une préférence
+        pref = {
+            'scope': 'global',
+            'agent': 'orchestrator',
+            'domain': 'communication',
+            'key': 'language',
+            'value': 'fr',
+            'source': 'user',
+            'confidence': 1.0
+        }
+        success = save_preference(pref, db_path=self.db_path)
+        self.assertTrue(success)
+        
+        # Lire la préférence
+        retrieved = get_preference_by_key('language', db_path=self.db_path)
+        self.assertIsNotNone(retrieved)
+        self.assertEqual(retrieved['key'], 'language')
+        self.assertEqual(retrieved['value'], 'fr')
+        self.assertEqual(retrieved['scope'], 'global')
+        self.assertEqual(retrieved['agent'], 'orchestrator')
+        self.assertEqual(retrieved['domain'], 'communication')
+        
+        # Test UPDATE (même key)
+        pref['value'] = 'en'
+        success = save_preference(pref, db_path=self.db_path)
+        self.assertTrue(success)
+        retrieved = get_preference_by_key('language', db_path=self.db_path)
+        self.assertEqual(retrieved['value'], 'en')
+        
+        # Test list_preferences
+        all_prefs = list_preferences(db_path=self.db_path)
+        self.assertEqual(len(all_prefs), 1)
+        
+        # Test search_preferences
+        results = search_preferences('language', db_path=self.db_path)
+        self.assertEqual(len(results), 1)
+        results = search_preferences('fr', db_path=self.db_path)
+        self.assertEqual(len(results), 0)  # 'en' maintenant
 
 
 if __name__ == '__main__':

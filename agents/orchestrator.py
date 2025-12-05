@@ -11,7 +11,7 @@ from datetime import datetime
 from drivers.llm_driver import LLMDriver
 from utils.logger import DebugLogger
 from memory.helpers import save_note, save_todo, save_process, save_protocol
-from memory.memory_core import get_items, search_items, delete_item
+from memory.memory_core import get_items, search_items, delete_item, save_preference
 
 
 class Orchestrator:
@@ -65,10 +65,14 @@ PROTOCOL :
 - memory_save_protocol : Enregistrer un protocole/règle générale
 - memory_list_protocols : Lister tous les protocoles
 
+PRÉFÉRENCES :
+- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)
+
 GÉNÉRAL :
 - memory_delete_item : Supprimer un élément par ID (tous types)
 
 Quand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,
+OU quand il exprime une préférence ("je préfère", "désormais", "à partir de maintenant", "toujours", "ne jamais"),
 tu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :
 
 ```json
@@ -297,6 +301,28 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                     result += f"  ... et {len(items) - 10} autre(s)"
                 return result
             
+            elif action == 'set_preference':
+                pref_dict = {
+                    'scope': intent.get('scope', 'global'),
+                    'agent': intent.get('agent'),
+                    'domain': intent.get('domain', 'general'),
+                    'key': intent.get('key'),
+                    'value': intent.get('value'),
+                    'source': intent.get('source', 'user'),
+                    'confidence': intent.get('confidence', 1.0)
+                }
+                if pref_dict['key'] and pref_dict['value']:
+                    success = save_preference(pref_dict)
+                    if success:
+                        # Sauvegarder aussi dans memory avec tags
+                        from memory.helpers import save_note
+                        tags = ["preference", pref_dict.get('domain', 'general'), pref_dict.get('agent') or 'global']
+                        save_note(f"Préférence: {pref_dict['key']} = {pref_dict['value']}", tags=tags)
+                        return f"✓ Préférence enregistrée : {pref_dict['key']} = {pref_dict['value']}"
+                    else:
+                        return "⚠ Erreur lors de l'enregistrement de la préférence"
+                return "⚠ Clé ou valeur manquante pour la préférence"
+            
             elif action == 'delete_item':
                 item_id = intent.get('item_id')
                 if item_id:
@@ -315,10 +341,25 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         Pré-vérifie si le message demande une lecture mémoire
         Si oui, interroge la DB AVANT l'appel LLM pour éviter hallucinations
         
+        Détecte aussi les intentions de préférences
+        
         Returns:
             str: Contexte mémoire formaté, ou None
         """
         msg_lower = user_message.lower()
+        
+        # Détection des préférences
+        preference_keywords = [
+            'je préfère', 'je préférerais', 'préfère', 'préférerais',
+            'désormais', 'à partir de maintenant', 'dorénavant',
+            'toujours', 'jamais', 'ne jamais',
+            'souhaite que', 'veux que'
+        ]
+        is_preference_intent = any(kw in msg_lower for kw in preference_keywords)
+        
+        if is_preference_intent:
+            # Retourner un contexte pour aider le LLM à générer l'intention JSON
+            return "L'utilisateur exprime une préférence. Génère une intention JSON avec memory_action='set_preference'."
         
         # Détection basique d'intentions de lecture
         keywords_list = ['montre', 'liste', 'affiche', 'voir', 'consulte', 'lis']

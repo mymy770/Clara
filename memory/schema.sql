@@ -15,6 +15,26 @@ CREATE INDEX IF NOT EXISTS idx_memory_type ON memory(type);
 CREATE INDEX IF NOT EXISTS idx_memory_created_at ON memory(created_at DESC);
 
 -- ============================================
+-- TABLE PREFERENCES
+-- ============================================
+CREATE TABLE IF NOT EXISTS preferences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scope TEXT,
+    agent TEXT,
+    domain TEXT,
+    key TEXT UNIQUE,
+    value TEXT,
+    source TEXT,
+    confidence REAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index pour les préférences
+CREATE INDEX IF NOT EXISTS idx_preferences_key ON preferences(key);
+CREATE INDEX IF NOT EXISTS idx_preferences_scope ON preferences(scope);
+CREATE INDEX IF NOT EXISTS idx_preferences_agent ON preferences(agent);
+
+-- ============================================
 -- FORMAT POUR type = 'contact'
 -- ============================================
 -- Pour type = 'contact', content est un objet JSON avec :

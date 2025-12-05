@@ -227,3 +227,131 @@ def delete_item(
         cursor = conn.cursor()
         cursor.execute("DELETE FROM memory WHERE id = ?", (item_id,))
         conn.commit()
+
+
+# ============================================
+# FONCTIONS PRÉFÉRENCES
+# ============================================
+
+def save_preference(pref: dict, db_path: str = "memory/memory.sqlite") -> bool:
+    """
+    Insère ou met à jour une préférence selon key+scope+agent
+    
+    Args:
+        pref: Dict avec structure préférence :
+            - scope: "global" | "agent"
+            - agent: "mail" | "calendar" | "orchestrator" | null
+            - domain: "communication" | "ui" | "agenda" | ...
+            - key: string (unique)
+            - value: string
+            - source: "user" | "inferred"
+            - confidence: float (0.0-1.0)
+        db_path: Chemin vers la base de données
+    
+    Returns:
+        True si succès, False sinon
+    """
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Vérifier si une préférence existe déjà avec cette key
+            cursor.execute("SELECT id FROM preferences WHERE key = ?", (pref.get('key'),))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # UPDATE
+                cursor.execute("""
+                    UPDATE preferences 
+                    SET scope = ?, agent = ?, domain = ?, value = ?, 
+                        source = ?, confidence = ?
+                    WHERE key = ?
+                """, (
+                    pref.get('scope'),
+                    pref.get('agent'),
+                    pref.get('domain'),
+                    pref.get('value'),
+                    pref.get('source', 'user'),
+                    pref.get('confidence', 1.0),
+                    pref.get('key')
+                ))
+            else:
+                # INSERT
+                cursor.execute("""
+                    INSERT INTO preferences (scope, agent, domain, key, value, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    pref.get('scope', 'global'),
+                    pref.get('agent'),
+                    pref.get('domain'),
+                    pref.get('key'),
+                    pref.get('value'),
+                    pref.get('source', 'user'),
+                    pref.get('confidence', 1.0)
+                ))
+            
+            conn.commit()
+            return True
+    except Exception:
+        return False
+
+
+def get_preference_by_key(key: str, db_path: str = "memory/memory.sqlite") -> Optional[dict]:
+    """
+    Retourne la préférence correspondant à key
+    
+    Args:
+        key: Clé de la préférence
+        db_path: Chemin vers la base de données
+    
+    Returns:
+        Dict avec la préférence ou None
+    """
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM preferences WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def list_preferences(db_path: str = "memory/memory.sqlite") -> list[dict]:
+    """
+    Liste toutes les préférences stockées
+    
+    Args:
+        db_path: Chemin vers la base de données
+    
+    Returns:
+        Liste de dicts avec toutes les préférences
+    """
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM preferences ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+
+def search_preferences(query: str, db_path: str = "memory/memory.sqlite") -> list[dict]:
+    """
+    Recherche textuelle dans key/value/domain
+    
+    Args:
+        query: Texte à rechercher
+        db_path: Chemin vers la base de données
+    
+    Returns:
+        Liste de dicts avec les préférences trouvées
+    """
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        search_pattern = f"%{query}%"
+        cursor.execute("""
+            SELECT * FROM preferences 
+            WHERE key LIKE ? OR value LIKE ? OR domain LIKE ?
+            ORDER BY created_at DESC
+        """, (search_pattern, search_pattern, search_pattern))
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
