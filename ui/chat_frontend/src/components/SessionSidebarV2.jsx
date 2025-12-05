@@ -298,9 +298,9 @@ export default function SessionSidebarV2({ currentSessionId, onSelectSession, on
         </div>
 
         <div className="sidebar-footer" style={{
-          padding: '10px',
-          borderTop: '1px solid var(--sidebar-footer-border)',
-          background: 'var(--sidebar-footer-bg)',
+          padding: '12px 8px',
+          borderTop: '1px solid var(--input-border)',
+          background: 'var(--input-area-bg)',
           display: 'flex',
           gap: '8px',
           flexShrink: 0,

@@ -194,7 +194,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
               fontWeight: activeTab === 'todo' ? '600' : '400',
             }}
           >
-            📝 Todo
+            <span style={{ opacity: 0.5, marginRight: '4px' }}>📝</span> Todo
           </button>
           <button
             className={`right-tab-btn ${activeTab === 'process' ? 'active' : ''}`}
@@ -211,7 +211,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
               fontWeight: activeTab === 'process' ? '600' : '400',
             }}
           >
-            ⚡ Process
+            <span style={{ opacity: 0.5, marginRight: '4px' }}>⚡</span> Process
           </button>
         </div>
 
@@ -350,7 +350,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
           color: 'var(--think-header-text)',
           flexShrink: 0,
         }}>
-          <span>🧠 Think</span>
+          <span><span style={{ opacity: 0.5, marginRight: '4px' }}>🧠</span> Think</span>
         </div>
         <div
           ref={thinkContentRef}
