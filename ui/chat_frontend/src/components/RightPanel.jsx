@@ -335,7 +335,10 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
         flexDirection: 'column',
         minHeight: 0,
         border: '1px solid var(--think-border)',
-        borderBottom: '1px solid var(--think-border)',
+        borderTop: '1px solid var(--think-border)',
+        borderLeft: '1px solid var(--think-border)',
+        borderRight: '1px solid var(--think-border)',
+        borderBottom: '2px solid var(--think-border)',
         borderRadius: '6px',
         margin: '4px',
         overflow: 'hidden',
@@ -351,7 +354,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
           color: 'var(--think-header-text)',
           flexShrink: 0,
         }}>
-          <span><span style={{ color: '#999999', marginRight: '4px' }}>🧠</span> Think</span>
+          <span><span style={{ filter: 'grayscale(100%)', opacity: 0.6, marginRight: '4px', display: 'inline-block' }}>🧠</span> Think</span>
         </div>
         <div
           ref={thinkContentRef}
@@ -368,6 +371,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
             boxSizing: 'border-box',
             position: 'relative',
             maxHeight: '100%',
+            borderBottom: '2px solid var(--think-border)',
           }}
         >
           {!sessionId ? (
