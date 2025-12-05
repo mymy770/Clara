@@ -334,11 +334,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
-        border: '1px solid var(--think-border)',
-        borderTop: '1px solid var(--think-border)',
-        borderLeft: '1px solid var(--think-border)',
-        borderRight: '1px solid var(--think-border)',
-        borderBottom: '2px solid var(--think-border)',
+        border: '2px solid var(--think-border)',
         borderRadius: '6px',
         margin: '4px',
         overflow: 'hidden',
@@ -371,7 +367,6 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
             boxSizing: 'border-box',
             position: 'relative',
             maxHeight: '100%',
-            borderBottom: '2px solid var(--think-border)',
           }}
         >
           {!sessionId ? (
