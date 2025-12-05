@@ -12,6 +12,7 @@ from drivers.llm_driver import LLMDriver
 from utils.logger import DebugLogger
 from memory.helpers import save_note, save_todo, save_process, save_protocol
 from memory.memory_core import get_items, search_items, delete_item, save_preference
+from memory.contacts import save_contact, update_contact, find_contacts, get_all_contacts
 
 
 class Orchestrator:
@@ -46,6 +47,36 @@ Capacités mémoire (Phase 2.5) :
 Tu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.
 
 Actions disponibles :
+
+CONTACTS :
+- memory_save_contact : Enregistrer un contact structuré
+- memory_update_contact : Modifier un contact existant
+- memory_list_contacts : Lister tous les contacts
+- memory_search_contacts : Rechercher dans les contacts
+
+Format JSON attendu pour save_contact :
+```json
+{"memory_action": "save_contact",
+ "contact": {
+    "first_name": "...",
+    "last_name": "...",
+    "aliases": ["..."],
+    "phones": [{"number": "...", "label": "perso", "primary": true}],
+    "emails": [{"address": "...", "label": "perso", "primary": true}],
+    "relationship": "...",
+    "category": "family" | "friend" | "client" | "supplier" | "other",
+    "notes": ["..."],
+    "company": "...",
+    "role": "..."
+  }}
+```
+
+Autres actions contacts :
+```json
+{"memory_action": "list_contacts"}
+{"memory_action": "search_contacts", "query": "..."}
+{"memory_action": "update_contact", "contact_id": 12, "updates": {...}}
+```
 
 NOTES :
 - memory_save_note : Sauvegarder une note
@@ -301,6 +332,55 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                     result += f"  ... et {len(items) - 10} autre(s)"
                 return result
             
+            elif action == 'save_contact':
+                contact = intent.get('contact')
+                if contact:
+                    item_id = save_contact(contact)
+                    return f"✓ Contact sauvegardé (ID: {item_id})"
+                return "⚠ Données contact manquantes"
+            
+            elif action == 'update_contact':
+                contact_id = intent.get('contact_id')
+                updates = intent.get('updates', {})
+                if contact_id and updates:
+                    try:
+                        update_contact(contact_id, updates)
+                        return f"✓ Contact mis à jour (ID: {contact_id})"
+                    except ValueError as e:
+                        return f"⚠ {str(e)}"
+                return "⚠ ID ou updates manquants"
+            
+            elif action == 'list_contacts':
+                contacts = get_all_contacts(limit=50)
+                if not contacts:
+                    return "Aucun contact en mémoire."
+                result = f"📇 {len(contacts)} contact(s) trouvé(s) :\n"
+                for contact in contacts[:10]:
+                    name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
+                    if not name:
+                        name = "Sans nom"
+                    result += f"  - ID {contact.get('id')}: {name}\n"
+                if len(contacts) > 10:
+                    result += f"  ... et {len(contacts) - 10} autre(s)"
+                return result
+            
+            elif action == 'search_contacts':
+                query = intent.get('query', '')
+                if query:
+                    results = find_contacts(query)
+                    if not results:
+                        return f"Aucun contact trouvé pour '{query}'."
+                    result = f"🔍 {len(results)} contact(s) trouvé(s) pour '{query}' :\n"
+                    for contact in results[:10]:
+                        name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
+                        if not name:
+                            name = "Sans nom"
+                        result += f"  - ID {contact.get('id')}: {name}\n"
+                    if len(results) > 10:
+                        result += f"  ... et {len(results) - 10} autre(s)"
+                    return result
+                return "⚠ Query manquante pour la recherche"
+            
             elif action == 'set_preference':
                 pref_dict = {
                     'scope': intent.get('scope', 'global'),
@@ -367,6 +447,33 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         
         is_list_intent = any(kw in msg_lower for kw in keywords_list)
         is_search_intent = any(kw in msg_lower for kw in keywords_search)
+        
+        # Détection des contacts
+        contact_keywords = ['contact', 'numéro', 'email', 'téléphone', 'téléphone', 'phone']
+        is_contact_intent = any(kw in msg_lower for kw in contact_keywords)
+        
+        if is_contact_intent and (is_list_intent or is_search_intent):
+            # Interroger la DB AVANT l'appel LLM
+            contacts = get_all_contacts(limit=20)
+            if contacts:
+                context = f"CONTACTS ENREGISTRÉS ({len(contacts)} trouvé(s)) :\n"
+                for contact in contacts[:10]:
+                    name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
+                    if not name:
+                        name = "Sans nom"
+                    phones = contact.get('phones', [])
+                    emails = contact.get('emails', [])
+                    context += f"- ID {contact.get('id')}: {name}"
+                    if phones:
+                        primary_phone = next((p for p in phones if p.get('primary')), phones[0])
+                        context += f" | Tél: {primary_phone.get('number', 'N/A')}"
+                    if emails:
+                        primary_email = next((e for e in emails if e.get('primary')), emails[0])
+                        context += f" | Email: {primary_email.get('address', 'N/A')}"
+                    context += "\n"
+                return context
+            else:
+                return "CONTACTS: Aucun contact enregistré."
         
         if not (is_list_intent or is_search_intent):
             return None

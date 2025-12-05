@@ -54,3 +54,38 @@ def generate_tags(content: str, max_tags: int = 5) -> list[str]:
     
     return tags
 
+
+def auto_tags_for_contact(contact_dict: dict) -> list[str]:
+    """
+    Génère des tags automatiques pour un contact
+    
+    Args:
+        contact_dict: Dict avec structure contact
+    
+    Returns:
+        Liste de tags
+    """
+    tags = ["contact"]
+    
+    # Ajouter la catégorie de relation
+    if "relationship" in contact_dict:
+        rel = contact_dict["relationship"]
+        if isinstance(rel, dict):
+            if rel.get("category"):
+                tags.append(rel["category"])
+            if rel.get("role"):
+                tags.append(rel["role"])
+        elif isinstance(rel, str):
+            tags.append(rel)
+    
+    # Ajouter la catégorie directe si présente
+    if contact_dict.get("category"):
+        tags.append(contact_dict["category"])
+    
+    # Ajouter la company si présente
+    if contact_dict.get("company"):
+        tags.append(contact_dict["company"].lower())
+    
+    # Dédupliquer et retourner
+    return list(set(tags))
+
