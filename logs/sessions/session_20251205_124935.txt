@@ -1,0 +1,164 @@
+=== Clara Session session_20251205_124935 ===
+Date: 2025-12-05 12:49:35
+==================================================
+
+[12:49:42] Utilisateur:
+Ajoute une note : demain appeler le plombier
+
+[12:49:44] Clara:
+J’ajoute la note : « demain appeler le plombier ».
+
+```json
+{"memory_action": "save_note", "content": "demain appeler le plombier", "tags": ["rappel", "plomberie"]}
+```
+
+[12:49:58] Utilisateur:
+ Montre-moi toutes mes notes 
+
+[12:50:03] Clara:
+Voici toutes tes notes :
+
+1. (ID 8) Contact: Aurélie Malai — Relation: femme — Téléphone: +972586266  
+2. (ID 7) Je dois appeler ma femme  
+3. (ID 1) Clara Phase 3 test  
+
+Pour l’instant, la note « demain appeler le plombier » n’apparaît pas encore dans la liste fournie par le système de mémoire (il y a peut‑être un léger décalage de synchro). Si tu veux, je peux la ressaisir explicitement comme note.
+
+📝 3 note(s) trouvée(s) :
+  - ID 8: Contact: Aurélie Malai
+Relation: femme
+Téléphone: ...
+  - ID 7: Je dois appeler ma femme...
+  - ID 1: Clara Phase 3 test...
+
+
+[12:52:18] Utilisateur:
+Ajoute un todo : envoyer le contrat à David
+
+[12:52:19] Clara:
+J’ajoute le todo : « envoyer le contrat à David ».
+
+✓ Todo sauvegardé (ID: 9)
+
+[12:52:24] Utilisateur:
+Cherche le todo qui parle de contrat
+
+[12:52:26] Clara:
+J’ai trouvé le todo suivant qui parle de « contrat » :
+
+- (ID 9) envoyer le contrat à David
+
+```json
+{"memory_action": "search_todos", "query": "contrat"}
+```
+
+[12:52:44] Utilisateur:
+Sauvegarde un process : comment préparer une réunion
+
+[12:53:06] Clara:
+Voici un exemple de processus pour « comment préparer une réunion » que je peux sauvegarder :
+
+**Processus : Préparer une réunion**
+
+1. **Définir l’objectif**
+   - Clarifier le but de la réunion (décider, informer, brainstormer, suivre un projet…)
+   - Vérifier si une réunion est vraiment nécessaire ou si un mail/document suffit
+
+2. **Identifier les participants**
+   - Lister les personnes indispensables à la décision ou au sujet
+   - Limiter le nombre de participants pour rester efficace
+   - Vérifier les disponibilités principales si besoin
+
+3. **Fixer la date, l’heure et la durée**
+   - Choisir un créneau adapté aux participants clés
+   - Définir une durée réaliste (30 min, 1h, etc.)
+   - Prévoir une marge pour les questions
+
+4. **Réserver le lieu / la visio**
+   - Réserver une salle adaptée (taille, matériel)
+   - Créer un lien de visioconférence si réunion à distance
+   - Vérifier le matériel : écran, projecteur, micro, connexion internet
+
+5. **Préparer l’ordre du jour**
+   - Lister les points à aborder dans l’ordre logique
+   - Associer, si possible, un temps indicatif à chaque point
+   - Préciser les décisions attendues pour chaque point
+
+6. **Envoyer l’invitation**
+   - Envoyer une invitation calendrier (date, heure, lieu/lien visio)
+   - Ajouter l’ordre du jour dans la description
+   - Joindre les documents à lire avant la réunion (si nécessaire)
+   - Préciser ce que l’on attend de chaque participant (préparation, documents, décisions…)
+
+7. **Préparer les supports**
+   - Préparer une présentation ou un document de synthèse
+   - Préparer éventuellement un tableau de suivi / compte-rendu
+   - Imprimer les documents si besoin (ou les partager à l’avance)
+
+8. **Anticiper l’animation**
+   - Définir qui anime la réunion, qui prend les notes
+   - Prévoir un tour de table si nécessaire
+   - Préparer quelques questions clés pour lancer la discussion
+
+9. **Juste avant la réunion**
+   - Arriver quelques minutes en avance
+   - Tester le matériel (visio, partage d’écran, audio)
+   - Afficher ou avoir sous la main l’ordre du jour
+
+Si tu veux, je peux adapter ce process à un type de réunion précis (client, équipe, comité de direction, etc.).
+
+✓ Processus sauvegardé (ID: 10)
+
+[12:53:16] Utilisateur:
+Affiche tous les protocoles
+
+[12:53:17] Clara:
+Voici les protocoles enregistrés :
+
+1. **(ID 6)** Toujours répondre aux mails fournisseurs en moins de 24h.
+
+[12:53:31] Utilisateur:
+Affiche tous les process
+
+[12:53:32] Clara:
+Voici les processus enregistrés :
+
+1. **(ID 10)** Processus : Préparer une réunion  
+2. **(ID 5)** Processus : Vérifier un fournisseur
+
+[12:53:39] Utilisateur:
+À partir de maintenant, je préfère que tu me répondes toujours en français
+
+[12:53:41] Clara:
+Je répondrai désormais toujours en français.
+
+✓ Préférence enregistrée : language = fr
+
+[12:54:25] Utilisateur:
+Enregistre un contact : Aurélie Malai, ma femme, numéro +972586266771, mmalaiaurelie1@gmail.com, emem numero pour whatsapp
+
+[12:54:27] Clara:
+J’enregistre le contact avec ces informations.
+
+✓ Contact sauvegardé (ID: 12)
+
+[12:55:28] Utilisateur:
+combien de ocntact j ai ?
+
+[12:55:29] Clara:
+Tu as actuellement 1 contact enregistré dans le système de mémoire :  
+- (ID 12) Aurélie Malai, ta femme.
+
+[12:55:38] Utilisateur:
+donne moi les details du contact aurelie
+
+[12:55:40] Clara:
+Voici les détails du contact correspondant à « Aurélie » :
+
+- **Nom** : Aurélie Malai  
+- **Relation** : ta femme  
+- **Téléphone** : +972586266771 (également utilisé pour WhatsApp)  
+- **Email** : mmalaiaurelie1@gmail.com  
+
+Si tu veux, je peux ajouter des notes complémentaires (adresse, anniversaire, etc.) à sa fiche contact.
+

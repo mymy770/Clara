@@ -35,7 +35,35 @@ CREATE INDEX IF NOT EXISTS idx_preferences_scope ON preferences(scope);
 CREATE INDEX IF NOT EXISTS idx_preferences_agent ON preferences(agent);
 
 -- ============================================
--- FORMAT POUR type = 'contact'
+-- TABLE CONTACTS
+-- ============================================
+CREATE TABLE IF NOT EXISTS contacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name TEXT,
+    last_name TEXT,
+    display_name TEXT,
+    aliases TEXT,           -- JSON list
+    category TEXT,          -- "family" | "friend" | "client" | "supplier" | "other"
+    relationship TEXT,      -- JSON dict {category, role} or string
+    phones TEXT,            -- JSON list
+    emails TEXT,            -- JSON list
+    company TEXT,
+    role TEXT,
+    notes TEXT,             -- JSON list
+    whatsapp_number TEXT,
+    tags TEXT,              -- JSON list
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index pour les contacts
+CREATE INDEX IF NOT EXISTS idx_contacts_first_name ON contacts(first_name);
+CREATE INDEX IF NOT EXISTS idx_contacts_last_name ON contacts(last_name);
+CREATE INDEX IF NOT EXISTS idx_contacts_category ON contacts(category);
+CREATE INDEX IF NOT EXISTS idx_contacts_created_at ON contacts(created_at DESC);
+
+-- ============================================
+-- FORMAT POUR type = 'contact' (OBSOLÈTE - utiliser table contacts)
 -- ============================================
 -- Pour type = 'contact', content est un objet JSON avec :
 -- {

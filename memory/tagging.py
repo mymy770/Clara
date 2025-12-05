@@ -29,6 +29,7 @@ def generate_tags(content: str, max_tags: int = 5) -> list[str]:
     
     Returns:
         Liste de tags (lowercase, sans stopwords)
+        Toujours retourne au moins un tag si content n'est pas vide
     """
     if not content:
         return []
@@ -51,6 +52,11 @@ def generate_tags(content: str, max_tags: int = 5) -> list[str]:
     # Trier par fréquence et prendre les N premiers
     sorted_words = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
     tags = [word for word, count in sorted_words[:max_tags]]
+    
+    # S'assurer qu'on a au moins un tag si le contenu n'est pas vide
+    # Prendre le premier mot significatif même s'il n'apparaît qu'une fois
+    if not tags and meaningful_words:
+        tags = [meaningful_words[0]]
     
     return tags
 

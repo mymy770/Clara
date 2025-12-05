@@ -6,8 +6,11 @@ Stockage SQLite simple, sans logique métier
 
 import sqlite3
 import json
+import logging
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 def init_db(
@@ -46,24 +49,33 @@ def save_item(
     Sauvegarde un item en mémoire
     
     Args:
-        type: Type d'item (contact, task, todo, preference, etc.)
+        type: Type d'item (note, todo, process, protocol, etc.)
         content: Contenu textuel de l'item
         tags: Liste de tags optionnels
         db_path: Chemin vers la base de données
     
     Returns:
         ID de l'item créé
+    
+    Raises:
+        Exception: Si la sauvegarde échoue (loggée avant de lever)
     """
     tags_json = json.dumps(tags) if tags else None
     
-    with sqlite3.connect(db_path) as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO memory (type, content, tags) VALUES (?, ?, ?)",
-            (type, content, tags_json)
-        )
-        conn.commit()
-        return cursor.lastrowid
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO memory (type, content, tags) VALUES (?, ?, ?)",
+                (type, content, tags_json)
+            )
+            conn.commit()
+            item_id = cursor.lastrowid
+            logger.debug(f"Item sauvegardé: type={type}, id={item_id}")
+            return item_id
+    except Exception as e:
+        logger.exception(f"save_item failed for type={type}: {e}")
+        raise
 
 
 def update_item(
@@ -355,3 +367,38 @@ def search_preferences(query: str, db_path: str = "memory/memory.sqlite") -> lis
         """, (search_pattern, search_pattern, search_pattern))
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
+
+
+# ============================================
+# FONCTION RESET MÉMOIRE
+# ============================================
+
+def reset_memory(hard: bool = False, db_path: str = "memory/memory.sqlite") -> None:
+    """
+    Réinitialise la mémoire de Clara
+    
+    Args:
+        hard: Si True, supprime aussi le fichier SQLite (réinitialisation complète)
+        db_path: Chemin vers la base de données
+    """
+    import os
+    
+    if hard:
+        if os.path.exists(db_path):
+            os.remove(db_path)
+            logger.info(f"Fichier DB supprimé: {db_path}")
+        return
+    
+    # Soft reset : vider les tables
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            # Vider toutes les tables
+            cursor.execute("DELETE FROM memory;")
+            cursor.execute("DELETE FROM preferences;")
+            cursor.execute("DELETE FROM contacts;")
+            conn.commit()
+            logger.info("Mémoire réinitialisée (soft reset)")
+    except Exception as e:
+        logger.exception(f"reset_memory failed: {e}")
+        raise
