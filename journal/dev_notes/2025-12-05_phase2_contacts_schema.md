@@ -84,3 +84,6 @@ Un contact peut avoir :
 - Validation (pas de doublons, format téléphone, etc.)
 - Relations entre contacts
 
+
+
+

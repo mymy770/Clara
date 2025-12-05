@@ -7,12 +7,21 @@ Lance une session interactive avec l'utilisateur
 
 import sys
 import yaml
+import logging
+import os
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement
 load_dotenv()
+
+# Configurer le logging pour DEBUG
+log_level = os.getenv('CLARA_LOG_LEVEL', 'DEBUG').upper()
+logging.basicConfig(
+    level=getattr(logging, log_level, logging.DEBUG),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 # Ajouter le répertoire courant au path
 sys.path.insert(0, str(Path(__file__).parent))

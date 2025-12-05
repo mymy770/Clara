@@ -1,9 +1,9 @@
 {
-  "session_id": "session_20251205_140142",
+  "session_id": "session_20251205_145816",
   "interactions": [
     {
-      "timestamp": "2025-12-05T14:02:13.278418",
-      "user_input": "Ajoute une note : demain appeler le plombier",
+      "timestamp": "2025-12-05T14:58:31.583615",
+      "user_input": "enregistre la note. appeler ma femme avant 16h",
       "prompt_messages": [
         {
           "role": "system",
@@ -11,14 +11,14 @@
         },
         {
           "role": "user",
-          "content": "Ajoute une note : demain appeler le plombier"
+          "content": "enregistre la note. appeler ma femme avant 16h"
         }
       ],
-      "llm_response": "J’enregistre la note : « demain appeler le plombier ».\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"demain appeler le plombier\", \"tags\": [\"rappel\", \"plombier\"]}\n```",
+      "llm_response": "D’accord, j’enregistre cette note.\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"appeler ma femme avant 16h\", \"tags\": [\"rappel\",\"personnel\"]}\n```",
       "usage": {
-        "completion_tokens": 57,
-        "prompt_tokens": 809,
-        "total_tokens": 866,
+        "completion_tokens": 53,
+        "prompt_tokens": 811,
+        "total_tokens": 864,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
@@ -33,8 +33,8 @@
       "error": null
     },
     {
-      "timestamp": "2025-12-05T14:02:25.230262",
-      "user_input": "Montre-moi toutes mes notes",
+      "timestamp": "2025-12-05T14:58:43.638746",
+      "user_input": "list emoi le snotes",
       "prompt_messages": [
         {
           "role": "system",
@@ -42,26 +42,26 @@
         },
         {
           "role": "user",
-          "content": "Ajoute une note : demain appeler le plombier"
+          "content": "enregistre la note. appeler ma femme avant 16h"
         },
         {
           "role": "assistant",
-          "content": "J’enregistre la note : « demain appeler le plombier ».\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"demain appeler le plombier\", \"tags\": [\"rappel\", \"plombier\"]}\n```"
+          "content": "D’accord, j’enregistre cette note.\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"appeler ma femme avant 16h\", \"tags\": [\"rappel\",\"personnel\"]}\n```"
         },
         {
           "role": "user",
-          "content": "Montre-moi toutes mes notes"
+          "content": "list emoi le snotes"
         },
         {
           "role": "system",
-          "content": "DONNÉES MÉMOIRE RÉELLES :\nNOTES: 4 en mémoire\n  - ID 11: Préférence: language = fr\n  - ID 8: Contact: Aurélie Malai\nRelation: femme\nTéléphone: +972586266\n  - ID 7: Je dois appeler ma femme\n  - ID 1: Clara Phase 3 test"
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nNOTES: 0 en mémoire"
         }
       ],
-      "llm_response": "Voici les notes que j’ai pour toi :\n\n1. (ID 11) Préférence : language = fr  \n2. (ID 8) Contact : Aurélie Malai — Relation : femme — Téléphone : +972586266  \n3. (ID 7) Je dois appeler ma femme  \n4. (ID 1) Clara Phase 3 test  \n\nÀ noter : la note « demain appeler le plombier » n’apparaît pas dans la liste actuelle, donc elle n’a probablement pas été réellement enregistrée dans le système de mémoire. Si tu veux, je peux la rajouter maintenant.",
+      "llm_response": "Tu n’as encore aucune note enregistrée en mémoire.\n\n(Vu les données actuelles, la note « appeler ma femme avant 16h » n’apparaît pas encore dans le système.)",
       "usage": {
-        "completion_tokens": 134,
-        "prompt_tokens": 959,
-        "total_tokens": 1093,
+        "completion_tokens": 48,
+        "prompt_tokens": 894,
+        "total_tokens": 942,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,

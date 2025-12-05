@@ -228,13 +228,20 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         Returns:
             tuple: (cleaned_response, result_message) ou (response_text, None) si pas d'action
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         try:
+            logger.debug(f"DEBUG: _process_memory_action appelé avec: {response_text[:200]}")
+            
             # 1) Essayer d'abord le cas idéal : ```json { ... } ```
             json_match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            logger.debug(f"DEBUG: json_match (premier essai) = {json_match is not None}")
             
             # 2) Si rien trouvé, accepter n'importe quel bloc ``` { ... } ```
             if not json_match:
                 json_match = re.search(r"```\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+                logger.debug(f"DEBUG: json_match (deuxième essai) = {json_match is not None}")
             
             raw_json = None
             fallback_match = None
@@ -242,31 +249,49 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             # 3) Si on a trouvé un bloc code, on récupère le JSON
             if json_match:
                 raw_json = json_match.group(1)
+                logger.debug(f"DEBUG: raw_json extrait = {raw_json[:200]}")
             else:
                 # 4) Fallback : chercher un objet JSON "nu" dans le texte
                 fallback_match = re.search(r"(\{\s*\"memory_action\".*?\})", response_text, re.DOTALL)
                 if fallback_match:
                     raw_json = fallback_match.group(1)
+                    logger.debug(f"DEBUG: raw_json (fallback) = {raw_json[:200]}")
             
             # Si on n'a toujours rien, on abandonne proprement
             if not raw_json:
+                logger.warning(f"DEBUG: Aucun JSON trouvé dans la réponse")
                 return (response_text, None)
             
             # Parser le JSON
-            intent = json.loads(raw_json)
+            try:
+                intent = json.loads(raw_json)
+                logger.debug(f"DEBUG: intent parsé = {intent}")
+            except json.JSONDecodeError as e:
+                logger.error(f"DEBUG: Erreur parsing JSON: {e}, raw_json = {raw_json[:200]}")
+                return (response_text, None)
+            
             action = intent.get('memory_action')
+            logger.debug(f"DEBUG: action extraite = {action}")
             
             if not action:
+                logger.warning(f"DEBUG: Pas de memory_action dans intent")
                 return (response_text, None)
             
             # Exécuter l'action correspondante
             result_message = None
             
             if action == 'save_note':
-                content = intent.get('content', '')
-                tags = intent.get('tags')
-                item_id = save_note(content=content, tags=tags)
-                result_message = f"✓ Note sauvegardée (ID: {item_id})"
+                logger.info(f"DEBUG: Exécution de save_note")
+                try:
+                    content = intent.get('content', '')
+                    tags = intent.get('tags')
+                    logger.debug(f"DEBUG: content = {content}, tags = {tags}")
+                    item_id = save_note(content=content, tags=tags)
+                    logger.info(f"DEBUG: save_note réussi, item_id = {item_id}")
+                    result_message = f"✓ Note sauvegardée (ID: {item_id})"
+                except Exception as e:
+                    logger.error(f"DEBUG: Erreur dans save_note: {e}", exc_info=True)
+                    result_message = f"⚠ Erreur lors de la sauvegarde: {str(e)}"
             
             elif action == 'list_notes':
                 items = get_items(type='note', limit=50)
@@ -428,7 +453,6 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                     success = save_preference(pref_dict)
                     if success:
                         # Sauvegarder aussi dans memory avec tags
-                        from memory.helpers import save_note
                         tags = ["preference", pref_dict.get('domain', 'general'), pref_dict.get('agent') or 'global']
                         save_note(f"Préférence: {pref_dict['key']} = {pref_dict['value']}", tags=tags)
                         result_message = f"✓ Préférence enregistrée : {pref_dict['key']} = {pref_dict['value']}"
