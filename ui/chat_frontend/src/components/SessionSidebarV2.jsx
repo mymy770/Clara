@@ -14,6 +14,7 @@ export default function SessionSidebarV2({ currentSessionId, onSelectSession, on
   const [showSettings, setShowSettings] = useState(false)
 
   useEffect(() => {
+    console.log('SessionSidebarV2 mounted')
     loadSessions()
     const interval = setInterval(loadSessions, 5000)
     return () => clearInterval(interval)

@@ -13,9 +13,18 @@ export default function App() {
 
   // Charger le thème au démarrage
   useEffect(() => {
-    const theme = loadThemeFromLocalStorage()
-    applyThemeToDocument(theme)
+    try {
+      const theme = loadThemeFromLocalStorage()
+      applyThemeToDocument(theme)
+    } catch (error) {
+      console.error('Error loading theme:', error)
+    }
   }, [])
+
+  // Debug
+  useEffect(() => {
+    console.log('App rendered', { sessionId, messagesCount: messages.length, rightPanelOpen })
+  }, [sessionId, messages.length, rightPanelOpen])
 
   function handleNewSession() {
     setSessionId(null)
@@ -103,6 +112,7 @@ export default function App() {
       overflow: 'hidden',
       fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
       background: 'var(--main-bg)',
+      color: 'var(--text-color)',
     }}>
       {/* Sidebar gauche */}
       <SessionSidebarV2
