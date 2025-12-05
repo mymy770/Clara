@@ -79,7 +79,7 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             // Ignorer ces erreurs, continuer l'enregistrement
             return
           }
-          shouldContinue = false
+          shouldContinueRef.current = false
           setIsListening(false)
         }
 
