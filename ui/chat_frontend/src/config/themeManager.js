@@ -46,7 +46,7 @@ const COLOR_MAP = {
   'deleteAllBtnBorder': '--delete-all-btn-border',
 };
 
-const DEFAULT_THEME = {
+export const DEFAULT_THEME = {
   sidebarBg: '#ffffff',
   sidebarText: '#000000',
   sidebarBorder: '#dddddd',
