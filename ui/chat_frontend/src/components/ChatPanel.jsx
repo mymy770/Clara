@@ -1,10 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { sendMessage } from '../api'
 
-export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnabled }) {
+export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnabled, onQuickAction }) {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef(null)
+
+  function handleQuickActionButton(type) {
+    const templates = {
+      note: 'Crée une note : ',
+      todo: 'Ajoute un todo : ',
+      process: 'Crée un process structuré pour : ',
+      protocol: 'Crée un protocole pour : '
+    }
+
+    const template = templates[type] || ''
+    setInput(template)
+    
+    // Focus sur le textarea
+    setTimeout(() => {
+      const textarea = document.querySelector('textarea')
+      if (textarea) {
+        textarea.focus()
+        textarea.setSelectionRange(template.length, template.length)
+      }
+    }, 0)
+  }
 
   useEffect(() => {
     scrollToBottom()
@@ -21,6 +42,14 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
     setInput('')
     setSending(true)
 
+    // Si onSendMessage est fourni (depuis App), l'utiliser
+    if (onSendMessage) {
+      onSendMessage(userMessage)
+      setSending(false)
+      return
+    }
+
+    // Sinon, utiliser la logique interne
     // Ajouter le message utilisateur immédiatement
     onNewMessage({ role: 'user', content: userMessage })
 
@@ -106,6 +135,40 @@ export default function ChatPanel({ sessionId, messages, onNewMessage, debugEnab
       </div>
 
       <div className="message-input-area">
+        {/* Quick action buttons */}
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+          {['note', 'todo', 'process', 'protocol'].map((type) => (
+            <button
+              key={type}
+              onClick={() => handleQuickActionButton(type)}
+              style={{
+                padding: '6px 12px',
+                background: 'var(--bg-soft)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontFamily: 'var(--font-sans)',
+                textTransform: 'capitalize',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'var(--accent-soft)'
+                e.target.style.color = 'var(--text-primary)'
+                e.target.style.borderColor = 'var(--accent)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'var(--bg-soft)'
+                e.target.style.color = 'var(--text-secondary)'
+                e.target.style.borderColor = 'var(--border-subtle)'
+              }}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+        
         <div style={{ display: 'flex', gap: '8px' }}>
           <textarea
             value={input}

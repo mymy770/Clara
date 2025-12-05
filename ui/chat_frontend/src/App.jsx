@@ -3,7 +3,8 @@ import HeaderBar from './components/HeaderBar'
 import SessionSidebar from './components/SessionSidebar'
 import ChatPanel from './components/ChatPanel'
 import DebugPanel from './components/DebugPanel'
-import { loadSession } from './api'
+import MemoryToolsPanel from './components/MemoryToolsPanel'
+import { loadSession, sendMessage } from './api'
 import layoutConfig from './config/layout.json'
 
 export default function App() {
@@ -13,12 +14,16 @@ export default function App() {
   const [debugData, setDebugData] = useState(null)
   const [theme, setTheme] = useState('dark')
   const [layout, setLayout] = useState(layoutConfig)
+  const [isThinking, setIsThinking] = useState(false)
+  const [showRightPanel, setShowRightPanel] = useState(layoutConfig.layout?.showRightPanel || true)
 
   // Appliquer le layout depuis la config
   useEffect(() => {
-    document.documentElement.style.setProperty('--left-sidebar-width', layout.leftSidebarWidth)
-    document.documentElement.style.setProperty('--right-sidebar-width', layout.rightSidebarWidth)
-    document.documentElement.style.setProperty('--chat-min-width', layout.chatMinWidth)
+    const sidebarLeftWidth = layout.layout?.sidebarLeftWidth || 280
+    const sidebarRightWidth = layout.layout?.sidebarRightWidth || 320
+    document.documentElement.style.setProperty('--left-sidebar-width', `${sidebarLeftWidth}px`)
+    document.documentElement.style.setProperty('--right-sidebar-width', `${sidebarRightWidth}px`)
+    document.documentElement.style.setProperty('--chat-min-width', layout.chatMinWidth || '480px')
     document.documentElement.className = `theme-${theme}`
   }, [layout, theme])
 
@@ -46,6 +51,34 @@ export default function App() {
     if (message.debug) {
       setDebugData(message.debug)
     }
+    
+    // Mettre à jour l'état thinking
+    if (message.role === 'user') {
+      setIsThinking(true)
+    } else {
+      setIsThinking(false)
+    }
+  }
+
+  async function handleSendMessage(message) {
+    // Ajouter le message utilisateur immédiatement
+    handleNewMessage({ role: 'user', content: message })
+    setIsThinking(true)
+
+    try {
+      const response = await sendMessage(message, sessionId, debugEnabled)
+      handleNewMessage({
+        role: 'assistant',
+        content: response.reply,
+        debug: response.debug,
+      })
+    } catch (error) {
+      console.error('Error:', error)
+      handleNewMessage({
+        role: 'assistant',
+        content: `Erreur: ${error.message}`,
+      })
+    }
   }
 
   function handleToggleDebug() {
@@ -60,15 +93,18 @@ export default function App() {
   }
 
   // Classes CSS pour le layout
+  const showLeft = layout.layout?.showSessions !== false
+  const showRight = showRightPanel && (layout.layout?.showMemoryPanel !== false)
+  
   const appClasses = [
     'app-root',
-    layout.showLeftSidebar ? 'with-left-sidebar' : '',
-    layout.showRightDebug && debugEnabled ? 'with-right-sidebar' : '',
+    showLeft ? 'with-left-sidebar' : '',
+    showRight ? 'with-right-sidebar' : '',
   ].filter(Boolean).join(' ')
 
   return (
     <div className={appClasses}>
-      {layout.showLeftSidebar && (
+      {showLeft && (
         <SessionSidebar
           currentSessionId={sessionId}
           onSelectSession={handleSelectSession}
@@ -82,16 +118,26 @@ export default function App() {
           debugEnabled={debugEnabled}
           onToggleTheme={handleToggleTheme}
           theme={theme}
+          isThinking={isThinking}
         />
         <ChatPanel
           sessionId={sessionId}
           messages={messages}
           onNewMessage={handleNewMessage}
           debugEnabled={debugEnabled}
+          onSendMessage={handleSendMessage}
         />
       </div>
       
-      {layout.showRightDebug && debugEnabled && (
+      {showRight && !debugEnabled && (
+        <MemoryToolsPanel
+          sessionId={sessionId}
+          onSendMessage={handleSendMessage}
+          onNewMessage={handleNewMessage}
+        />
+      )}
+      
+      {debugEnabled && (
         <DebugPanel debugData={debugData} />
       )}
     </div>

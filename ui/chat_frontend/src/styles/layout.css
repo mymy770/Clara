@@ -9,7 +9,7 @@
 
 /* Grid layout based on config */
 .app-root.with-left-sidebar.with-right-sidebar {
-  grid-template-columns: var(--left-sidebar-width, 280px) 1fr var(--right-sidebar-width, 340px);
+  grid-template-columns: var(--left-sidebar-width, 280px) 1fr var(--right-sidebar-width, 320px);
 }
 
 .app-root.with-left-sidebar:not(.with-right-sidebar) {

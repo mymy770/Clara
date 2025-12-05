@@ -1,26 +1,39 @@
 /* Clara - Theme CSS Variables */
 
 :root {
-  /* Backgrounds */
-  --bg-main: #05060a;
-  --bg-elevated: #0b0d12;
+  /* Backgrounds - mapped from theme.json */
+  --bg-main: #050816;
+  --bg-alt: #090f1f;
+  --bg-elevated: #0b1020;
+  --bg-panel: #0b1020;
   --bg-soft: #11141c;
 
   /* Accent colors */
   --accent: #4f46e5;
-  --accent-soft: #312e81;
+  --accent-soft: #6366f1;
   --accent-hover: #6366f1;
 
+  /* Danger color */
+  --danger: #f97373;
+
   /* Text colors */
+  --text-primary: #f9fafb;
   --text-main: #f9fafb;
+  --text-secondary: #9ca3af;
   --text-muted: #9ca3af;
   --text-subtle: #6b7280;
 
   /* Borders */
-  --border-subtle: #1f2933;
+  --border: rgba(148, 163, 184, 0.4);
+  --border-subtle: rgba(148, 163, 184, 0.4);
   --border-strong: #374151;
 
-  /* Radius */
+  /* Glow effect */
+  --glow: rgba(79, 70, 229, 0.5);
+
+  /* Radius - mapped from theme.json */
+  --radius-panel: 18px;
+  --radius-button: 999px;
   --radius-lg: 18px;
   --radius-md: 12px;
   --radius-sm: 8px;
@@ -28,6 +41,7 @@
   /* Shadows */
   --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.5);
   --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px var(--glow);
 
   /* Fonts */
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;

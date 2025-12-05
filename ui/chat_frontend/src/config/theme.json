@@ -1,0 +1,20 @@
+{
+  "themeName": "clara-default",
+  "colors": {
+    "background": "#050816",
+    "backgroundAlt": "#090f1f",
+    "panel": "#0b1020",
+    "accent": "#4f46e5",
+    "accentSoft": "#6366f1",
+    "danger": "#f97373",
+    "textPrimary": "#f9fafb",
+    "textSecondary": "#9ca3af",
+    "border": "rgba(148, 163, 184, 0.4)",
+    "glow": "rgba(79, 70, 229, 0.5)"
+  },
+  "radii": {
+    "panel": "18px",
+    "button": "999px"
+  }
+}
+

@@ -1,4 +1,11 @@
 {
+  "layout": {
+    "sidebarLeftWidth": 280,
+    "sidebarRightWidth": 320,
+    "showRightPanel": true,
+    "showSessions": true,
+    "showMemoryPanel": true
+  },
   "showLeftSidebar": true,
   "showRightDebug": false,
   "leftSidebarWidth": "280px",
