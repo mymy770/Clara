@@ -23,8 +23,15 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
         recognition.interimResults = true
         recognition.lang = 'fr-FR'
 
+        let baseInput = ''
+
         recognition.onstart = () => {
           setIsListening(true)
+          // Sauvegarder l'input actuel comme base
+          setInput(prev => {
+            baseInput = prev
+            return prev
+          })
         }
 
         recognition.onresult = (event) => {
@@ -35,20 +42,14 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             const transcript = event.results[i][0].transcript
             if (event.results[i].isFinal) {
               finalTranscript += transcript + ' '
+              baseInput += finalTranscript
             } else {
               interimTranscript += transcript
             }
           }
 
-          setInput(prev => {
-            // Retirer l'ancien interimTranscript s'il existe
-            let base = prev
-            if (base.includes(interimTranscript)) {
-              base = base.replace(interimTranscript, '')
-            }
-            // Ajouter le nouveau texte
-            return base + finalTranscript + interimTranscript
-          })
+          // Afficher base + final + interim
+          setInput(baseInput + interimTranscript)
         }
 
         recognition.onerror = (event) => {
