@@ -32,6 +32,7 @@ clara-v3/
 
 - Python 3.8+
 - pip
+- Node.js 18+ et npm (pour l'UI - optionnel)
 
 ### Installation
 
@@ -50,9 +51,38 @@ cp config/env.example .env
 
 ### Lancement
 
+#### Mode Terminal (classique)
+
 ```bash
-python run_clara.py
+python3 run_clara.py
 ```
+
+#### Mode API + UI (nouveau)
+
+**Terminal 1 - API Server :**
+```bash
+# Installer les dépendances si nécessaire
+pip install -r requirements.txt
+
+# Lancer le serveur API
+uvicorn api_server:app --reload --port 8001
+```
+
+**Terminal 2 - UI Frontend :**
+```bash
+cd ui/chat_frontend
+
+# Installer les dépendances Node.js (première fois seulement)
+npm install
+
+# Lancer le serveur de développement
+npm run dev
+```
+
+**Accès :**
+- UI Chat : http://localhost:5173 (ou le port affiché par Vite)
+- API Health : http://localhost:8001/health
+- API Docs : http://localhost:8001/docs (documentation Swagger automatique)
 
 ## 📊 Roadmap
 

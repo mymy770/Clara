@@ -1,0 +1,80 @@
+/* Clara - Theme CSS Variables */
+
+:root {
+  /* Backgrounds */
+  --bg-main: #05060a;
+  --bg-elevated: #0b0d12;
+  --bg-soft: #11141c;
+
+  /* Accent colors */
+  --accent: #4f46e5;
+  --accent-soft: #312e81;
+  --accent-hover: #6366f1;
+
+  /* Text colors */
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --text-subtle: #6b7280;
+
+  /* Borders */
+  --border-subtle: #1f2933;
+  --border-strong: #374151;
+
+  /* Radius */
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  /* Shadows */
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.5);
+  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+  /* Fonts */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+/* Light theme (optional, for future toggle) */
+:root.theme-light {
+  --bg-main: #ffffff;
+  --bg-elevated: #f9fafb;
+  --bg-soft: #f3f4f6;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+  --border-subtle: #e5e7eb;
+  --border-strong: #d1d5db;
+}
+
+/* Dark theme (default) */
+:root.theme-dark,
+:root {
+  /* Already defined above */
+}
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at top, var(--accent-soft) 0, var(--bg-main) 45%);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+

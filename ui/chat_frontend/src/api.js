@@ -1,0 +1,49 @@
+// Clara - API Client
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8001'
+
+export async function sendMessage(message, sessionId = null, debug = false) {
+  const response = await fetch(`${API_BASE}/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message,
+      session_id: sessionId,
+      debug,
+    }),
+  })
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function listSessions() {
+  const response = await fetch(`${API_BASE}/sessions`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function loadSession(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function checkHealth() {
+  const response = await fetch(`${API_BASE}/health`)
+  return await response.json()
+}
+

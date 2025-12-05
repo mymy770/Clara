@@ -1,0 +1,96 @@
+/* Clara - Layout CSS */
+
+.app-root {
+  display: grid;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Grid layout based on config */
+.app-root.with-left-sidebar.with-right-sidebar {
+  grid-template-columns: var(--left-sidebar-width, 280px) 1fr var(--right-sidebar-width, 340px);
+}
+
+.app-root.with-left-sidebar:not(.with-right-sidebar) {
+  grid-template-columns: var(--left-sidebar-width, 280px) 1fr;
+}
+
+.app-root:not(.with-left-sidebar).with-right-sidebar {
+  grid-template-columns: 1fr var(--right-sidebar-width, 340px);
+}
+
+.app-root:not(.with-left-sidebar):not(.with-right-sidebar) {
+  grid-template-columns: 1fr;
+}
+
+/* Sidebar styles */
+.sidebar {
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border-subtle);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.right {
+  border-right: none;
+  border-left: 1px solid var(--border-subtle);
+}
+
+/* Chat area */
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-main);
+  min-width: var(--chat-min-width, 480px);
+  overflow: hidden;
+}
+
+/* Header */
+.header-bar {
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+}
+
+/* Chat messages container */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Message input area */
+.message-input-area {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--spacing-md);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
