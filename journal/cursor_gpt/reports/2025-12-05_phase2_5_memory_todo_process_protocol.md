@@ -1,20 +1,20 @@
-# Phase 3.5 – Extension Mémoire : TODO / PROCESS / PROTOCOL
+# Phase 2.5 – Extension Mémoire : TODO / PROCESS / PROTOCOL
 Date: 2025-12-05
 
 ## Contexte
 
-Suite à la Phase 3 où Clara a acquis la capacité de gérer des notes en mémoire, cette Phase 3.5 étend ces capacités à trois nouveaux types :
+Suite à la Phase 3 où Clara a acquis la capacité de gérer des notes en mémoire, cette Phase 2.5 étend ces capacités à trois nouveaux types :
 - **todo** : Choses à faire, tâches
 - **process** : Procédures détaillées, workflows
 - **protocol** : Protocoles, règles générales
 
-**État avant Phase 3.5 :**
+**État avant Phase 2.5 :**
 - ✅ Mémoire SQLite fonctionnelle
 - ✅ API générique (save_item, get_items, search_items, delete_item)
 - ✅ Notes supportées avec intentions JSON
 - ❌ Autres types non exposés à l'orchestrator
 
-**Objectif Phase 3.5 :**
+**Objectif Phase 2.5 :**
 Étendre le système d'intentions JSON pour supporter todo/process/protocol en réutilisant exactement le même pattern que pour les notes.
 
 ## Décisions
@@ -64,7 +64,7 @@ Le code de `_process_memory_action()` a été étendu avec :
 - Formatage du résultat
 - Gestion d'erreur silencieuse
 
-### 5. Limites de Phase 3.5
+### 5. Limites de Phase 2.5
 
 **Ce qui est fait :**
 - ✅ 4 types supportés : note, todo, process, protocol
@@ -94,7 +94,7 @@ from memory.helpers import save_note, save_todo, save_process, save_protocol
 - Section PROCESS (nouvelle)
 - Section PROTOCOL (nouvelle)
 - Exemples JSON pour chaque type
-- Mise à jour version : "Phase 3.5"
+- Mise à jour version : "Phase 2.5"
 
 **Méthode `_process_memory_action()` étendue :**
 - 6 nouveaux cas traités :
@@ -184,7 +184,7 @@ python3 run_clara.py
 
 **Résultat :** Tous les scénarios fonctionnent correctement.
 
-## Architecture Phase 3.5 (finale)
+## Architecture Phase 2.5 (finale)
 
 ```
 Table memory (SQLite)
@@ -275,13 +275,13 @@ Future intégration :
 
 ## Conclusion
 
-**Phase 3.5 : Extension Mémoire ✅ TERMINÉE**
+**Phase 2.5 : Extension Mémoire ✅ TERMINÉE**
 
 Clara peut maintenant gérer :
 - ✅ Notes (Phase 3)
-- ✅ Todos (Phase 3.5)
-- ✅ Processus (Phase 3.5)
-- ✅ Protocoles (Phase 3.5)
+- ✅ Todos (Phase 2.5)
+- ✅ Processus (Phase 2.5)
+- ✅ Protocoles (Phase 2.5)
 
 Le système est :
 - ✅ Cohérent (même pattern partout)

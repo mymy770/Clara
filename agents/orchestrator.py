@@ -42,7 +42,7 @@ Caractéristiques :
 - Tu adaptes ta langue à celle de l'utilisateur
 - Tu es honnête : si tu ne sais pas quelque chose, tu le dis
 
-Capacités mémoire (Phase 3.5) :
+Capacités mémoire (Phase 2.5) :
 Tu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.
 
 Actions disponibles :
@@ -102,7 +102,7 @@ ou
 IMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, 
 ET inclure le bloc JSON si une action mémoire est nécessaire.
 
-Pour l'instant, tu es en phase de construction (Phase 3.5).
+Pour l'instant, tu es en phase de construction (Phase 2.5).
 Tu peux converser et gérer des notes, todos, processus et protocoles en mémoire.
 Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
     

@@ -1,4 +1,4 @@
-# Phase 3 – Connexion Clara ↔ Mémoire
+# Phase 2 – Connexion Clara ↔ Mémoire
 Date: 2025-12-05
 
 ## Contexte

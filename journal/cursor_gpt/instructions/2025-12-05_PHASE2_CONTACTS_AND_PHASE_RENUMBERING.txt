@@ -1,0 +1,205 @@
+2025-12-05_PHASE2_CONTACTS_AND_PHASE_RENUMBERING.txt
+======================================================
+
+🎯 Objectif global
+------------------
+1. Harmoniser toutes les références de phases du projet avec le plan officiel (Phase 0 → 5), en particulier la mémoire qui doit être **Phase 2**, pas Phase 3.
+2. Mettre en place le schéma **Contact** dans la mémoire (SQLite) en suivant les décisions ci-dessous.
+
+IMPORTANT : tu dois tout faire **dans ce repo Clara uniquement** et tout documenter dans `journal/cursor_gpt/`.
+
+--------------------------------------------------
+1) RÉNUMÉROTATION DES PHASES (Phase 3 → Phase 2)
+--------------------------------------------------
+
+But : tout ce qui parle de « Phase 3 » pour la mémoire doit devenir « Phase 2 » pour être aligné avec le plan initial.
+
+A. Référentiel de vérité
+------------------------
+Le plan de référence est :
+
+- Phase 0 – Infrastructure
+- Phase 1 – Fondation Clara
+- Phase 2 – Mémoire solide
+- Phase 3 – UI Admin
+- Phase 4 – Agents outils
+- Phase 5 – Automatisation avancée
+
+Tu dois t’assurer que :
+- `README.md` (roadmap) reflète exactement ce plan.
+- `journal/dev_notes/2025-12-04_clara_project_plan.md` (et éventuelles variantes) est cohérent avec ce plan.
+
+B. Où corriger les phases
+-------------------------
+
+1. **README.md**
+   - Met à jour la section *Roadmap* pour qu’elle reflète le plan ci-dessus.
+   - Vérifie qu’aucune ligne ne dit encore « Phase 3 – Mémoire », etc.
+
+2. **Journaux de dev**
+   - Dans `journal/dev_notes/` :
+     - Renomme tous les fichiers qui commencent par `2025-12-05_phase3_...` en `2025-12-05_phase2_...` s’ils concernent la mémoire.
+     - À l’intérieur de ces fichiers, remplace :
+       - `Phase 3` → `Phase 2` quand ça parle de mémoire.
+     - Vérifie aussi `2025-12-05_phase3_memory_integration.md`, `2025-12-05_phase3_5_memory_todo_process_protocol.md`, etc.
+
+3. **Journaux Cursor**
+   - Dans `journal/cursor_gpt/` :
+     - Corrige les titres et le contenu des fichiers qui parlent de « Phase 3 » pour la mémoire → « Phase 2 ».
+     - Ne touche pas au contenu purement historique si c’est juste une citation utilisateur, mais tu peux ajouter une NOTE explicite en haut du fichier si besoin, par exemple :
+       - `NOTE: À partir du 2025-12-05, ce qui était appelé "Phase 3 (mémoire)" est renommé en "Phase 2 (mémoire solide)".`
+
+4. **Autres fichiers éventuels**
+   - Recherche globale dans le repo :
+     - `Phase 3` 
+     - `phase3_`
+   - Pour chaque occurrence, vérifie **le contexte** :
+     - Si c’est de la mémoire/SQLite/notes/todo/process/protocol → renommer en Phase 2.
+     - Si c’est de l’UI Admin ou d’autres sujets → laisser en Phase 3.
+
+C. Renommer aussi les commits (réécriture de l’historique)
+----------------------------------------------------------
+
+Contexte : Jeremy est actuellement **le seul** à travailler sur ce repo, et accepte que tu réécrives l’historique pour avoir quelque chose de propre.
+
+Tâche :
+1. Affiche le log récent :
+   - `git log --oneline --decorate`
+2. Identifie les commits dont le message contient par exemple :
+   - `Phase 3`
+   - `phase3`
+   - ou des intitulés qui décrivent la mémoire comme Phase 3.
+3. Fais une réécriture de l’historique depuis le début :
+   - `git rebase -i --root`
+   - Dans l’éditeur, remplace les messages concernés :
+     - `Phase 3` → `Phase 2` **uniquement quand ça parle de mémoire**.
+4. Quand le rebase est propre : 
+   - `git push --force origin main`
+
+IMPORTANT :
+- Documente cette opération dans un nouveau fichier :
+  - `journal/cursor_gpt/2025-12-05_phase_renumbering_history_rewrite.md`
+  - Contenu minimum :
+    - Contexte
+    - Liste des commits modifiés (avant/après)
+    - Commandes principales utilisées
+    - Résultat final
+
+
+--------------------------------------------------
+2) SCHÉMA CONTACT – MÉMOIRE SQLITE
+--------------------------------------------------
+
+Objectif : définir et implémenter un format de contact cohérent, simple, mais déjà exploitable.
+
+A. Schéma logique contact
+--------------------------
+
+On veut pouvoir représenter un contact sous cette forme logique (JSON conceptuel) :
+
+{
+  "first_name": "Aurélie",
+  "last_name": "Malai",
+  "display_name": "Aurélie Malai",
+
+  "aliases": ["ma femme", "mon épouse"],
+
+  "category": "family",             // family | friend | client | supplier | other
+  "relationship": "wife",           // wife, brother, cousin, best_friend, etc.
+
+  "phones": [
+    {
+      "number": "+972-5x-xxx-xxxx",
+      "label": "mobile perso",      // perso | pro | other (libre)
+      "primary": true,
+      "channels": ["call", "sms", "whatsapp"]
+    }
+  ],
+
+  "emails": [
+    {
+      "address": "aurelie@example.com",
+      "label": "perso",             // perso | pro | other (libre)
+      "primary": true
+    }
+  ],
+
+  "company": "Active Games",
+  "role": "Associée / co-fondatrice",
+
+  "notes": [
+    "Prépare les deals fournisseurs LED",
+    "Passeport FR + passeport ISR – numéros à ajouter plus tard"
+  ]
+}
+
+Décisions finales importantes :
+- `aliases` : **liste** d’alias possibles (ma femme, mon frère, mon frérot…).
+- `importance` : **SUPPRIMÉ** pour l’instant (tous les contacts sont importants).
+- `emails[].tags` : **SUPPRIMÉ** → on garde juste `label` + `primary`.
+- `phones[].channels` : on garde (call/sms/whatsapp/telegram/etc.).
+- Plusieurs téléphones / emails sont possibles, avec possibilité d’un `primary` par type (le code pourra plus tard éviter de mettre plusieurs `primary` sur un même type si on le souhaite).
+
+B. Implémentation dans memory (SQLite)
+--------------------------------------
+
+1. `schema.sql`
+   - Vérifie la table `memory` existante.
+   - On **ne change pas** la structure de base (id, type, content, tags, created_at, updated_at).
+   - On documente dans des commentaires le format attendu pour `type = "contact"`, par exemple :
+
+   - For type = 'contact', content is a JSON object with:
+     - first_name, last_name, display_name
+     - aliases: [string]
+     - category: 'family' | 'friend' | 'client' | 'supplier' | 'other'
+     - relationship: string (wife, brother, best_friend, ...)
+     - phones: [ { number, label, primary, channels[] } ]
+     - emails: [ { address, label, primary } ]
+     - company: string | null
+     - role: string | null
+     - notes: [string]
+
+2. `memory/memory_core.py`
+   - Ajouter des helpers dédiés aux contacts **sans casser** les fonctions existantes :
+     - `save_contact(contact: dict) -> int`
+       - Valide et normalise le dict contact.
+       - Sauvegarde dans `memory` avec `type = "contact"`.
+     - `update_contact(contact_id: int, updates: dict) -> None`
+       - Charge le contact existant, applique les updates, resauvegarde.
+     - `find_contacts(query: str) -> List[dict]`
+       - Recherche par nom, alias, email, téléphone, company… (match simple pour l’instant).
+   - Les helpers doivent s’appuyer sur le mécanisme générique déjà en place :
+     - `save_memory_item`
+     - `search_memory`
+     - etc.
+
+3. Tests unitaires
+   - Dans `tests/test_memory_core.py` :
+     - Ajouter des tests simples :
+       - Création d’un contact minimal (first_name + au moins un phone).
+       - Création avec plusieurs `phones` et `emails`.
+       - Recherche d’un contact par alias, par email, par téléphone.
+   - Les tests doivent utiliser une base SQLite temporaire (comme les tests existants).
+
+C. Intégration future avec Clara
+--------------------------------
+Pour cette étape, tu **prépares seulement** les helpers côté mémoire.
+La vraie intégration dans l’orchestrator (intentions “contact”) viendra dans une phase suivante.
+
+Documente cette phase dans :
+- `journal/dev_notes/2025-12-05_phase2_contacts_schema.md`
+  - Contexte
+  - Schéma final retenu
+  - Décisions (importance supprimée, tags email supprimés, etc.)
+- `journal/cursor_gpt/2025-12-05_phase2_contacts_implementation.md`
+  - Ce que tu as réellement fait (fichiers modifiés, tests, etc.)
+
+--------------------------------------------------
+3) FIN DE MISSION
+--------------------------------------------------
+
+À la fin :
+- Tous les fichiers du repo doivent être cohérents avec le plan de phases officiel.
+- L’historique Git (messages de commits) ne doit plus parler de “Phase 3” pour la mémoire.
+- Le schéma contact doit être documenté et les helpers de base présents dans `memory_core.py`.
+- Les journaux dans `journal/` doivent refléter clairement ces changements.
