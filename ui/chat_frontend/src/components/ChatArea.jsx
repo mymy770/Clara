@@ -4,12 +4,70 @@ import { sendMessage } from '../api'
 export default function ChatArea({ sessionId, messages, onNewMessage, onSendMessage, isThinking }) {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
+  const recognitionRef = useRef(null)
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Initialiser la reconnaissance vocale
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition()
+        recognition.continuous = false
+        recognition.interimResults = true
+        recognition.lang = 'fr-FR'
+
+        recognition.onstart = () => {
+          setIsListening(true)
+        }
+
+        recognition.onresult = (event) => {
+          let interimTranscript = ''
+          let finalTranscript = ''
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' '
+            } else {
+              interimTranscript += transcript
+            }
+          }
+
+          if (finalTranscript) {
+            setInput(prev => prev + finalTranscript)
+          } else {
+            // Afficher temporairement le texte en cours
+            const currentInput = input.replace(interimTranscript, '')
+            setInput(currentInput + interimTranscript)
+          }
+        }
+
+        recognition.onerror = (event) => {
+          console.error('Erreur reconnaissance vocale:', event.error)
+          setIsListening(false)
+        }
+
+        recognition.onend = () => {
+          setIsListening(false)
+        }
+
+        recognitionRef.current = recognition
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [])
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -76,6 +134,25 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
       textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
+    }
+  }
+
+  function toggleListening() {
+    if (!recognitionRef.current) {
+      alert('La reconnaissance vocale n\'est pas disponible dans votre navigateur.')
+      return
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    } else {
+      try {
+        recognitionRef.current.start()
+      } catch (error) {
+        console.error('Erreur démarrage reconnaissance:', error)
+        setIsListening(false)
+      }
     }
   }
 
@@ -199,6 +276,29 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             color: 'var(--input-text)',
           }}
         />
+        <button
+          id="mic-btn"
+          onClick={toggleListening}
+          disabled={sending}
+          title={isListening ? 'Arrêter l\'enregistrement' : 'Parler'}
+          style={{
+            padding: '8px 12px',
+            fontSize: '18px',
+            cursor: sending ? 'not-allowed' : 'pointer',
+            border: '1px solid #ccc',
+            borderRadius: '6px',
+            background: isListening ? '#ff4444' : '#888',
+            color: '#fff',
+            transition: 'all 0.2s',
+            opacity: sending ? 0.5 : 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '44px',
+          }}
+        >
+          🎤
+        </button>
         <button
           id="send-btn"
           onClick={handleSend}
