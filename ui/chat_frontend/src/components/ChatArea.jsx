@@ -53,23 +53,87 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             }
           }
 
-          // Ajouter la ponctuation automatique
+          // Ajouter la ponctuation automatique et capitalisation
           if (finalTranscript) {
             // Ajouter un espace avant si nécessaire
             if (baseInput && !baseInput.endsWith(' ') && !baseInput.endsWith('\n')) {
               baseInput += ' '
             }
-            // Ajouter le texte final avec ponctuation
+            // Traiter le texte final
             let text = finalTranscript.trim()
-            // Ajouter un point si la phrase ne se termine pas par une ponctuation
-            if (text && !/[.!?]$/.test(text)) {
-              text += '.'
+            
+            if (text) {
+              // Capitaliser la première lettre
+              text = text.charAt(0).toUpperCase() + text.slice(1)
+              
+              // Détecter si c'est une question
+              const isQuestion = detectQuestion(text)
+              
+              // Ajouter la ponctuation appropriée
+              if (!/[.!?]$/.test(text)) {
+                text += isQuestion ? '?' : '.'
+              }
             }
+            
             baseInput += text + ' '
           }
 
-          // Afficher base + interim (sans ponctuation pour l'instant)
-          setInput(baseInput + interimTranscript)
+          // Traiter le texte intermédiaire avec capitalisation
+          let displayText = baseInput
+          if (interimTranscript) {
+            let interim = interimTranscript.trim()
+            if (interim) {
+              // Capitaliser la première lettre du texte intermédiaire si c'est le début d'une phrase
+              if (!baseInput || baseInput.trim().endsWith('.') || baseInput.trim().endsWith('?') || baseInput.trim().endsWith('!')) {
+                interim = interim.charAt(0).toUpperCase() + interim.slice(1)
+              }
+              displayText += interim
+            }
+          }
+
+          // Afficher base + interim
+          setInput(displayText)
+        }
+        
+        // Fonction pour détecter si c'est une question
+        function detectQuestion(text) {
+          const lowerText = text.toLowerCase().trim()
+          
+          // Mots interrogatifs au début
+          const questionStarters = [
+            'est-ce que', 'est ce que', 'qu\'est-ce que', 'qu est ce que',
+            'comment', 'pourquoi', 'quand', 'où', 'qui', 'quoi', 'quel', 'quelle', 'quels', 'quelles',
+            'combien', 'lequel', 'laquelle', 'lesquels', 'lesquelles',
+            'peux-tu', 'peux tu', 'peut-on', 'peut on', 'peut-il', 'peut il',
+            'as-tu', 'as tu', 'avez-vous', 'avez vous', 'es-tu', 'es tu', 'êtes-vous', 'êtes vous'
+          ]
+          
+          // Vérifier si ça commence par un mot interrogatif
+          for (const starter of questionStarters) {
+            if (lowerText.startsWith(starter + ' ') || lowerText === starter) {
+              return true
+            }
+          }
+          
+          // Vérifier si ça se termine par une intonation montante (approximation)
+          // Les phrases courtes qui se terminent par certains mots peuvent être des questions
+          const questionEnders = ['n\'est-ce pas', 'n est ce pas', 'non', 'si', 'hein', 'd\'accord', 'd accord']
+          for (const ender of questionEnders) {
+            if (lowerText.endsWith(' ' + ender) || lowerText.endsWith(ender)) {
+              return true
+            }
+          }
+          
+          // Détecter l'intonation via la structure (approximation)
+          // Si la phrase est courte et se termine par certains patterns
+          if (text.length < 50) {
+            // Patterns de questions courantes
+            if (/\b(c\'est|ce sont|il est|elle est|ils sont|elles sont)\b/i.test(text) && text.length < 30) {
+              return true
+            }
+          }
+          
+          return false
         }
 
         recognition.onerror = (event) => {
