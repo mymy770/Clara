@@ -575,6 +575,96 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             logger.warning(f"Erreur dans _process_memory_action: {e}")
             return (response_text, None, [])
     
+    def _process_filesystem_action(self, response_text):
+        """
+        Extrait et exécute une action filesystem depuis la réponse du LLM
+        
+        Returns:
+            tuple: (cleaned_response, result_message) ou (response_text, None) si pas d'action
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # Chercher un bloc JSON avec intent="filesystem"
+            json_match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            if not json_match:
+                json_match = re.search(r"```\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            if not json_match:
+                fallback_match = re.search(r"(\{\s*\"intent\".*?\})", response_text, re.DOTALL)
+                if fallback_match:
+                    raw_json = fallback_match.group(1)
+                else:
+                    return (response_text, None)
+            else:
+                raw_json = json_match.group(1)
+            
+            # Parser le JSON
+            try:
+                intent_data = json.loads(raw_json)
+            except json.JSONDecodeError as e:
+                logger.warning(f"Erreur parsing JSON filesystem: {e}")
+                return (response_text, None)
+            
+            intent = intent_data.get('intent')
+            if intent != 'filesystem':
+                return (response_text, None)
+            
+            action = intent_data.get('action')
+            params = intent_data.get('params', {})
+            
+            if not action:
+                return (response_text, None)
+            
+            # Exécuter l'action filesystem
+            fs_result = execute_fs_action(action, params)
+            
+            if fs_result.get('ok'):
+                # Construire un message lisible pour l'utilisateur
+                if action == 'read_text':
+                    content = fs_result.get('content', '')
+                    result_message = f"✓ Fichier lu ({len(content)} caractères)"
+                elif action == 'write_text':
+                    result_message = f"✓ Fichier écrit : {params.get('path', '')}"
+                elif action == 'append_text':
+                    result_message = f"✓ Contenu ajouté à : {params.get('path', '')}"
+                elif action == 'list_dir':
+                    items = fs_result.get('items', [])
+                    result_message = f"✓ {len(items)} élément(s) trouvé(s)"
+                elif action == 'make_dir':
+                    result_message = f"✓ Dossier créé : {params.get('path', '')}"
+                elif action == 'move_path':
+                    result_message = f"✓ Déplacé : {params.get('src', '')} → {params.get('dst', '')}"
+                elif action == 'delete_path':
+                    result_message = f"✓ Supprimé : {params.get('path', '')}"
+                elif action == 'stat_path':
+                    info = fs_result.get('info', {})
+                    result_message = f"✓ Infos récupérées pour : {params.get('path', '')}"
+                elif action == 'search_text':
+                    results = fs_result.get('results', [])
+                    result_message = f"✓ {len(results)} résultat(s) trouvé(s)"
+                else:
+                    result_message = fs_result.get('message', '✓ Action filesystem exécutée')
+            else:
+                error = fs_result.get('error', 'Erreur inconnue')
+                result_message = f"⚠ Erreur filesystem : {error}"
+            
+            # Nettoyer la réponse (enlever le bloc JSON)
+            if json_match:
+                cleaned = response_text.replace(json_match.group(0), "").strip()
+            elif 'fallback_match' in locals() and fallback_match:
+                cleaned = response_text.replace(fallback_match.group(1), "").strip()
+            else:
+                cleaned = response_text
+            
+            logger.info(f"filesystem_action_executed: action={action}, path={params.get('path', 'N/A')}")
+            
+            return (cleaned, result_message)
+            
+        except Exception as e:
+            logger.warning(f"Erreur dans _process_filesystem_action: {e}")
+            return (response_text, None)
+    
     def _check_memory_read_intent(self, user_message):
         """
         Pré-vérifie si le message demande une lecture mémoire
