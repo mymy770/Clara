@@ -29,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from agents.orchestrator import Orchestrator
 from utils.logger import SessionLogger, DebugLogger
 from memory.memory_core import init_db
+from drivers.fs_driver import FSDriver
 
 
 def generate_session_id():
@@ -58,9 +59,14 @@ def main():
         session_logger = SessionLogger(session_id)
         debug_logger = DebugLogger(session_id)
         
+        # Initialiser le driver filesystem
+        workspace_root = Path(__file__).resolve().parent
+        fs_driver = FSDriver(root_path=workspace_root)
+        print("✓ Filesystem driver initialisé")
+        
         # Initialiser l'orchestrateur
         print("Initialisation de Clara...")
-        orchestrator = Orchestrator()
+        orchestrator = Orchestrator(fs_driver=fs_driver)
         print("✓ Clara est prête !")
         print()
         print("Tapez 'quit' ou 'exit' pour quitter.")

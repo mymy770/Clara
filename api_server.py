@@ -32,6 +32,8 @@ from pydantic import BaseModel
 from agents.orchestrator import Orchestrator
 from utils.logger import SessionLogger, DebugLogger
 from memory.memory_core import init_db
+from drivers.fs_driver import FSDriver
+from agents.helpers import set_fs_driver
 import json
 
 # Initialiser la base de données au démarrage
@@ -49,8 +51,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialiser le driver filesystem
+workspace_root = Path(__file__).resolve().parent
+fs_driver = FSDriver(root_path=workspace_root)
+set_fs_driver(fs_driver)
+
 # Orchestrateur global (réutilisé pour toutes les requêtes)
-orchestrator = Orchestrator()
+orchestrator = Orchestrator(fs_driver=fs_driver)
 
 
 def generate_session_id():

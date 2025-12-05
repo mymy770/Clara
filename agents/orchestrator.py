@@ -13,18 +13,25 @@ from utils.logger import DebugLogger
 from memory.helpers import save_note, save_todo, save_process, save_protocol
 from memory.memory_core import get_items, search_items, delete_item, save_preference
 from memory.contacts import save_contact, update_contact, find_contacts, get_all_contacts
+from agents.helpers import set_fs_driver, execute_fs_action
+from drivers.fs_driver import FSDriver
+from typing import Optional
 
 
 class Orchestrator:
     """Orchestrateur central de Clara"""
     
-    def __init__(self, config_path="config/settings.yaml"):
+    def __init__(self, config_path="config/settings.yaml", fs_driver: Optional[FSDriver] = None):
         # Charger la configuration
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = yaml.safe_load(f)
         
         # Initialiser les composants
         self.llm_driver = LLMDriver(config_path)
+        
+        # Initialiser le driver filesystem si fourni
+        if fs_driver:
+            set_fs_driver(fs_driver)
         
         # Historique de conversation (en mémoire RAM)
         self.conversation_history = []
@@ -137,9 +144,46 @@ ou
 IMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, 
 ET inclure le bloc JSON si une action mémoire est nécessaire.
 
+FILESYSTEM :
+Tu peux aussi utiliser le FILESYSTEM pour travailler avec des fichiers.
+
+INTENT: "filesystem"
+- Utilise-le quand tu dois lire, écrire, lister, créer, déplacer ou supprimer des fichiers/dossiers.
+
+Structure JSON attendue:
+{
+  "intent": "filesystem",
+  "action": "<nom_action>",
+  "params": {
+    ...
+  }
+}
+
+Actions supportées :
+- "read_text"      → lire un fichier texte
+- "write_text"     → écrire un fichier texte (création ou écrasement)
+- "append_text"    → ajouter du texte à la fin d'un fichier
+- "list_dir"       → lister un dossier
+- "make_dir"       → créer un dossier
+- "move_path"      → déplacer/renommer un fichier ou dossier
+- "delete_path"    → supprimer un fichier ou dossier
+- "stat_path"      → obtenir des infos sur un chemin
+- "search_text"    → rechercher un texte dans des fichiers
+
+Exemples:
+- Pour lire un fichier:
+  {
+    "intent": "filesystem",
+    "action": "read_text",
+    "params": { "path": "journal/dev_notes/..." }
+  }
+
+- Pour créer un rapport:
+  1) construire le contenu du rapport dans ta réponse interne
+  2) utiliser "write_text" pour l'enregistrer dans un fichier .md ou .txt
+
 Pour l'instant, tu es en phase de construction (Phase 2.5).
-Tu peux converser et gérer des notes, todos, processus et protocoles en mémoire.
-Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
+Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et travailler avec des fichiers."""
     
     def handle_message(self, user_message, session_id, debug_logger):
         """
@@ -180,8 +224,13 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             # Chercher une intention mémoire dans la réponse (pour les actions d'écriture)
             cleaned_response, memory_result, memory_ops = self._process_memory_action(llm_raw_response)
             
-            # Si une action mémoire a été exécutée, utiliser la réponse nettoyée et ajouter le résultat
-            if memory_result:
+            # Chercher une intention filesystem dans la réponse
+            fs_cleaned_response, fs_result = self._process_filesystem_action(cleaned_response)
+            
+            # Si une action filesystem a été exécutée, utiliser la réponse nettoyée et ajouter le résultat
+            if fs_result:
+                clara_response = fs_cleaned_response + f"\n\n{fs_result}"
+            elif memory_result:
                 clara_response = cleaned_response + f"\n\n{memory_result}"
             else:
                 clara_response = cleaned_response
@@ -524,7 +573,7 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             import logging
             logger = logging.getLogger(__name__)
             logger.warning(f"Erreur dans _process_memory_action: {e}")
-            return (response_text, None)
+            return (response_text, None, [])
     
     def _check_memory_read_intent(self, user_message):
         """
