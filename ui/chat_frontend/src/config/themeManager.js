@@ -44,6 +44,11 @@ const COLOR_MAP = {
   'deleteAllBtnBg': '--delete-all-btn-bg',
   'deleteAllBtnText': '--delete-all-btn-text',
   'deleteAllBtnBorder': '--delete-all-btn-border',
+  'newSessionBtnBg': '--new-session-btn-bg',
+  'newSessionBtnText': '--new-session-btn-text',
+  'newSessionBtnBorder': '--new-session-btn-border',
+  'sidebarHeaderBg': '--sidebar-header-bg',
+  'sidebarHeaderText': '--sidebar-header-text',
 };
 
 export const DEFAULT_THEME = {
@@ -89,6 +94,11 @@ export const DEFAULT_THEME = {
   deleteAllBtnBg: '#ffffff',
   deleteAllBtnText: '#000000',
   deleteAllBtnBorder: '#dddddd',
+  newSessionBtnBg: '#007AFF',
+  newSessionBtnText: '#ffffff',
+  newSessionBtnBorder: '#007AFF',
+  sidebarHeaderBg: '#ffffff',
+  sidebarHeaderText: '#000000',
   fontSize: '14',
 };
 

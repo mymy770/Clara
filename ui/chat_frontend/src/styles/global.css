@@ -6,8 +6,12 @@
   --sidebar-text: #000000;
   --sidebar-border: #dddddd;
   --sidebar-header-bg: #ffffff;
+  --sidebar-header-text: #000000;
   --sidebar-footer-bg: #ffffff;
   --sidebar-footer-border: #dddddd;
+  --new-session-btn-bg: #007AFF;
+  --new-session-btn-text: #ffffff;
+  --new-session-btn-border: #007AFF;
 
   /* Header */
   --header-bg: #ffffff;

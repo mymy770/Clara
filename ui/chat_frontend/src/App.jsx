@@ -143,7 +143,12 @@ export default function App() {
           zIndex: 1,
         }}>
           <span id="chat-title">
-            {sessionId ? (sessionId.replace(/\.txt$/, '') || 'Session') : 'Aucune session'}
+            Clara • gpt-5.1
+            {sessionId && (
+              <span style={{ marginLeft: '12px', opacity: 0.7, fontWeight: '400' }}>
+                • {sessionId.replace(/\.txt$/, '') || 'Session'}
+              </span>
+            )}
           </span>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center' }}>
             <button

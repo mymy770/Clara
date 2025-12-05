@@ -72,6 +72,21 @@ export default function AppearanceSettings({ isOpen, onClose }) {
       ]
     },
     {
+      title: 'Header Sidebar (Conversations)',
+      items: [
+        { key: 'sidebarHeaderBg', label: 'Fond header' },
+        { key: 'sidebarHeaderText', label: 'Texte header' },
+      ]
+    },
+    {
+      title: 'Bouton Nouvelle Session',
+      items: [
+        { key: 'newSessionBtnBg', label: 'Fond' },
+        { key: 'newSessionBtnText', label: 'Texte' },
+        { key: 'newSessionBtnBorder', label: 'Bordure' },
+      ]
+    },
+    {
       title: 'Header',
       items: [
         { key: 'headerBg', label: 'Fond header' },

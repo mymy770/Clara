@@ -137,6 +137,7 @@ export default function SessionSidebarV2({ currentSessionId, onSelectSession, on
           alignItems: 'center',
           fontSize: '13px',
           background: 'var(--sidebar-header-bg)',
+          color: 'var(--sidebar-header-text)',
         }}>
           <span>Conversations</span>
           <button
@@ -145,10 +146,10 @@ export default function SessionSidebarV2({ currentSessionId, onSelectSession, on
               padding: '4px 8px',
               fontSize: '12px',
               cursor: 'pointer',
-              border: '1px solid var(--sidebar-border)',
+              border: '1px solid var(--new-session-btn-border)',
               borderRadius: '4px',
-              background: 'var(--sidebar-bg)',
-              color: 'var(--sidebar-text)',
+              background: 'var(--new-session-btn-bg)',
+              color: 'var(--new-session-btn-text)',
             }}
           >
             + Nouvelle
