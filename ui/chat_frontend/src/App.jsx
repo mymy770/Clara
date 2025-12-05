@@ -98,9 +98,11 @@ export default function App() {
   return (
     <div style={{
       display: 'flex',
+      width: '100%',
       height: '100vh',
       overflow: 'hidden',
       fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+      background: 'var(--main-bg)',
     }}>
       {/* Sidebar gauche */}
       <SessionSidebarV2

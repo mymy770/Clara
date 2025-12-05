@@ -80,7 +80,8 @@
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   height: 100vh;
-  display: flex;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   background: var(--main-bg);
   color: var(--text-color);
@@ -89,5 +90,6 @@ body {
 #root {
   width: 100%;
   height: 100vh;
+  display: flex;
 }
 

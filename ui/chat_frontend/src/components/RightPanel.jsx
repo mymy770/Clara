@@ -130,16 +130,14 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
 
   return (
     <div className={`right-panel ${!isOpen ? 'collapsed' : ''}`} style={{
-      width: '320px',
-      borderLeft: '1px solid var(--right-panel-border)',
-      display: 'flex',
+      width: isOpen ? '320px' : '0',
+      borderLeft: isOpen ? '1px solid var(--right-panel-border)' : 'none',
+      display: isOpen ? 'flex' : 'none',
       flexDirection: 'column',
       background: 'var(--right-panel-bg)',
-      transition: 'transform 0.3s ease',
-      transform: !isOpen ? 'translateX(100%)' : 'translateX(0)',
-      position: isOpen ? 'relative' : 'absolute',
-      right: 0,
+      transition: 'width 0.3s ease',
       height: '100vh',
+      overflow: 'hidden',
     }}>
       <div className="right-panel-header" style={{
         padding: '10px',
