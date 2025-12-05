@@ -178,11 +178,13 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
             clara_response = response['text']
             
             # Chercher une intention mémoire dans la réponse (pour les actions d'écriture)
-            memory_result = self._process_memory_action(clara_response)
+            cleaned_response, memory_result = self._process_memory_action(clara_response)
             
-            # Si une action mémoire a été exécutée, ajouter le résultat à la réponse
+            # Si une action mémoire a été exécutée, utiliser la réponse nettoyée et ajouter le résultat
             if memory_result:
-                clara_response = self._clean_response(clara_response) + f"\n\n{memory_result}"
+                clara_response = cleaned_response + f"\n\n{memory_result}"
+            else:
+                clara_response = cleaned_response
             
             # Ajouter la réponse à l'historique
             self.conversation_history.append({
@@ -224,120 +226,147 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
         Extrait et exécute une action mémoire depuis la réponse du LLM
         
         Returns:
-            str: Message de résultat de l'action, ou None
+            tuple: (cleaned_response, result_message) ou (response_text, None) si pas d'action
         """
         try:
-            # Chercher un bloc JSON dans la réponse
-            json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_text, re.DOTALL)
+            # 1) Essayer d'abord le cas idéal : ```json { ... } ```
+            json_match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            
+            # 2) Si rien trouvé, accepter n'importe quel bloc ``` { ... } ```
             if not json_match:
-                return None
+                json_match = re.search(r"```\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            
+            raw_json = None
+            fallback_match = None
+            
+            # 3) Si on a trouvé un bloc code, on récupère le JSON
+            if json_match:
+                raw_json = json_match.group(1)
+            else:
+                # 4) Fallback : chercher un objet JSON "nu" dans le texte
+                fallback_match = re.search(r"(\{\s*\"memory_action\".*?\})", response_text, re.DOTALL)
+                if fallback_match:
+                    raw_json = fallback_match.group(1)
+            
+            # Si on n'a toujours rien, on abandonne proprement
+            if not raw_json:
+                return (response_text, None)
             
             # Parser le JSON
-            intent = json.loads(json_match.group(1))
+            intent = json.loads(raw_json)
             action = intent.get('memory_action')
             
             if not action:
-                return None
+                return (response_text, None)
             
             # Exécuter l'action correspondante
+            result_message = None
+            
             if action == 'save_note':
                 content = intent.get('content', '')
                 tags = intent.get('tags')
                 item_id = save_note(content=content, tags=tags)
-                return f"✓ Note sauvegardée (ID: {item_id})"
+                result_message = f"✓ Note sauvegardée (ID: {item_id})"
             
             elif action == 'list_notes':
                 items = get_items(type='note', limit=50)
                 if not items:
-                    return "Aucune note en mémoire."
-                result = f"📝 {len(items)} note(s) trouvée(s) :\n"
-                for item in items[:10]:
-                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
-                if len(items) > 10:
-                    result += f"  ... et {len(items) - 10} autre(s)"
-                return result
+                    result_message = "Aucune note en mémoire."
+                else:
+                    result = f"📝 {len(items)} note(s) trouvée(s) :\n"
+                    for item in items[:10]:
+                        result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                    if len(items) > 10:
+                        result += f"  ... et {len(items) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'search_notes':
                 query = intent.get('query', '')
                 items = search_items(query=query, type='note', limit=50)
                 if not items:
-                    return f"Aucune note trouvée pour '{query}'."
-                result = f"🔍 {len(items)} note(s) trouvée(s) pour '{query}' :\n"
-                for item in items[:10]:
-                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
-                if len(items) > 10:
-                    result += f"  ... et {len(items) - 10} autre(s)"
-                return result
+                    result_message = f"Aucune note trouvée pour '{query}'."
+                else:
+                    result = f"🔍 {len(items)} note(s) trouvée(s) pour '{query}' :\n"
+                    for item in items[:10]:
+                        result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                    if len(items) > 10:
+                        result += f"  ... et {len(items) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'save_todo':
                 content = intent.get('content', '')
                 tags = intent.get('tags')
                 item_id = save_todo(content=content, tags=tags)
-                return f"✓ Todo sauvegardé (ID: {item_id})"
+                result_message = f"✓ Todo sauvegardé (ID: {item_id})"
             
             elif action == 'list_todos':
                 items = get_items(type='todo', limit=50)
                 if not items:
-                    return "Aucun todo en mémoire."
-                result = f"✅ {len(items)} todo(s) trouvé(s) :\n"
-                for item in items[:10]:
-                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
-                if len(items) > 10:
-                    result += f"  ... et {len(items) - 10} autre(s)"
-                return result
+                    result_message = "Aucun todo en mémoire."
+                else:
+                    result = f"✅ {len(items)} todo(s) trouvé(s) :\n"
+                    for item in items[:10]:
+                        result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                    if len(items) > 10:
+                        result += f"  ... et {len(items) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'search_todos':
                 query = intent.get('query', '')
                 items = search_items(query=query, type='todo', limit=50)
                 if not items:
-                    return f"Aucun todo trouvé pour '{query}'."
-                result = f"🔍 {len(items)} todo(s) trouvé(s) pour '{query}' :\n"
-                for item in items[:10]:
-                    result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
-                if len(items) > 10:
-                    result += f"  ... et {len(items) - 10} autre(s)"
-                return result
+                    result_message = f"Aucun todo trouvé pour '{query}'."
+                else:
+                    result = f"🔍 {len(items)} todo(s) trouvé(s) pour '{query}' :\n"
+                    for item in items[:10]:
+                        result += f"  - ID {item['id']}: {item['content'][:50]}...\n"
+                    if len(items) > 10:
+                        result += f"  ... et {len(items) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'save_process':
                 content = intent.get('content', '')
                 tags = intent.get('tags')
                 item_id = save_process(content=content, tags=tags)
-                return f"✓ Processus sauvegardé (ID: {item_id})"
+                result_message = f"✓ Processus sauvegardé (ID: {item_id})"
             
             elif action == 'list_processes':
                 items = get_items(type='process', limit=50)
                 if not items:
-                    return "Aucun processus en mémoire."
-                result = f"⚙️ {len(items)} processus trouvé(s) :\n"
-                for item in items[:10]:
-                    result += f"  - ID {item['id']}: {item['content'][:80]}...\n"
-                if len(items) > 10:
-                    result += f"  ... et {len(items) - 10} autre(s)"
-                return result
+                    result_message = "Aucun processus en mémoire."
+                else:
+                    result = f"⚙️ {len(items)} processus trouvé(s) :\n"
+                    for item in items[:10]:
+                        result += f"  - ID {item['id']}: {item['content'][:80]}...\n"
+                    if len(items) > 10:
+                        result += f"  ... et {len(items) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'save_protocol':
                 content = intent.get('content', '')
                 tags = intent.get('tags')
                 item_id = save_protocol(content=content, tags=tags)
-                return f"✓ Protocole sauvegardé (ID: {item_id})"
+                result_message = f"✓ Protocole sauvegardé (ID: {item_id})"
             
             elif action == 'list_protocols':
                 items = get_items(type='protocol', limit=50)
                 if not items:
-                    return "Aucun protocole en mémoire."
-                result = f"📋 {len(items)} protocole(s) trouvé(s) :\n"
-                for item in items[:10]:
-                    result += f"  - ID {item['id']}: {item['content'][:80]}...\n"
-                if len(items) > 10:
-                    result += f"  ... et {len(items) - 10} autre(s)"
-                return result
+                    result_message = "Aucun protocole en mémoire."
+                else:
+                    result = f"📋 {len(items)} protocole(s) trouvé(s) :\n"
+                    for item in items[:10]:
+                        result += f"  - ID {item['id']}: {item['content'][:80]}...\n"
+                    if len(items) > 10:
+                        result += f"  ... et {len(items) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'save_contact':
                 contact = intent.get('contact')
                 if contact:
                     item_id = save_contact(contact)
-                    return f"✓ Contact sauvegardé (ID: {item_id})"
-                return "⚠ Données contact manquantes"
+                    result_message = f"✓ Contact sauvegardé (ID: {item_id})"
+                else:
+                    result_message = "⚠ Données contact manquantes"
             
             elif action == 'update_contact':
                 contact_id = intent.get('contact_id')
@@ -345,41 +374,45 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                 if contact_id and updates:
                     try:
                         update_contact(contact_id, updates)
-                        return f"✓ Contact mis à jour (ID: {contact_id})"
+                        result_message = f"✓ Contact mis à jour (ID: {contact_id})"
                     except ValueError as e:
-                        return f"⚠ {str(e)}"
-                return "⚠ ID ou updates manquants"
+                        result_message = f"⚠ {str(e)}"
+                else:
+                    result_message = "⚠ ID ou updates manquants"
             
             elif action == 'list_contacts':
                 contacts = get_all_contacts(limit=50)
                 if not contacts:
-                    return "Aucun contact en mémoire."
-                result = f"📇 {len(contacts)} contact(s) trouvé(s) :\n"
-                for contact in contacts[:10]:
-                    name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
-                    if not name:
-                        name = "Sans nom"
-                    result += f"  - ID {contact.get('id')}: {name}\n"
-                if len(contacts) > 10:
-                    result += f"  ... et {len(contacts) - 10} autre(s)"
-                return result
+                    result_message = "Aucun contact en mémoire."
+                else:
+                    result = f"📇 {len(contacts)} contact(s) trouvé(s) :\n"
+                    for contact in contacts[:10]:
+                        name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
+                        if not name:
+                            name = "Sans nom"
+                        result += f"  - ID {contact.get('id')}: {name}\n"
+                    if len(contacts) > 10:
+                        result += f"  ... et {len(contacts) - 10} autre(s)"
+                    result_message = result
             
             elif action == 'search_contacts':
                 query = intent.get('query', '')
                 if query:
                     results = find_contacts(query)
                     if not results:
-                        return f"Aucun contact trouvé pour '{query}'."
-                    result = f"🔍 {len(results)} contact(s) trouvé(s) pour '{query}' :\n"
-                    for contact in results[:10]:
-                        name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
-                        if not name:
-                            name = "Sans nom"
-                        result += f"  - ID {contact.get('id')}: {name}\n"
-                    if len(results) > 10:
-                        result += f"  ... et {len(results) - 10} autre(s)"
-                    return result
-                return "⚠ Query manquante pour la recherche"
+                        result_message = f"Aucun contact trouvé pour '{query}'."
+                    else:
+                        result = f"🔍 {len(results)} contact(s) trouvé(s) pour '{query}' :\n"
+                        for contact in results[:10]:
+                            name = contact.get('display_name', f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip())
+                            if not name:
+                                name = "Sans nom"
+                            result += f"  - ID {contact.get('id')}: {name}\n"
+                        if len(results) > 10:
+                            result += f"  ... et {len(results) - 10} autre(s)"
+                        result_message = result
+                else:
+                    result_message = "⚠ Query manquante pour la recherche"
             
             elif action == 'set_preference':
                 pref_dict = {
@@ -398,23 +431,52 @@ Tu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."""
                         from memory.helpers import save_note
                         tags = ["preference", pref_dict.get('domain', 'general'), pref_dict.get('agent') or 'global']
                         save_note(f"Préférence: {pref_dict['key']} = {pref_dict['value']}", tags=tags)
-                        return f"✓ Préférence enregistrée : {pref_dict['key']} = {pref_dict['value']}"
+                        result_message = f"✓ Préférence enregistrée : {pref_dict['key']} = {pref_dict['value']}"
                     else:
-                        return "⚠ Erreur lors de l'enregistrement de la préférence"
-                return "⚠ Clé ou valeur manquante pour la préférence"
+                        result_message = "⚠ Erreur lors de l'enregistrement de la préférence"
+                else:
+                    result_message = "⚠ Clé ou valeur manquante pour la préférence"
             
             elif action == 'delete_item':
                 item_id = intent.get('item_id')
                 if item_id:
                     delete_item(item_id=item_id)
-                    return f"✓ Élément {item_id} supprimé"
-                return "⚠ ID manquant pour la suppression"
+                    result_message = f"✓ Élément {item_id} supprimé"
+                else:
+                    result_message = "⚠ ID manquant pour la suppression"
+            else:
+                return (response_text, None)
             
-            return None
+            # Si aucune action n'a été exécutée, retourner la réponse originale
+            if result_message is None:
+                return (response_text, None)
+            
+            # Nettoyage : on retire le bloc JSON de la réponse utilisateur
+            try:
+                if json_match:
+                    cleaned = response_text.replace(json_match.group(0), "").strip()
+                else:
+                    # Fallback : si on a utilisé fallback_match, on enlève juste le JSON nu
+                    if fallback_match:
+                        cleaned = response_text.replace(fallback_match.group(1), "").strip()
+                    else:
+                        cleaned = response_text
+            except Exception:
+                cleaned = response_text
+            
+            # Logging optionnel
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"memory_action_executed: action={action}, raw_json={raw_json[:100] if len(raw_json) > 100 else raw_json}...")
+            
+            return (cleaned or "C'est enregistré.", result_message)
             
         except (json.JSONDecodeError, Exception) as e:
             # En cas d'erreur de parsing ou d'exécution, ne pas planter
-            return None
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Erreur dans _process_memory_action: {e}")
+            return (response_text, None)
     
     def _check_memory_read_intent(self, user_message):
         """
