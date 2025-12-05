@@ -172,7 +172,6 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
       </div>
 
       <div className="input-area" style={{
-        borderTop: '1px solid var(--input-border)',
         padding: '12px 8px',
         display: 'flex',
         gap: '8px',

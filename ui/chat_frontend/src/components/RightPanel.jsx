@@ -367,6 +367,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
             boxSizing: 'border-box',
             position: 'relative',
             maxHeight: '100%',
+            borderBottom: '2px solid var(--think-border)',
           }}
         >
           {!sessionId ? (

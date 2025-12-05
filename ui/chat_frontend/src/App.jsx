@@ -131,12 +131,13 @@ export default function App() {
         {/* Header avec bouton Todo */}
         <div className="chat-header" style={{
           padding: '10px',
+          borderBottom: '1px solid var(--header-border)',
           fontSize: '14px',
           fontWeight: '600',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          background: 'var(--chat-bg)',
+          background: 'var(--header-bg)',
           color: 'var(--header-text)',
           flexShrink: 0,
           zIndex: 1,
