@@ -137,6 +137,22 @@ export default function AppearanceSettings({ isOpen, onClose }) {
       ]
     },
     {
+      title: 'Bouton Micro (inactif)',
+      items: [
+        { key: 'micBtnBg', label: 'Fond' },
+        { key: 'micBtnText', label: 'Texte' },
+        { key: 'micBtnBorder', label: 'Bordure' },
+      ]
+    },
+    {
+      title: 'Bouton Micro (enregistrement)',
+      items: [
+        { key: 'micBtnActiveBg', label: 'Fond' },
+        { key: 'micBtnActiveText', label: 'Texte' },
+        { key: 'micBtnActiveBorder', label: 'Bordure' },
+      ]
+    },
+    {
       title: 'Bande droite',
       items: [
         { key: 'rightPanelBg', label: 'Fond panel' },

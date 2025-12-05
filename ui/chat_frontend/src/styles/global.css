@@ -43,6 +43,14 @@
   --send-btn-text: #ffffff;
   --send-btn-border: #007AFF;
 
+  /* Bouton Micro */
+  --mic-btn-bg: #888888;
+  --mic-btn-text: #ffffff;
+  --mic-btn-border: #cccccc;
+  --mic-btn-active-bg: #ff4444;
+  --mic-btn-active-text: #ffffff;
+  --mic-btn-active-border: #ff4444;
+
   /* Panneau droit */
   --right-panel-bg: #ffffff;
   --right-panel-header-bg: #ffffff;

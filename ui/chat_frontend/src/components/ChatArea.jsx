@@ -19,46 +19,83 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition()
-        recognition.continuous = false
+        recognition.continuous = true  // Continue jusqu'à arrêt manuel
         recognition.interimResults = true
         recognition.lang = 'fr-FR'
 
         let baseInput = ''
+        let lastFinalIndex = 0
+        let shouldContinue = false
 
         recognition.onstart = () => {
           setIsListening(true)
+          shouldContinue = true
           // Sauvegarder l'input actuel comme base
           setInput(prev => {
             baseInput = prev
             return prev
           })
+          lastFinalIndex = 0
         }
 
         recognition.onresult = (event) => {
           let interimTranscript = ''
           let finalTranscript = ''
 
-          for (let i = event.resultIndex; i < event.results.length; i++) {
+          // Traiter seulement les nouveaux résultats depuis le dernier index final
+          for (let i = lastFinalIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript
             if (event.results[i].isFinal) {
-              finalTranscript += transcript + ' '
-              baseInput += finalTranscript
+              finalTranscript += transcript
+              lastFinalIndex = i + 1
             } else {
               interimTranscript += transcript
             }
           }
 
-          // Afficher base + final + interim
+          // Ajouter la ponctuation automatique
+          if (finalTranscript) {
+            // Ajouter un espace avant si nécessaire
+            if (baseInput && !baseInput.endsWith(' ') && !baseInput.endsWith('\n')) {
+              baseInput += ' '
+            }
+            // Ajouter le texte final avec ponctuation
+            let text = finalTranscript.trim()
+            // Ajouter un point si la phrase ne se termine pas par une ponctuation
+            if (text && !/[.!?]$/.test(text)) {
+              text += '.'
+            }
+            baseInput += text + ' '
+          }
+
+          // Afficher base + interim (sans ponctuation pour l'instant)
           setInput(baseInput + interimTranscript)
         }
 
         recognition.onerror = (event) => {
           console.error('Erreur reconnaissance vocale:', event.error)
+          // Ne pas arrêter automatiquement, seulement si erreur fatale
+          if (event.error === 'no-speech' || event.error === 'aborted') {
+            // Ignorer ces erreurs, continuer l'enregistrement
+            return
+          }
+          shouldContinue = false
           setIsListening(false)
         }
 
         recognition.onend = () => {
-          setIsListening(false)
+          // Ne pas arrêter automatiquement, seulement si l'utilisateur clique
+          // Si onend est appelé sans clic utilisateur, relancer (sauf si shouldContinue est false)
+          if (shouldContinue && recognition._shouldContinue !== false) {
+            // Relancer automatiquement pour continuer l'enregistrement
+            try {
+              recognition.start()
+            } catch (e) {
+              // Si erreur, arrêter proprement
+              shouldContinue = false
+              setIsListening(false)
+            }
+          }
         }
 
         recognitionRef.current = recognition
@@ -147,10 +184,17 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
     }
 
     if (isListening) {
+      // Arrêter manuellement
       recognitionRef.current.stop()
       setIsListening(false)
+      // Marquer qu'on ne doit plus continuer
+      if (recognitionRef.current._shouldContinue !== undefined) {
+        recognitionRef.current._shouldContinue = false
+      }
     } else {
       try {
+        // Marquer qu'on doit continuer
+        recognitionRef.current._shouldContinue = true
         recognitionRef.current.start()
       } catch (error) {
         console.error('Erreur démarrage reconnaissance:', error)
@@ -288,10 +332,10 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
             padding: '8px 12px',
             fontSize: '18px',
             cursor: sending ? 'not-allowed' : 'pointer',
-            border: '1px solid #ccc',
+            border: `1px solid ${isListening ? 'var(--mic-btn-active-border)' : 'var(--mic-btn-border)'}`,
             borderRadius: '6px',
-            background: isListening ? '#ff4444' : '#888',
-            color: '#fff',
+            background: isListening ? 'var(--mic-btn-active-bg)' : 'var(--mic-btn-bg)',
+            color: isListening ? 'var(--mic-btn-active-text)' : 'var(--mic-btn-text)',
             transition: 'all 0.2s',
             opacity: sending ? 0.5 : 1,
             display: 'flex',

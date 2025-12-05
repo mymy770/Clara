@@ -49,6 +49,12 @@ const COLOR_MAP = {
   'newSessionBtnBorder': '--new-session-btn-border',
   'sidebarHeaderBg': '--sidebar-header-bg',
   'sidebarHeaderText': '--sidebar-header-text',
+  'micBtnBg': '--mic-btn-bg',
+  'micBtnText': '--mic-btn-text',
+  'micBtnBorder': '--mic-btn-border',
+  'micBtnActiveBg': '--mic-btn-active-bg',
+  'micBtnActiveText': '--mic-btn-active-text',
+  'micBtnActiveBorder': '--mic-btn-active-border',
 };
 
 export const DEFAULT_THEME = {
@@ -99,6 +105,12 @@ export const DEFAULT_THEME = {
   newSessionBtnBorder: '#007AFF',
   sidebarHeaderBg: '#ffffff',
   sidebarHeaderText: '#000000',
+  micBtnBg: '#888888',
+  micBtnText: '#ffffff',
+  micBtnBorder: '#cccccc',
+  micBtnActiveBg: '#ff4444',
+  micBtnActiveText: '#ffffff',
+  micBtnActiveBorder: '#ff4444',
   fontSize: '14',
 };
 
