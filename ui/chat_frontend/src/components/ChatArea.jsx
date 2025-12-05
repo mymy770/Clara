@@ -8,6 +8,7 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
   const recognitionRef = useRef(null)
+  const shouldContinueRef = useRef(false)
 
   useEffect(() => {
     scrollToBottom()
@@ -25,11 +26,10 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
 
         let baseInput = ''
         let lastFinalIndex = 0
-        let shouldContinue = false
 
         recognition.onstart = () => {
           setIsListening(true)
-          shouldContinue = true
+          shouldContinueRef.current = true
           // Sauvegarder l'input actuel comme base
           setInput(prev => {
             baseInput = prev
@@ -185,19 +185,16 @@ export default function ChatArea({ sessionId, messages, onNewMessage, onSendMess
 
     if (isListening) {
       // Arrêter manuellement
+      shouldContinueRef.current = false
       recognitionRef.current.stop()
       setIsListening(false)
-      // Marquer qu'on ne doit plus continuer
-      if (recognitionRef.current._shouldContinue !== undefined) {
-        recognitionRef.current._shouldContinue = false
-      }
     } else {
       try {
-        // Marquer qu'on doit continuer
-        recognitionRef.current._shouldContinue = true
+        shouldContinueRef.current = true
         recognitionRef.current.start()
       } catch (error) {
         console.error('Erreur démarrage reconnaissance:', error)
+        shouldContinueRef.current = false
         setIsListening(false)
       }
     }
