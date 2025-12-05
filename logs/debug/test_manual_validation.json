@@ -1,0 +1,921 @@
+{
+  "session_id": "test_manual_validation",
+  "interactions": [
+    {
+      "timestamp": "2025-12-05T20:26:58.984535",
+      "user_input": "Sauvegarde une note : demain appeler le plombier",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        }
+      ],
+      "llm_response": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)",
+      "usage": {
+        "completion_tokens": 59,
+        "prompt_tokens": 810,
+        "total_tokens": 869,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:01.544144",
+      "user_input": "Sauvegarde un todo : préparer le dossier pour le banquier",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        }
+      ],
+      "llm_response": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)",
+      "usage": {
+        "completion_tokens": 60,
+        "prompt_tokens": 860,
+        "total_tokens": 920,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:05.218343",
+      "user_input": "Sauvegarde un process : comment je prépare une réunion importante",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        }
+      ],
+      "llm_response": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)",
+      "usage": {
+        "completion_tokens": 182,
+        "prompt_tokens": 911,
+        "total_tokens": 1093,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:10.388417",
+      "user_input": "Sauvegarde un protocole : ma façon idéale de gérer les mails",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        }
+      ],
+      "llm_response": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)",
+      "usage": {
+        "completion_tokens": 254,
+        "prompt_tokens": 1066,
+        "total_tokens": 1320,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:12.350890",
+      "user_input": "Ajoute une préférence : je préfère les résumés courts pour les mails",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "system",
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nL'utilisateur exprime une préférence. Génère une intention JSON avec memory_action='set_preference'."
+        }
+      ],
+      "llm_response": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short",
+      "usage": {
+        "completion_tokens": 80,
+        "prompt_tokens": 1338,
+        "total_tokens": 1418,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1024
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:15.865893",
+      "user_input": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        }
+      ],
+      "llm_response": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)",
+      "usage": {
+        "completion_tokens": 183,
+        "prompt_tokens": 1395,
+        "total_tokens": 1578,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1280
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:17.922419",
+      "user_input": "Montre-moi toutes mes notes",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        },
+        {
+          "role": "assistant",
+          "content": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "system",
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nNOTES: 2 en mémoire\n  - ID 5: Préférence: email_summary_style = short\n  - ID 1: demain appeler le plombier"
+        }
+      ],
+      "llm_response": "Voici tes notes enregistrées :\n\n1. ID 1 : « demain appeler le plombier »\n2. ID 5 : « Préférence: email_summary_style = short »\n\n📝 2 note(s) trouvée(s) :\n  - ID 5: Préférence: email_summary_style = short...\n  - ID 1: demain appeler le plombier...\n",
+      "usage": {
+        "completion_tokens": 56,
+        "prompt_tokens": 1491,
+        "total_tokens": 1547,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1280
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:19.223330",
+      "user_input": "Montre-moi tous mes todos",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        },
+        {
+          "role": "assistant",
+          "content": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes notes enregistrées :\n\n1. ID 1 : « demain appeler le plombier »\n2. ID 5 : « Préférence: email_summary_style = short »\n\n📝 2 note(s) trouvée(s) :\n  - ID 5: Préférence: email_summary_style = short...\n  - ID 1: demain appeler le plombier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes todos"
+        },
+        {
+          "role": "system",
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nTODOS: 1 en mémoire\n  - ID 2: préparer le dossier pour le banquier"
+        }
+      ],
+      "llm_response": "Voici tes todos enregistrés :\n\n1. ID 2 : « préparer le dossier pour le banquier »\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 2: préparer le dossier pour le banquier...\n",
+      "usage": {
+        "completion_tokens": 43,
+        "prompt_tokens": 1568,
+        "total_tokens": 1611,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1408
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:22.302760",
+      "user_input": "Montre-moi tous mes process",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        },
+        {
+          "role": "assistant",
+          "content": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes notes enregistrées :\n\n1. ID 1 : « demain appeler le plombier »\n2. ID 5 : « Préférence: email_summary_style = short »\n\n📝 2 note(s) trouvée(s) :\n  - ID 5: Préférence: email_summary_style = short...\n  - ID 1: demain appeler le plombier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes todos"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes todos enregistrés :\n\n1. ID 2 : « préparer le dossier pour le banquier »\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 2: préparer le dossier pour le banquier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes process"
+        },
+        {
+          "role": "system",
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nPROCESSUS: 1 en mémoire\n  - ID 3: "
+        }
+      ],
+      "llm_response": "Voici tes process enregistrés :\n\n1. ID 3 : (processus enregistré sans détails de contenu affichables ici)",
+      "usage": {
+        "completion_tokens": 33,
+        "prompt_tokens": 1623,
+        "total_tokens": 1656,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1408
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:23.580320",
+      "user_input": "Montre-moi tous mes protocoles",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        },
+        {
+          "role": "assistant",
+          "content": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes notes enregistrées :\n\n1. ID 1 : « demain appeler le plombier »\n2. ID 5 : « Préférence: email_summary_style = short »\n\n📝 2 note(s) trouvée(s) :\n  - ID 5: Préférence: email_summary_style = short...\n  - ID 1: demain appeler le plombier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes todos"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes todos enregistrés :\n\n1. ID 2 : « préparer le dossier pour le banquier »\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 2: préparer le dossier pour le banquier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes process"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes process enregistrés :\n\n1. ID 3 : (processus enregistré sans détails de contenu affichables ici)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes protocoles"
+        },
+        {
+          "role": "system",
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nPROTOCOLES: 1 en mémoire\n  - ID 4: ma façon idéale de gérer les mails (à détailler avec l'utili"
+        }
+      ],
+      "llm_response": "Voici tes protocoles enregistrés :\n\n1. ID 4 : « ma façon idéale de gérer les mails » (à détailler avec toi ultérieurement)",
+      "usage": {
+        "completion_tokens": 41,
+        "prompt_tokens": 1679,
+        "total_tokens": 1720,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1536
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:24.932163",
+      "user_input": "Montre-moi toutes mes préférences",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde une note : demain appeler le plombier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je sauvegarde la note : « demain appeler le plombier ».\n\n✓ Note sauvegardée (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        },
+        {
+          "role": "assistant",
+          "content": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes notes enregistrées :\n\n1. ID 1 : « demain appeler le plombier »\n2. ID 5 : « Préférence: email_summary_style = short »\n\n📝 2 note(s) trouvée(s) :\n  - ID 5: Préférence: email_summary_style = short...\n  - ID 1: demain appeler le plombier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes todos"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes todos enregistrés :\n\n1. ID 2 : « préparer le dossier pour le banquier »\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 2: préparer le dossier pour le banquier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes process"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes process enregistrés :\n\n1. ID 3 : (processus enregistré sans détails de contenu affichables ici)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes protocoles"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes protocoles enregistrés :\n\n1. ID 4 : « ma façon idéale de gérer les mails » (à détailler avec toi ultérieurement)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes préférences"
+        }
+      ],
+      "llm_response": "Voici tes préférences enregistrées :\n\n- Tu préfères les résumés courts pour les mails (email_summary_style = short).",
+      "usage": {
+        "completion_tokens": 35,
+        "prompt_tokens": 1682,
+        "total_tokens": 1717,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1536
+        }
+      },
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-05T20:27:26.300428",
+      "user_input": "Montre-moi la fiche contact d'Aurélie",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser et gérer des notes, todos, processus et protocoles en mémoire.\nTu n'as pas encore accès à des outils externes (fichiers, emails, etc.)."
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un todo : préparer le dossier pour le banquier"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, j’enregistre ce todo : « préparer le dossier pour le banquier ».\n\n✓ Todo sauvegardé (ID: 2)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un process : comment je prépare une réunion importante"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je vais enregistrer un process pour « comment je prépare une réunion importante ».\n\nPour bien le structurer, peux-tu me décrire rapidement les grandes étapes que tu suis habituellement ?  \nPar exemple :\n- J-3 : préparation du contenu\n- J-2 : envoi de l’ordre du jour\n- J-1 : répétition, vérification du matériel\n- Jour J : déroulé de la réunion\n- Après : compte-rendu, suivi des actions\n\nSi tu préfères, je peux aussi te proposer un process type que tu pourras ajuster.\n\n✓ Processus sauvegardé (ID: 3)"
+        },
+        {
+          "role": "user",
+          "content": "Sauvegarde un protocole : ma façon idéale de gérer les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "D’accord, je peux enregistrer un protocole pour « ta façon idéale de gérer les mails ».\n\nPour que ce soit vraiment utile, j’ai besoin de quelques précisions. Par exemple :  \n- À quelle fréquence veux-tu traiter tes mails ? (ex : 2 fois par jour, toutes les heures…)  \n- Est-ce que tu utilises des dossiers / labels ? Lesquels ?  \n- Comment décides-tu quoi faire d’un mail ? (répondre tout de suite, archiver, transférer, mettre en attente…)  \n- As-tu des règles personnelles ? (ex : « je ne réponds pas aux mails après 19h », « jamais plus de 20 mails non lus », etc.)\n\nSi tu veux, je peux aussi te proposer un protocole type de gestion des mails que tu pourras modifier.\n\nQuand tu m’auras donné ta méthode (même en vrac), je l’enregistrerai comme ton protocole de référence pour les mails.\n\n✓ Protocole sauvegardé (ID: 4)"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute une préférence : je préfère les résumés courts pour les mails"
+        },
+        {
+          "role": "assistant",
+          "content": "Je note ta préférence : tu préfères les résumés courts pour les mails.  \nÀ partir de maintenant, quand je t’aide avec des mails, je privilégierai des synthèses brèves et directes.\n\n✓ Préférence enregistrée : email_summary_style = short"
+        },
+        {
+          "role": "user",
+          "content": "Ajoute un contact : Aurélie, ma femme, numéro +33612345678, email aurelie@example.com, relation : femme"
+        },
+        {
+          "role": "assistant",
+          "content": "J’enregistre le contact d’Aurélie avec les informations que tu m’as données.\n\n✓ Contact sauvegardé (ID: 1)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes notes"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes notes enregistrées :\n\n1. ID 1 : « demain appeler le plombier »\n2. ID 5 : « Préférence: email_summary_style = short »\n\n📝 2 note(s) trouvée(s) :\n  - ID 5: Préférence: email_summary_style = short...\n  - ID 1: demain appeler le plombier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes todos"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes todos enregistrés :\n\n1. ID 2 : « préparer le dossier pour le banquier »\n\n✅ 1 todo(s) trouvé(s) :\n  - ID 2: préparer le dossier pour le banquier...\n"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes process"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes process enregistrés :\n\n1. ID 3 : (processus enregistré sans détails de contenu affichables ici)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi tous mes protocoles"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes protocoles enregistrés :\n\n1. ID 4 : « ma façon idéale de gérer les mails » (à détailler avec toi ultérieurement)"
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi toutes mes préférences"
+        },
+        {
+          "role": "assistant",
+          "content": "Voici tes préférences enregistrées :\n\n- Tu préfères les résumés courts pour les mails (email_summary_style = short)."
+        },
+        {
+          "role": "user",
+          "content": "Montre-moi la fiche contact d'Aurélie"
+        },
+        {
+          "role": "system",
+          "content": "DONNÉES MÉMOIRE RÉELLES :\nCONTACTS ENREGISTRÉS (1 trouvé(s)) :\n- ID 1: Aurélie | Tél: +33612345678 | Email: aurelie@example.com\n"
+        }
+      ],
+      "llm_response": "Voici la fiche contact d’Aurélie :\n\n- Nom : Aurélie  \n- Relation : femme  \n- Téléphone : +33 6 12 34 56 78  \n- Email : aurelie@example.com  \n- Catégorie : family (famille)",
+      "usage": {
+        "completion_tokens": 65,
+        "prompt_tokens": 1734,
+        "total_tokens": 1799,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        }
+      },
+      "error": null
+    }
+  ]
+}
