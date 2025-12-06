@@ -83,7 +83,7 @@ def update_item(
     content: Optional[str] = None,
     tags: Optional[list[str]] = None,
     db_path: str = "memory/memory.sqlite"
-) -> None:
+) -> bool:
     """
     Met à jour un item existant
     
@@ -92,10 +92,13 @@ def update_item(
         content: Nouveau contenu (si fourni)
         tags: Nouveaux tags (si fournis)
         db_path: Chemin vers la base de données
+    
+    Returns:
+        True si l'item a été mis à jour, False si l'item n'existe pas
     """
     # Ne rien faire si aucun champ n'est fourni
     if content is None and tags is None:
-        return
+        return False
     
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
@@ -125,6 +128,9 @@ def update_item(
             )
         
         conn.commit()
+        
+        # Retourner True si une ligne a été modifiée
+        return cursor.rowcount > 0
 
 
 def get_items(

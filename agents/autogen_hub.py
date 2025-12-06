@@ -225,15 +225,33 @@ def create_memory_agent(llm_config: Dict[str, Any], db_path: str = "memory/memor
             return f"⚠ Erreur listage todos : {str(e)}"
     
     def update_todo_tool(todo_id: int, content: Optional[str] = None, tags: Optional[list] = None) -> str:
-        """Met à jour un todo existant. Retourne un message de succès ou d'erreur."""
+        """Met à jour un todo existant. Retourne un message de succès ou d'erreur.
+        
+        Args:
+            todo_id: ID du todo à mettre à jour
+            content: Nouveau contenu (optionnel)
+            tags: Nouveaux tags (optionnel)
+        """
         try:
             from memory.memory_core import update_item
+            # Vérifier que le todo existe d'abord
+            existing = get_items(type="todo")
+            todo_exists = any(t['id'] == todo_id for t in existing)
+            if not todo_exists:
+                return f"⚠ Todo ID {todo_id} non trouvé"
+            
             success = update_item(item_id=todo_id, content=content, tags=tags)
             if success:
+                # Récupérer le contenu mis à jour pour confirmation
+                updated = get_items(type="todo")
+                updated_todo = next((t for t in updated if t['id'] == todo_id), None)
+                if updated_todo:
+                    return f"✓ Todo ID {todo_id} mis à jour : {updated_todo['content']}"
                 return f"✓ Todo ID {todo_id} mis à jour"
             else:
-                return f"⚠ Todo ID {todo_id} non trouvé"
+                return f"⚠ Échec de la mise à jour du todo ID {todo_id}"
         except Exception as e:
+            logging.error(f"Erreur update_todo_tool: {e}")
             return f"⚠ Erreur mise à jour todo : {str(e)}"
     
     def save_process_tool(content: str, tags: Optional[list] = None) -> str:
