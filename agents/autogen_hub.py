@@ -224,6 +224,18 @@ def create_memory_agent(llm_config: Dict[str, Any], db_path: str = "memory/memor
         except Exception as e:
             return f"⚠ Erreur listage todos : {str(e)}"
     
+    def update_todo_tool(todo_id: int, content: Optional[str] = None, tags: Optional[list] = None) -> str:
+        """Met à jour un todo existant. Retourne un message de succès ou d'erreur."""
+        try:
+            from memory.memory_core import update_item
+            success = update_item(item_id=todo_id, content=content, tags=tags)
+            if success:
+                return f"✓ Todo ID {todo_id} mis à jour"
+            else:
+                return f"⚠ Todo ID {todo_id} non trouvé"
+        except Exception as e:
+            return f"⚠ Erreur mise à jour todo : {str(e)}"
+    
     def save_process_tool(content: str, tags: Optional[list] = None) -> str:
         """Enregistre un processus. Retourne un message de succès ou d'erreur."""
         try:
@@ -317,6 +329,7 @@ Fonctions disponibles : save_note_tool, list_notes, save_todo_tool, list_todos, 
             "list_notes": list_notes,
             "save_todo_tool": save_todo_tool,
             "list_todos": list_todos,
+            "update_todo_tool": update_todo_tool,
             "save_process_tool": save_process_tool,
             "list_processes": list_processes,
             "save_protocol_tool": save_protocol_tool,
@@ -332,6 +345,7 @@ Fonctions disponibles : save_note_tool, list_notes, save_todo_tool, list_todos, 
     memory_agent.register_for_llm(name="list_notes", description=list_notes.__doc__)(list_notes)
     memory_agent.register_for_llm(name="save_todo_tool", description=save_todo_tool.__doc__)(save_todo_tool)
     memory_agent.register_for_llm(name="list_todos", description=list_todos.__doc__)(list_todos)
+    memory_agent.register_for_llm(name="update_todo_tool", description=update_todo_tool.__doc__)(update_todo_tool)
     memory_agent.register_for_llm(name="save_process_tool", description=save_process_tool.__doc__)(save_process_tool)
     memory_agent.register_for_llm(name="list_processes", description=list_processes.__doc__)(list_processes)
     memory_agent.register_for_llm(name="save_protocol_tool", description=save_protocol_tool.__doc__)(save_protocol_tool)

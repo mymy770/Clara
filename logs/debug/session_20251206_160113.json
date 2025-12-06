@@ -1,9 +1,9 @@
 {
-  "session_id": "session_20251206_155704",
+  "session_id": "session_20251206_160113",
   "interactions": [
     {
-      "timestamp": "2025-12-06T15:57:31.398163",
-      "user_input": "modifi le id 2 et rajoute appeler mes enfants",
+      "timestamp": "2025-12-06T16:02:16.214488",
+      "user_input": "rajoute au todo 2 d appeer aussi mes enfants",
       "prompt_messages": [
         {
           "role": "system",
@@ -11,30 +11,38 @@
         },
         {
           "role": "user",
-          "content": "slaut"
+          "content": "salut"
         },
         {
           "role": "assistant",
-          "content": "Salut 🙂  \nJe suis Clara, ton assistante IA.  \n\nJe peux t’aider à :\n- prendre des notes, créer des todos,\n- gérer des contacts,\n- écrire/lire des fichiers, organiser des dossiers,\n- répondre à tes questions (travail, études, perso, etc.).\n\nTu veux faire quoi aujourd’hui ?"
+          "content": "Salut 🙂  \nJe suis Clara, ton assistante IA.  \n\nComment puis-je t’aider aujourd’hui ?"
         },
         {
           "role": "user",
-          "content": "liste moi les todo"
+          "content": "liste mes notes"
         },
         {
           "role": "assistant",
-          "content": "Voici tes todos en cours :\n\n1. [ID 3] Appeler ma mère à 20h10 ce soir  \n2. [ID 2] Appeler ma femme ce soir à 20h  \n\nSi tu veux, je peux en ajouter un nouveau, en modifier un, ou en supprimer un.\n\n✅ 2 todo(s) trouvé(s) :\n  - ID 3: Appeler ma mère à 20h10 ce soir...\n  - ID 2: Appeler ma femme ce soir à 20h...\n"
+          "content": "Voici la liste de tes notes en mémoire :\n\n1. (ID 9) test max turns 5  \n2. (ID 8) test via API autogen  \n3. (ID 7) test vérification fonction appel  \n4. (ID 4) Préférence: clarity_on_memory = User wants direct and explic\n\nTu veux que je t’en affiche une en détail, que j’en cherche une spécifique, ou que j’en crée une nouvelle ?\n\n📝 4 note(s) trouvée(s) :\n  - ID 9: test max turns 5...\n  - ID 8: test via API autogen...\n  - ID 7: test vérification fonction appel...\n  - ID 4: Préférence: clarity_on_memory = User wants direct ...\n"
         },
         {
           "role": "user",
-          "content": "modifi le id 2 et rajoute appeler mes enfants"
+          "content": "liste mes todo"
+        },
+        {
+          "role": "assistant",
+          "content": "Tu as actuellement ces todos en mémoire :\n\n1. (ID 3) Appeler ma mère à 20h10 ce soir  \n2. (ID 2) Appeler ma femme ce soir à 20h  \n\nTu veux en ajouter un, en modifier un, ou en marquer un comme terminé ?\n\n✅ 2 todo(s) trouvé(s) :\n  - ID 3: Appeler ma mère à 20h10 ce soir...\n  - ID 2: Appeler ma femme ce soir à 20h...\n"
+        },
+        {
+          "role": "user",
+          "content": "rajoute au todo 2 d appeer aussi mes enfants"
         }
       ],
-      "llm_response": "D’accord, je modifie le todo ID 2 pour y ajouter « appeler mes enfants ».\n\n```json\n{\"memory_action\": \"update_todo\", \"todo_id\": 2, \"updates\": {\"content\": \"Appeler ma femme et mes enfants ce soir à 20h\"}}\n```\n\nLe todo 2 est maintenant :  \n- Appeler ma femme et mes enfants ce soir à 20h  \n\nTu veux que je change aussi l’heure ou c’est bon comme ça ?",
+      "llm_response": "Je vais mettre à jour le todo 2 pour inclure aussi d’appeler tes enfants.\n\n```json\n{\"memory_action\": \"update_todo\", \"todo_id\": 2, \"updates\": {\"content\": \"Appeler ma femme et mes enfants ce soir à 20h\"}}\n```\n\nC’est noté :  \n2. Appeler ma femme et mes enfants ce soir à 20h.",
       "usage": {
-        "completion_tokens": 109,
-        "prompt_tokens": 1479,
-        "total_tokens": 1588,
+        "completion_tokens": 93,
+        "prompt_tokens": 1605,
+        "total_tokens": 1698,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
@@ -43,12 +51,12 @@
         },
         "prompt_tokens_details": {
           "audio_tokens": 0,
-          "cached_tokens": 1280
+          "cached_tokens": 1408
         }
       },
       "error": null,
       "internal_data": {
-        "thoughts": "D’accord, je modifie le todo ID 2 pour y ajouter « appeler mes enfants ».",
+        "thoughts": "Je vais mettre à jour le todo 2 pour inclure aussi d’appeler tes enfants.",
         "todo": null,
         "steps": [
           "✓ Réponse envoyée"
@@ -57,29 +65,29 @@
       "memory_ops": [],
       "execution_log": [
         {
-          "timestamp": "2025-12-06T15:57:29.422334",
+          "timestamp": "2025-12-06T16:02:14.206937",
           "type": "llm_call",
           "action": "generate",
           "params": {
             "model": "gpt-5.1",
-            "messages_count": 6
+            "messages_count": 8
           },
           "result": null,
           "error": null
         },
         {
-          "timestamp": "2025-12-06T15:57:31.396324",
+          "timestamp": "2025-12-06T16:02:16.213765",
           "type": "llm_call",
           "action": "generate",
           "params": {
             "model": "gpt-5.1"
           },
           "result": {
-            "response_length": 347,
+            "response_length": 272,
             "usage": {
-              "completion_tokens": 109,
-              "prompt_tokens": 1479,
-              "total_tokens": 1588,
+              "completion_tokens": 93,
+              "prompt_tokens": 1605,
+              "total_tokens": 1698,
               "completion_tokens_details": {
                 "accepted_prediction_tokens": 0,
                 "audio_tokens": 0,
@@ -88,7 +96,7 @@
               },
               "prompt_tokens_details": {
                 "audio_tokens": 0,
-                "cached_tokens": 1280
+                "cached_tokens": 1408
               }
             }
           },
@@ -99,29 +107,29 @@
   ],
   "full_execution_log": [
     {
-      "timestamp": "2025-12-06T15:57:29.422334",
+      "timestamp": "2025-12-06T16:02:14.206937",
       "type": "llm_call",
       "action": "generate",
       "params": {
         "model": "gpt-5.1",
-        "messages_count": 6
+        "messages_count": 8
       },
       "result": null,
       "error": null
     },
     {
-      "timestamp": "2025-12-06T15:57:31.396324",
+      "timestamp": "2025-12-06T16:02:16.213765",
       "type": "llm_call",
       "action": "generate",
       "params": {
         "model": "gpt-5.1"
       },
       "result": {
-        "response_length": 347,
+        "response_length": 272,
         "usage": {
-          "completion_tokens": 109,
-          "prompt_tokens": 1479,
-          "total_tokens": 1588,
+          "completion_tokens": 93,
+          "prompt_tokens": 1605,
+          "total_tokens": 1698,
           "completion_tokens_details": {
             "accepted_prediction_tokens": 0,
             "audio_tokens": 0,
@@ -130,7 +138,7 @@
           },
           "prompt_tokens_details": {
             "audio_tokens": 0,
-            "cached_tokens": 1280
+            "cached_tokens": 1408
           }
         }
       },
