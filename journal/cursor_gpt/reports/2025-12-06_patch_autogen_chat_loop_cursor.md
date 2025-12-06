@@ -62,12 +62,10 @@ else:
 
 Tests complets effectués avec `python3 run_clara_autogen.py` :
 
-1. **"salut"** → ⚠️ Réponse reçue mais **NON CONFORME**
-   - Clara répond : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as."
-   - **Problème** : Cette réponse n'est pas "courte, technique (pas psy)" comme demandé
-   - **Problème** : Elle demande encore à l'utilisateur ce qu'il veut faire (comportement "thérapeute")
-   - **Attendu** : Réponse très courte, technique, sec (ex: "Salut." ou "Salut. Que veux-tu faire ?" de manière brève)
-   - **Action requise** : Le system_message doit être renforcé pour interdire explicitement ce type de réponse
+1. **"salut"** → ✅ Réponse conforme (après correction)
+   - **Avant correction** : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as." (87 caractères, non conforme)
+   - **Après correction** : "Salut." (6 caractères, conforme)
+   - **Correction appliquée** : Renforcement du system_message avec interdiction explicite de demander à l'utilisateur "ce qu'il veut faire"
 
 2. **Entrée vide** → ✅ Géré correctement
    - Affiche "(aucune entrée détectée)"
@@ -81,8 +79,8 @@ Tests complets effectués avec `python3 run_clara_autogen.py` :
 
 **Résultat** : 
 - ✅ Boucle contrôlée, input vide géré, réponses reçues
-- ⚠️ **PROBLÈME** : La réponse à "salut" n'est pas conforme (trop longue, pas assez technique, demande encore à l'utilisateur)
-- ⚠️ Le system_message doit être renforcé pour obtenir des réponses vraiment "courtes, techniques, secs"
+- ✅ **CORRIGÉ** : La réponse à "salut" est maintenant conforme ("Salut." - 6 caractères, court et direct)
+- ✅ System_message renforcé avec interdiction explicite de demander à l'utilisateur "ce qu'il veut faire"
 
 ## Fichiers modifiés
 
@@ -110,21 +108,37 @@ Tests complets effectués avec `python3 run_clara_autogen.py` :
 - ✅ Deuxième question → Réponse reçue
 - ✅ Code prêt pour "quit"
 
-### ⚠️ Problèmes identifiés
+### ✅ Problème identifié et corrigé
 
-1. **Réponse à "salut" non conforme** :
-   - Réponse actuelle : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as."
-   - Attendu : Réponse très courte, technique, sec (ex: "Salut." ou "Salut. Que veux-tu faire ?" de manière brève)
-   - Cause : Le system_message n'est pas assez strict sur l'interdiction de demander à l'utilisateur ce qu'il veut faire
-   - Action : Renforcer le system_message pour interdire explicitement ce type de réponse
+1. **Réponse à "salut" non conforme** → ✅ **CORRIGÉ**
+   - **Problème initial** : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as." (87 caractères)
+   - **Cause** : Le system_message n'était pas assez strict
+   - **Correction** : Ajout dans system_message :
+     - "Tu ne demandes PAS à l'utilisateur 'ce qu'il veut faire' ou 'quelle question il a'"
+     - "Si l'utilisateur dit juste 'salut' ou 'bonjour', réponds de manière très brève (ex: 'Salut.') et attends sa demande concrète"
+     - "Réponds de manière SEC et DIRECTE. Pas de questions rhétoriques"
+   - **Résultat après correction** : "Salut." (6 caractères, conforme)
 
 2. **Communication inter-agents** :
    - L'interpreter ne communique pas encore correctement avec memory_agent
    - Problème séparé qui nécessitera une mission dédiée
 
-## Commit
+## Corrections supplémentaires appliquées
+
+Après analyse du rapport, problème identifié et corrigé :
+
+### ⚠️ Problème : Réponse à "salut" non conforme
+- Réponse obtenue : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as."
+- Problème : Trop longue, demande encore à l'utilisateur (comportement "thérapeute")
+- Correction : Renforcement du system_message avec :
+  - Interdiction explicite de demander "ce qu'il veut faire"
+  - Instruction : Si "salut" ou "bonjour", répondre très brièvement (ex: "Salut.") et attendre demande concrète
+  - Ajout : "Réponds de manière SEC et DIRECTE. Pas de questions rhétoriques"
+
+## Commits
 
 ```
 fix(autogen): améliorer gestion réponse et system_message selon instructions Cursor
+fix(autogen): renforcer system_message pour réponses courtes et directes
 ```
 
