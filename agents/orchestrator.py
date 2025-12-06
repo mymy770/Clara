@@ -11,7 +11,7 @@ from datetime import datetime
 from drivers.llm_driver import LLMDriver
 from utils.logger import DebugLogger
 from memory.helpers import save_note, save_todo, save_process, save_protocol
-from memory.memory_core import get_items, search_items, delete_item, save_preference
+from memory.memory_core import get_items, search_items, delete_item, save_preference, update_item
 from memory.contacts import save_contact, update_contact, find_contacts, get_all_contacts
 from agents.helpers import set_fs_driver, execute_fs_action
 from drivers.fs_driver import FSDriver
@@ -87,20 +87,29 @@ Autres actions contacts :
 
 NOTES :
 - memory_save_note : Sauvegarder une note
+- memory_update_note : Modifier une note existante (ajouter du contenu à la fin)
 - memory_list_notes : Lister toutes les notes
 - memory_search_notes : Chercher dans les notes
 
+IMPORTANT pour update_note :
+Quand l'utilisateur dit "rajoute X dans la note Y" ou "ajoute X dans la même note",
+tu dois utiliser update_note avec le NOUVEAU contenu à ajouter (pas l'ancien + nouveau).
+Le système combinera automatiquement l'ancien et le nouveau contenu.
+
 TODOS :
 - memory_save_todo : Enregistrer un todo (chose à faire)
+- memory_update_todo : Modifier un todo existant (ajouter du contenu ou remplacer)
 - memory_list_todos : Lister tous les todos
 - memory_search_todos : Chercher dans les todos
 
 PROCESS :
 - memory_save_process : Enregistrer un processus/procédure détaillée
+- memory_update_process : Modifier un processus existant
 - memory_list_processes : Lister tous les processus
 
 PROTOCOL :
 - memory_save_protocol : Enregistrer un protocole/règle générale
+- memory_update_protocol : Modifier un protocole existant
 - memory_list_protocols : Lister tous les protocoles
 
 PRÉFÉRENCES :
@@ -125,6 +134,18 @@ ou
 
 ```json
 {"memory_action": "save_todo", "content": "chose à faire", "tags": ["optionnel"]}
+```
+
+ou
+
+```json
+{"memory_action": "update_note", "item_id": 1, "content": "nouveau contenu"}
+```
+
+ou
+
+```json
+{"memory_action": "update_todo", "item_id": 2, "content": "nouveau contenu"}
 ```
 
 ou
@@ -457,6 +478,37 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                         result += f"  ... et {len(items) - 10} autre(s)"
                     result_message = result
             
+            elif action == 'update_note':
+                item_id = intent.get('item_id')
+                new_content = intent.get('content', '').strip()
+                if item_id and new_content:
+                    # Récupérer la note existante pour combiner le contenu
+                    existing_notes = get_items(type='note', item_ids=[item_id])
+                    if not existing_notes:
+                        result_message = f"⚠ Note ID {item_id} non trouvée"
+                        memory_ops.append({"action": "update_note", "result": "error", "error": "Note non trouvée"})
+                    else:
+                        existing_content = existing_notes[0]['content']
+                        # Toujours combiner : ancien contenu + nouveau contenu
+                        # Nettoyer le nouveau contenu (enlever "rajoute", "ajoute", etc.)
+                        new_content_clean = new_content
+                        for prefix in ['rajoute', 'ajoute', 'et aussi', 'et', 'aussi', '+', '-']:
+                            if new_content_clean.lower().startswith(prefix):
+                                new_content_clean = new_content_clean[len(prefix):].strip()
+                        
+                        combined_content = f"{existing_content} et {new_content_clean}"
+                        
+                        success = update_item(item_id=item_id, content=combined_content)
+                        if success:
+                            result_message = f"✓ Note ID {item_id} mise à jour : {combined_content[:80]}..."
+                            memory_ops.append({"action": "update_note", "result": "success", "item_id": item_id})
+                        else:
+                            result_message = f"⚠ Échec de la mise à jour de la note ID {item_id}"
+                            memory_ops.append({"action": "update_note", "result": "error", "error": "Échec mise à jour"})
+                else:
+                    result_message = "⚠ ID ou contenu manquant pour la mise à jour"
+                    memory_ops.append({"action": "update_note", "result": "error", "error": "Paramètres manquants"})
+            
             elif action == 'save_todo':
                 content = intent.get('content', '')
                 tags = intent.get('tags')
@@ -487,6 +539,36 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                     if len(items) > 10:
                         result += f"  ... et {len(items) - 10} autre(s)"
                     result_message = result
+            
+            elif action == 'update_todo':
+                item_id = intent.get('item_id')
+                new_content = intent.get('content', '').strip()
+                if item_id and new_content:
+                    # Récupérer le todo existant pour combiner le contenu
+                    existing_todos = get_items(type='todo', item_ids=[item_id])
+                    if not existing_todos:
+                        result_message = f"⚠ Todo ID {item_id} non trouvé"
+                        memory_ops.append({"action": "update_todo", "result": "error", "error": "Todo non trouvé"})
+                    else:
+                        existing_content = existing_todos[0]['content']
+                        # Toujours combiner : ancien contenu + nouveau contenu
+                        new_content_clean = new_content
+                        for prefix in ['rajoute', 'ajoute', 'et aussi', 'et', 'aussi', '+']:
+                            if new_content_clean.lower().startswith(prefix):
+                                new_content_clean = new_content_clean[len(prefix):].strip()
+                        
+                        combined_content = f"{existing_content} et {new_content_clean}"
+                        
+                        success = update_item(item_id=item_id, content=combined_content)
+                        if success:
+                            result_message = f"✓ Todo ID {item_id} mis à jour : {combined_content[:80]}..."
+                            memory_ops.append({"action": "update_todo", "result": "success", "item_id": item_id})
+                        else:
+                            result_message = f"⚠ Échec de la mise à jour du todo ID {item_id}"
+                            memory_ops.append({"action": "update_todo", "result": "error", "error": "Échec mise à jour"})
+                else:
+                    result_message = "⚠ ID ou contenu manquant pour la mise à jour"
+                    memory_ops.append({"action": "update_todo", "result": "error", "error": "Paramètres manquants"})
             
             elif action == 'save_process':
                 content = intent.get('content', '')
@@ -523,6 +605,32 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                     if len(items) > 10:
                         result += f"  ... et {len(items) - 10} autre(s)"
                     result_message = result
+            
+            elif action == 'update_protocol':
+                item_id = intent.get('item_id')
+                new_content = intent.get('content', '').strip()
+                if item_id and new_content:
+                    existing_protocols = get_items(type='protocol', item_ids=[item_id])
+                    if not existing_protocols:
+                        result_message = f"⚠ Protocole ID {item_id} non trouvé"
+                        memory_ops.append({"action": "update_protocol", "result": "error", "error": "Protocole non trouvé"})
+                    else:
+                        existing_content = existing_protocols[0]['content']
+                        new_content_clean = new_content
+                        for prefix in ['rajoute', 'ajoute', 'et aussi', 'et', 'aussi', '+']:
+                            if new_content_clean.lower().startswith(prefix):
+                                new_content_clean = new_content_clean[len(prefix):].strip()
+                        combined_content = f"{existing_content} et {new_content_clean}"
+                        success = update_item(item_id=item_id, content=combined_content)
+                        if success:
+                            result_message = f"✓ Protocole ID {item_id} mis à jour"
+                            memory_ops.append({"action": "update_protocol", "result": "success", "item_id": item_id})
+                        else:
+                            result_message = f"⚠ Échec de la mise à jour du protocole ID {item_id}"
+                            memory_ops.append({"action": "update_protocol", "result": "error", "error": "Échec mise à jour"})
+                else:
+                    result_message = "⚠ ID ou contenu manquant pour la mise à jour"
+                    memory_ops.append({"action": "update_protocol", "result": "error", "error": "Paramètres manquants"})
             
             elif action == 'save_contact':
                 contact = intent.get('contact')

@@ -1,0 +1,49 @@
+=== Clara Session session_20251206_165732 ===
+Date: 2025-12-06 16:57:32
+==================================================
+
+[16:57:32] Utilisateur:
+salut
+
+[16:57:40] Clara:
+Salut.
+
+[16:58:06] Utilisateur:
+liste desnotes
+
+[16:58:13] Clara:
+Aucune note enregistrée pour l’instant.
+
+[16:58:34] Utilisateur:
+ajoute une note d appeler ma femem a 18h
+
+[16:58:58] Clara:
+Note ajoutée : "Appeler ma femme à 18h".
+
+[16:59:21] Utilisateur:
+rajoute d ausisi appeler mes enfants dans le mem enote
+
+[16:59:28] Clara:
+Note mise à jour sous forme d’une nouvelle entrée :
+
+- ID 2 : « Appeler ma femme à 18h et aussi appeler mes enfants »
+
+[17:00:12] Utilisateur:
+non tu as cree une nouvelle note. je veux que se soit dans la meme note
+
+[17:00:30] Clara:
+OK.  
+Techniquement, avec les outils actuels, je **ne peux pas** modifier une note existante ni fusionner dedans du nouveau texte. Je peux seulement :
+
+- créer une nouvelle note (`save_note_tool`)  
+- lister les notes (`list_notes`)
+
+Donc “mettre dans la même note” au sens strict (réécrire l’ID 1 ou 2) n’est pas possible via les fonctions disponibles.
+
+La seule chose que je peux faire de concret pour aller dans ton sens, c’est :
+
+- considérer **une** des notes comme la “bonne” (par ex. l’ID 2 ou 3, qui contient déjà tout)  
+- ignorer les autres à l’avenir quand on parlera de cette note
+
+Dis-moi juste : tu veux garder laquelle comme référence, 2 ou 3 ?
+

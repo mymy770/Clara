@@ -136,6 +136,7 @@ def update_item(
 def get_items(
     type: Optional[str] = None,
     limit: Optional[int] = None,
+    item_ids: Optional[list[int]] = None,
     db_path: str = "memory/memory.sqlite"
 ) -> list[dict]:
     """
@@ -144,6 +145,7 @@ def get_items(
     Args:
         type: Filtrer par type (si fourni)
         limit: Limiter le nombre de résultats (si fourni)
+        item_ids: Filtrer par liste d'IDs (si fourni)
         db_path: Chemin vers la base de données
     
     Returns:
@@ -153,12 +155,22 @@ def get_items(
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
+        query_parts = []
+        params = []
+        
         if type is not None:
-            query = "SELECT * FROM memory WHERE type = ? ORDER BY created_at DESC"
-            params = [type]
+            query_parts.append("type = ?")
+            params.append(type)
+        
+        if item_ids is not None and len(item_ids) > 0:
+            placeholders = ','.join('?' for _ in item_ids)
+            query_parts.append(f"id IN ({placeholders})")
+            params.extend(item_ids)
+        
+        if query_parts:
+            query = "SELECT * FROM memory WHERE " + " AND ".join(query_parts) + " ORDER BY created_at DESC"
         else:
             query = "SELECT * FROM memory ORDER BY created_at DESC"
-            params = []
         
         if limit is not None:
             query += " LIMIT ?"
