@@ -12,10 +12,14 @@ from typing import Optional
 try:
     import autogen
     from autogen import AssistantAgent, UserProxyAgent
-    from autogen import settings
-    # Désactiver comportements automatiques d'Autogen
-    settings.disable_telemetry = True
-    settings.allow_non_api_models = True
+    # Désactiver comportements automatiques d'Autogen (si settings existe)
+    try:
+        from autogen import settings
+        settings.disable_telemetry = True
+        settings.allow_non_api_models = True
+    except (ImportError, AttributeError):
+        # settings n'existe pas dans toutes les versions d'Autogen, on continue
+        pass
 except ImportError:
     print("❌ pyautogen n'est pas installé.")
     print("   Installez-le avec: pip install pyautogen")
