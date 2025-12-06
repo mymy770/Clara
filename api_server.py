@@ -104,7 +104,8 @@ def init_autogen_instances():
         groupchat = GroupChat(
             agents=[interpreter, fs_agent, memory_agent],
             messages=[],
-            max_round=3,
+            max_round=5,  # Augmenter pour permettre la délégation aux agents spécialisés
+            speaker_selection_method="round_robin",  # Permet à chaque agent de répondre à tour de rôle
         )
         manager = GroupChatManager(
             groupchat=groupchat,

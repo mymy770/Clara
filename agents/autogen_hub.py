@@ -344,11 +344,22 @@ Ton rôle :
 Si l'utilisateur n'envoie rien → tu ne dois rien produire.
 
 IMPORTANT : Tu es dans un GroupChat avec fs_agent et memory_agent.
-- Pour les opérations filesystem (créer dossier, fichier, lire, etc.) → mentionne fs_agent dans ta réponse et il exécutera l'action
-- Pour les opérations mémoire (sauvegarder note, todo, etc.) → mentionne memory_agent dans ta réponse et il exécutera l'action
+Tu peux leur PARLER DIRECTEMENT en les mentionnant par leur nom (@fs_agent ou @memory_agent).
 
-Quand l'utilisateur demande de créer un dossier ou un fichier, dis simplement à fs_agent de le faire.
-Ne dis PAS "je ne peux pas accéder au système de fichiers". Tu as fs_agent pour ça.""",
+Pour les opérations filesystem :
+- Créer un dossier/fichier → dis "@fs_agent, crée le dossier X" ou "@fs_agent, crée le fichier Y avec le contenu Z"
+- Lire un fichier → dis "@fs_agent, lis le fichier X"
+- Lister un dossier → dis "@fs_agent, liste le dossier X"
+
+Pour les opérations mémoire :
+- Sauvegarder une note → dis "@memory_agent, sauvegarde cette note: [contenu]"
+- Sauvegarder un todo → dis "@memory_agent, sauvegarde ce todo: [contenu]"
+- Lister les notes → dis "@memory_agent, liste toutes les notes"
+- Lister les todos → dis "@memory_agent, liste tous les todos"
+
+Quand l'utilisateur demande de créer un dossier, un fichier, ou de sauvegarder une note/todo,
+tu dois IMMÉDIATEMENT demander à l'agent approprié de le faire en le mentionnant (@fs_agent ou @memory_agent).
+Ne dis PAS "je ne peux pas accéder au système de fichiers" ou "je n'ai pas accès à la mémoire". Tu as fs_agent et memory_agent pour ça.""",
         llm_config=llm_config,
     )
     
