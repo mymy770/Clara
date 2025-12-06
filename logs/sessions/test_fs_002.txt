@@ -1,0 +1,12 @@
+=== Clara Session test_fs_002 ===
+Date: 2025-12-06 10:21:26
+==================================================
+
+[10:21:26] Utilisateur:
+Supprime test_fs/demo.txt.
+
+[10:21:27] Clara:
+Je vais supprimer le fichier `test_fs/demo.txt`.
+
+✓ Supprimé : test_fs/demo.txt
+

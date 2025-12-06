@@ -593,12 +593,50 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             json_match = re.search(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
             if not json_match:
                 json_match = re.search(r"```\s*(\{.*?\})\s*```", response_text, re.DOTALL)
+            
+            # Si pas de bloc markdown, chercher du JSON brut avec "intent"
             if not json_match:
-                fallback_match = re.search(r"(\{\s*\"intent\".*?\})", response_text, re.DOTALL)
-                if fallback_match:
-                    raw_json = fallback_match.group(1)
-                else:
-                    return (response_text, None, [])
+                # D'abord, vérifier si toute la réponse est du JSON valide
+                try:
+                    test_json = json.loads(response_text.strip())
+                    if test_json.get('intent') == 'filesystem':
+                        raw_json = response_text.strip()
+                        json_match = None  # Pas de match markdown, mais on a le JSON
+                    else:
+                        return (response_text, None, [])
+                except json.JSONDecodeError:
+                    # Si ce n'est pas du JSON pur, chercher un bloc JSON dans le texte
+                    # Chercher un objet JSON qui commence par { et se termine par } avec "intent"
+                    # Utiliser une approche qui compte les accolades pour gérer les objets imbriqués
+                    start_idx = response_text.find('{')
+                    if start_idx != -1:
+                        # Compter les accolades pour trouver la fin de l'objet JSON
+                        brace_count = 0
+                        end_idx = start_idx
+                        for i in range(start_idx, len(response_text)):
+                            if response_text[i] == '{':
+                                brace_count += 1
+                            elif response_text[i] == '}':
+                                brace_count -= 1
+                                if brace_count == 0:
+                                    end_idx = i + 1
+                                    break
+                        
+                        if end_idx > start_idx:
+                            candidate_json = response_text[start_idx:end_idx]
+                            try:
+                                test_json = json.loads(candidate_json)
+                                if test_json.get('intent') == 'filesystem':
+                                    raw_json = candidate_json
+                                    json_match = None
+                                else:
+                                    return (response_text, None, [])
+                            except json.JSONDecodeError:
+                                return (response_text, None, [])
+                        else:
+                            return (response_text, None, [])
+                    else:
+                        return (response_text, None, [])
             else:
                 raw_json = json_match.group(1)
             
@@ -679,10 +717,35 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             # Nettoyer la réponse (enlever le bloc JSON)
             if json_match:
                 cleaned = response_text.replace(json_match.group(0), "").strip()
-            elif 'fallback_match' in locals() and fallback_match:
-                cleaned = response_text.replace(fallback_match.group(1), "").strip()
             else:
-                cleaned = response_text
+                # Si on a trouvé du JSON brut (sans markdown), le supprimer de la réponse
+                # Chercher où commence le JSON dans response_text
+                start_idx = response_text.find('{')
+                if start_idx != -1:
+                    # Trouver la fin du JSON (même logique que pour le parsing)
+                    brace_count = 0
+                    end_idx = start_idx
+                    for i in range(start_idx, len(response_text)):
+                        if response_text[i] == '{':
+                            brace_count += 1
+                        elif response_text[i] == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                end_idx = i + 1
+                                break
+                    if end_idx > start_idx:
+                        # Supprimer le JSON de la réponse
+                        before = response_text[:start_idx].strip()
+                        after = response_text[end_idx:].strip()
+                        cleaned = (before + " " + after).strip()
+                    else:
+                        cleaned = response_text
+                else:
+                    cleaned = response_text
+            
+            # Si cleaned est vide ou ne contient que du JSON, utiliser un message par défaut
+            if not cleaned or cleaned.strip().startswith('{'):
+                cleaned = ""
             
             logger.info(f"filesystem_action_executed: action={action}, path={params.get('path', 'N/A')}")
             
