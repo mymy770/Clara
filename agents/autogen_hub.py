@@ -41,16 +41,15 @@ def build_llm_config() -> Dict[str, Any]:
     
     model = cfg.get("model", "gpt-5.1")
     temperature = float(cfg.get("temperature", 0.7))
+    base_url = cfg.get("base_url") or os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
     
     return {
-        "model": model,
-        "api_key": api_key,
         "temperature": temperature,
         "config_list": [
             {
                 "model": model,
                 "api_key": api_key,
-                "base_url": os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+                "base_url": base_url,
             }
         ],
     }
