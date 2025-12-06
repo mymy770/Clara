@@ -438,7 +438,7 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
                     wordBreak: 'break-word',
                     color: 'var(--think-text)',
                   }}>
-                    {escapeHtml(displayText)}
+                    {escapeHtml(thought.text || '')}
                   </div>
                 </div>
               )
