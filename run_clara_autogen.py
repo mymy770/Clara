@@ -124,12 +124,24 @@ def main():
                 
                 # 3 — Envoyer au user_proxy / interpreter avec un nombre de tours limité
                 try:
+                    # Capturer stdout/stderr pour supprimer tous les messages verbeux d'Autogen
+                    import sys
+                    from io import StringIO
+                    old_stdout = sys.stdout
+                    old_stderr = sys.stderr
+                    sys.stdout = StringIO()
+                    sys.stderr = StringIO()
+                    
                     response = user_proxy.initiate_chat(
                         interpreter,
                         message=user_input,
                         max_turns=1,  # 1 tour suffit pour une réponse directe
                         silent=True,  # Désactiver l'affichage verbeux des échanges inter-agents
                     )
+                    
+                    # Restaurer stdout/stderr
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
                     # Autogen renvoie un objet, on affiche soit un résumé, soit le dernier message
                     if hasattr(response, "summary") and response.summary:
                         final_response = response.summary
