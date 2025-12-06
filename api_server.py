@@ -233,6 +233,78 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/chat/autogen", response_model=ChatResponse)
+async def chat_autogen(request: ChatRequest):
+    """Endpoint pour envoyer un message à Clara en mode Autogen (multi-agents)"""
+    if not AUTOGEN_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Autogen non disponible. Installez pyautogen.")
+    
+    try:
+        instances = init_autogen_instances()
+        manager = instances['manager']
+        user_proxy = instances['user_proxy']
+        
+        session_id = request.session_id or generate_session_id()
+        session_logger = SessionLogger(session_id)
+        session_logger.log_user(request.message)
+        
+        import sys
+        from io import StringIO
+        old_stdout, old_stderr = sys.stdout, sys.stderr
+        sys.stdout, sys.stderr = StringIO(), StringIO()
+        
+        try:
+            response = user_proxy.initiate_chat(manager, message=request.message, max_turns=2, silent=True)
+            sys.stdout, sys.stderr = old_stdout, old_stderr
+            
+            final_response = ""
+            if hasattr(manager, "groupchat") and manager.groupchat.messages:
+                for msg in reversed(manager.groupchat.messages):
+                    if hasattr(msg, "name") and msg.name == "interpreter":
+                        if hasattr(msg, "content") and msg.content and msg.content.strip():
+                            final_response = msg.content.strip()
+                            break
+                    elif isinstance(msg, dict) and msg.get("name") == "interpreter":
+                        content = msg.get("content", "")
+                        if content and content.strip():
+                            final_response = content.strip()
+                            break
+                if not final_response:
+                    for msg in reversed(manager.groupchat.messages):
+                        if hasattr(msg, "name") and msg.name != "user_proxy":
+                            if hasattr(msg, "content") and msg.content and msg.content.strip():
+                                final_response = msg.content.strip()
+                                break
+            
+            if not final_response:
+                if hasattr(response, "summary") and response.summary:
+                    final_response = response.summary
+                elif hasattr(response, "chat_history") and response.chat_history:
+                    for msg in reversed(response.chat_history):
+                        content = msg.get("content", "") if isinstance(msg, dict) else str(msg)
+                        if content and content.strip():
+                            final_response = content.strip()
+                            break
+            
+            if not final_response:
+                final_response = "(pas de réponse)"
+        except Exception as e:
+            sys.stdout, sys.stderr = old_stdout, old_stderr
+            raise
+        
+        session_logger.log_clara(final_response)
+        return ChatResponse(
+            reply=final_response,
+            session_id=session_id,
+            internal={'thoughts': None, 'todo': None, 'steps': [], 'observe': "✓ Réponse envoyée"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.exception(f"Erreur dans chat_autogen: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur serveur: {str(e)}")
+
+
 def load_session_titles():
     """Charge les titres des sessions depuis un fichier JSON"""
     titles_file = Path("logs/sessions/_titles.json")
