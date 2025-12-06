@@ -19,11 +19,12 @@ class SessionLogger:
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.log_file = self.logs_dir / f"{session_id}.txt"
         
-        # Écrire l'en-tête
-        with open(self.log_file, 'w', encoding='utf-8') as f:
-            f.write(f"=== Clara Session {session_id} ===\n")
-            f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write("=" * 50 + "\n\n")
+        # Écrire l'en-tête seulement si le fichier n'existe pas déjà
+        if not self.log_file.exists():
+            with open(self.log_file, 'w', encoding='utf-8') as f:
+                f.write(f"=== Clara Session {session_id} ===\n")
+                f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("=" * 50 + "\n\n")
     
     def log_user(self, message):
         """Log un message utilisateur"""
