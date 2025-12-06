@@ -130,3 +130,23 @@ export async function createSession() {
   return await response.json()
 }
 
+export async function getAutogenAgents(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}/autogen/agents`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+
+export async function getAutogenMessages(sessionId) {
+  const response = await fetch(`${API_BASE}/sessions/${sessionId}/autogen/messages`)
+  
+  if (!response.ok) {
+    throw new Error(`API error: ${response.statusText}`)
+  }
+  
+  return await response.json()
+}
+

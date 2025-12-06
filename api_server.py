@@ -11,6 +11,7 @@ import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+from collections import defaultdict
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement
@@ -86,6 +87,9 @@ autogen_instances = {
     'manager': None,
     'user_proxy': None,
 }
+
+# Stockage des messages Autogen par session (pour le Studio)
+autogen_sessions = defaultdict(lambda: {'messages': [], 'last_update': None})
 
 def init_autogen_instances():
     """Initialise les instances Autogen une seule fois"""
@@ -249,6 +253,10 @@ async def chat_autogen(request: ChatRequest):
         session_logger = SessionLogger(session_id)
         session_logger.log_user(request.message)
         
+        # Capturer les messages avant le chat
+        groupchat = instances['groupchat']
+        messages_before = len(groupchat.messages) if hasattr(groupchat, 'messages') else 0
+        
         import sys
         from io import StringIO
         old_stdout, old_stderr = sys.stdout, sys.stderr
@@ -258,6 +266,54 @@ async def chat_autogen(request: ChatRequest):
             # Augmenter max_turns pour permettre l'exécution des fonctions
             response = user_proxy.initiate_chat(manager, message=request.message, max_turns=5, silent=True)
             sys.stdout, sys.stderr = old_stdout, old_stderr
+            
+            # Capturer tous les messages du GroupChat après le chat
+            if hasattr(groupchat, 'messages'):
+                session_messages = []
+                for idx, msg in enumerate(groupchat.messages):
+                    # Convertir le message en format JSON-serializable
+                    msg_dict = {
+                        'id': idx,
+                        'timestamp': datetime.now().isoformat(),
+                    }
+                    
+                    # Extraire name
+                    if hasattr(msg, 'name'):
+                        msg_dict['name'] = msg.name
+                    elif isinstance(msg, dict):
+                        msg_dict['name'] = msg.get('name')
+                    else:
+                        msg_dict['name'] = 'unknown'
+                    
+                    # Extraire content
+                    if hasattr(msg, 'content'):
+                        msg_dict['content'] = msg.content
+                    elif isinstance(msg, dict):
+                        msg_dict['content'] = msg.get('content', '')
+                    else:
+                        msg_dict['content'] = str(msg)
+                    
+                    # Extraire role
+                    if hasattr(msg, 'role'):
+                        msg_dict['role'] = msg.role
+                    elif isinstance(msg, dict):
+                        msg_dict['role'] = msg.get('role')
+                    
+                    # Extraire function_call si présent
+                    if hasattr(msg, 'function_call') and msg.function_call:
+                        func_call = msg.function_call
+                        msg_dict['function_call'] = {
+                            'name': getattr(func_call, 'name', None) or (func_call.get('name') if isinstance(func_call, dict) else None),
+                            'arguments': getattr(func_call, 'arguments', None) or (func_call.get('arguments') if isinstance(func_call, dict) else None),
+                        }
+                    elif isinstance(msg, dict) and 'function_call' in msg:
+                        msg_dict['function_call'] = msg['function_call']
+                    
+                    session_messages.append(msg_dict)
+                
+                # Stocker les messages pour cette session
+                autogen_sessions[session_id]['messages'] = session_messages
+                autogen_sessions[session_id]['last_update'] = datetime.now().isoformat()
             
             final_response = ""
             if hasattr(manager, "groupchat") and manager.groupchat.messages:
@@ -748,6 +804,72 @@ async def get_session_thinking(session_id: str):
     except Exception as e:
         logging.exception(f"Erreur lecture thinking {session_id}: {e}")
         return {"thinking": []}
+
+
+@app.get("/sessions/{session_id}/autogen/agents")
+async def get_autogen_agents(session_id: str):
+    """Retourne la liste des agents et leurs fonctions pour le Studio"""
+    if not AUTOGEN_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Autogen non disponible")
+    
+    try:
+        instances = init_autogen_instances()
+        
+        agents_info = []
+        for agent_name in ['interpreter', 'fs_agent', 'memory_agent']:
+            agent = instances.get(agent_name)
+            if agent:
+                functions = list(agent.function_map.keys()) if hasattr(agent, 'function_map') else []
+                agents_info.append({
+                    'name': agent_name,
+                    'type': 'assistant',
+                    'functions': functions,
+                    'system_message': (getattr(agent, 'system_message', '')[:200] + '...') if hasattr(agent, 'system_message') else ''
+                })
+        
+        return {
+            'agents': agents_info,
+            'groupchat_config': {
+                'max_round': instances['groupchat'].max_round if instances.get('groupchat') else 5,
+                'speaker_selection': getattr(instances['groupchat'], 'speaker_selection_method', 'round_robin') if instances.get('groupchat') else None
+            }
+        }
+    except Exception as e:
+        logging.exception(f"Erreur dans get_autogen_agents: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/sessions/{session_id}/autogen/messages")
+async def get_autogen_messages(session_id: str):
+    """Retourne tous les messages du GroupChat pour cette session (pour le Studio)"""
+    if not AUTOGEN_AVAILABLE:
+        return {
+            'messages': [],
+            'total': 0,
+            'last_update': None,
+            'agents': [],
+            'error': 'Autogen non disponible'
+        }
+    
+    try:
+        # Récupérer les messages stockés pour cette session
+        session_data = autogen_sessions.get(session_id, {'messages': [], 'last_update': None})
+        
+        return {
+            'messages': session_data['messages'],
+            'total': len(session_data['messages']),
+            'last_update': session_data['last_update'],
+            'agents': list(set(m.get('name') for m in session_data['messages'] if m.get('name')))
+        }
+    except Exception as e:
+        logging.exception(f"Erreur dans get_autogen_messages: {e}")
+        return {
+            'messages': [],
+            'total': 0,
+            'last_update': None,
+            'agents': [],
+            'error': str(e)
+        }
 
 
 if __name__ == "__main__":

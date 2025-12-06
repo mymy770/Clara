@@ -1,0 +1,130 @@
+{
+  "session_id": "test_20251206_165510",
+  "interactions": [
+    {
+      "timestamp": "2025-12-06T16:55:11.340386",
+      "user_input": "suprimes toutes les notes",
+      "prompt_messages": [
+        {
+          "role": "system",
+          "content": "Tu es Clara, une assistante IA intelligente et serviable.\n\nCaractéristiques :\n- Tu es courtoise et professionnelle\n- Tu réponds de manière claire et concise\n- Tu adaptes ta langue à celle de l'utilisateur\n- Tu es honnête : si tu ne sais pas quelque chose, tu le dis\n\nCapacités mémoire (Phase 2.5) :\nTu as maintenant accès à une mémoire persistante pour plusieurs types d'informations.\n\nActions disponibles :\n\nCONTACTS :\n- memory_save_contact : Enregistrer un contact structuré\n- memory_update_contact : Modifier un contact existant\n- memory_list_contacts : Lister tous les contacts\n- memory_search_contacts : Rechercher dans les contacts\n\nFormat JSON attendu pour save_contact :\n```json\n{\"memory_action\": \"save_contact\",\n \"contact\": {\n    \"first_name\": \"...\",\n    \"last_name\": \"...\",\n    \"aliases\": [\"...\"],\n    \"phones\": [{\"number\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"emails\": [{\"address\": \"...\", \"label\": \"perso\", \"primary\": true}],\n    \"relationship\": \"...\",\n    \"category\": \"family\" | \"friend\" | \"client\" | \"supplier\" | \"other\",\n    \"notes\": [\"...\"],\n    \"company\": \"...\",\n    \"role\": \"...\"\n  }}\n```\n\nAutres actions contacts :\n```json\n{\"memory_action\": \"list_contacts\"}\n{\"memory_action\": \"search_contacts\", \"query\": \"...\"}\n{\"memory_action\": \"update_contact\", \"contact_id\": 12, \"updates\": {...}}\n```\n\nNOTES :\n- memory_save_note : Sauvegarder une note\n- memory_list_notes : Lister toutes les notes\n- memory_search_notes : Chercher dans les notes\n\nTODOS :\n- memory_save_todo : Enregistrer un todo (chose à faire)\n- memory_list_todos : Lister tous les todos\n- memory_search_todos : Chercher dans les todos\n\nPROCESS :\n- memory_save_process : Enregistrer un processus/procédure détaillée\n- memory_list_processes : Lister tous les processus\n\nPROTOCOL :\n- memory_save_protocol : Enregistrer un protocole/règle générale\n- memory_list_protocols : Lister tous les protocoles\n\nPRÉFÉRENCES :\n- memory_set_preference : Enregistrer une préférence (langue, canal de communication, etc.)\n\nGÉNÉRAL :\n- memory_delete_item : Supprimer un élément par ID (tous types)\n- memory_delete_all_notes : Supprimer toutes les notes\n- memory_delete_all_todos : Supprimer tous les todos\n- memory_delete_all_processes : Supprimer tous les processus\n- memory_delete_all_protocols : Supprimer tous les protocoles\n\nQuand l'utilisateur demande de sauvegarder/lister/chercher/supprimer ces éléments,\nOU quand il exprime une préférence (\"je préfère\", \"désormais\", \"à partir de maintenant\", \"toujours\", \"ne jamais\"),\ntu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :\n\n```json\n{\"memory_action\": \"save_note\", \"content\": \"texte\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"save_todo\", \"content\": \"chose à faire\", \"tags\": [\"optionnel\"]}\n```\n\nou\n\n```json\n{\"memory_action\": \"list_todos\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"search_notes\", \"query\": \"mot\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_item\", \"item_id\": 123}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_all_notes\"}\n```\n\nou\n\n```json\n{\"memory_action\": \"delete_all_todos\"}\n```\n\nIMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, \nET inclure le bloc JSON si une action mémoire est nécessaire.\n\nFILESYSTEM :\nTu peux EXÉCUTER des actions filesystem pour travailler avec des fichiers.\n\nIMPORTANT : Quand l'utilisateur te demande de créer, lire, écrire, lister, déplacer ou supprimer des fichiers/dossiers,\ntu dois TOUJOURS EXÉCUTER l'action immédiatement en incluant un bloc JSON dans ta réponse, pas juste expliquer comment faire.\n\nINTENT: \"filesystem\"\n- Utilise-le quand tu dois lire, écrire, lister, créer, déplacer ou supprimer des fichiers/dossiers.\n- EXÉCUTE l'action, ne l'explique pas.\n\nStructure JSON attendue (à inclure dans ta réponse):\n```json\n{\n  \"intent\": \"filesystem\",\n  \"action\": \"<nom_action>\",\n  \"params\": {\n    ...\n  }\n}\n```\n\nActions supportées :\n- \"read_text\"      → lire un fichier texte\n- \"write_text\"     → écrire un fichier texte (création ou écrasement)\n- \"append_text\"    → ajouter du texte à la fin d'un fichier\n- \"list_dir\"       → lister un dossier\n- \"make_dir\"       → créer un dossier\n- \"move_path\"      → déplacer/renommer un fichier ou dossier\n- \"delete_path\"    → supprimer un fichier ou dossier\n- \"stat_path\"      → obtenir des infos sur un chemin\n- \"search_text\"    → rechercher un texte dans des fichiers\n\nExemples d'exécution:\n- Si l'utilisateur dit \"créer un dossier test\" → EXÉCUTE immédiatement:\n```json\n{\n  \"intent\": \"filesystem\",\n  \"action\": \"make_dir\",\n  \"params\": { \"path\": \"test\" }\n}\n```\n\n- Si l'utilisateur dit \"écris 'bonjour' dans fichier.txt\" → EXÉCUTE immédiatement:\n```json\n{\n  \"intent\": \"filesystem\",\n  \"action\": \"write_text\",\n  \"params\": { \"path\": \"fichier.txt\", \"content\": \"bonjour\" }\n}\n```\n\n- Pour lire un fichier:\n```json\n{\n  \"intent\": \"filesystem\",\n  \"action\": \"read_text\",\n  \"params\": { \"path\": \"journal/dev_notes/...\" }\n}\n```\n\nRÈGLE ABSOLUE : Ne JAMAIS expliquer comment faire. EXÉCUTE directement l'action demandée.\n\nPour l'instant, tu es en phase de construction (Phase 2.5).\nTu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et travailler avec des fichiers."
+        },
+        {
+          "role": "user",
+          "content": "suprimes toutes les notes"
+        }
+      ],
+      "llm_response": "Je supprime toutes tes notes de la mémoire.\n\n✓ 6 note(s) supprimée(s)",
+      "usage": {
+        "completion_tokens": 32,
+        "prompt_tokens": 1361,
+        "total_tokens": 1393,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 1280
+        }
+      },
+      "error": null,
+      "internal_data": {
+        "thoughts": "Je supprime toutes tes notes de la mémoire.",
+        "todo": "1 étape(s)",
+        "steps": [
+          "✓ delete_all_notes"
+        ]
+      },
+      "memory_ops": [
+        {
+          "action": "delete_all_notes",
+          "result": "success",
+          "count": 6
+        }
+      ],
+      "execution_log": [
+        {
+          "timestamp": "2025-12-06T16:55:10.123047",
+          "type": "llm_call",
+          "action": "generate",
+          "params": {
+            "model": "gpt-5.1",
+            "messages_count": 2
+          },
+          "result": null,
+          "error": null
+        },
+        {
+          "timestamp": "2025-12-06T16:55:11.329228",
+          "type": "llm_call",
+          "action": "generate",
+          "params": {
+            "model": "gpt-5.1"
+          },
+          "result": {
+            "response_length": 94,
+            "usage": {
+              "completion_tokens": 32,
+              "prompt_tokens": 1361,
+              "total_tokens": 1393,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1280
+              }
+            }
+          },
+          "error": null
+        }
+      ]
+    }
+  ],
+  "full_execution_log": [
+    {
+      "timestamp": "2025-12-06T16:55:10.123047",
+      "type": "llm_call",
+      "action": "generate",
+      "params": {
+        "model": "gpt-5.1",
+        "messages_count": 2
+      },
+      "result": null,
+      "error": null
+    },
+    {
+      "timestamp": "2025-12-06T16:55:11.329228",
+      "type": "llm_call",
+      "action": "generate",
+      "params": {
+        "model": "gpt-5.1"
+      },
+      "result": {
+        "response_length": 94,
+        "usage": {
+          "completion_tokens": 32,
+          "prompt_tokens": 1361,
+          "total_tokens": 1393,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": 0,
+            "audio_tokens": 0,
+            "reasoning_tokens": 0,
+            "rejected_prediction_tokens": 0
+          },
+          "prompt_tokens_details": {
+            "audio_tokens": 0,
+            "cached_tokens": 1280
+          }
+        }
+      },
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+=== Clara Session session_20251206_163300 ===
+Date: 2025-12-06 16:33:00
+==================================================
+
+[16:33:00] Utilisateur:
+salut
+
+[16:33:02] Clara:
+Salut 🙂  
+Comment puis-je t’aider aujourd’hui ?
+
+[16:33:06] Utilisateur:
+salut
+
+[16:33:17] Clara:
+Salut.
+
+[16:34:06] Utilisateur:
+suprimes toutes me snotes
+
+[16:34:16] Clara:
+Succès : toutes tes notes ont été supprimées.
+
+[16:35:33] Utilisateur:
+suprimes tous les todos
+
+[16:35:40] Clara:
+None
+
+[16:36:08] Utilisateur:
+quoi none ?
+
+[16:36:23] Clara:
+Précise ta question sur `None` ou envoie le code / message où tu le vois. Sans contexte, je ne peux pas affiner plus.
+
+[16:37:55] Utilisateur:
+suprime tous les todo
+
+[16:38:01] Clara:
+None
+

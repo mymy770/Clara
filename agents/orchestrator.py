@@ -108,8 +108,12 @@ PRÉFÉRENCES :
 
 GÉNÉRAL :
 - memory_delete_item : Supprimer un élément par ID (tous types)
+- memory_delete_all_notes : Supprimer toutes les notes
+- memory_delete_all_todos : Supprimer tous les todos
+- memory_delete_all_processes : Supprimer tous les processus
+- memory_delete_all_protocols : Supprimer tous les protocoles
 
-Quand l'utilisateur demande de sauvegarder/lister/chercher ces éléments,
+Quand l'utilisateur demande de sauvegarder/lister/chercher/supprimer ces éléments,
 OU quand il exprime une préférence ("je préfère", "désormais", "à partir de maintenant", "toujours", "ne jamais"),
 tu dois RETOURNER une structure JSON d'intention dans ta réponse, délimitée par des balises :
 
@@ -139,6 +143,18 @@ ou
 
 ```json
 {"memory_action": "delete_item", "item_id": 123}
+```
+
+ou
+
+```json
+{"memory_action": "delete_all_notes"}
+```
+
+ou
+
+```json
+{"memory_action": "delete_all_todos"}
 ```
 
 IMPORTANT : Tu dois TOUJOURS répondre au format texte naturel à l'utilisateur, 
@@ -589,8 +605,59 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                 if item_id:
                     delete_item(item_id=item_id)
                     result_message = f"✓ Élément {item_id} supprimé"
+                    memory_ops.append({"action": "delete_item", "result": "success", "item_id": item_id})
                 else:
                     result_message = "⚠ ID manquant pour la suppression"
+                    memory_ops.append({"action": "delete_item", "result": "error", "error": "ID manquant"})
+            
+            elif action == 'delete_all_notes':
+                items = get_items(type='note')
+                count = len(items)
+                if count == 0:
+                    result_message = "Aucune note à supprimer."
+                    memory_ops.append({"action": "delete_all_notes", "result": "empty"})
+                else:
+                    for item in items:
+                        delete_item(item_id=item['id'])
+                    result_message = f"✓ {count} note(s) supprimée(s)"
+                    memory_ops.append({"action": "delete_all_notes", "result": "success", "count": count})
+            
+            elif action == 'delete_all_todos':
+                items = get_items(type='todo')
+                count = len(items)
+                if count == 0:
+                    result_message = "Aucun todo à supprimer."
+                    memory_ops.append({"action": "delete_all_todos", "result": "empty"})
+                else:
+                    for item in items:
+                        delete_item(item_id=item['id'])
+                    result_message = f"✓ {count} todo(s) supprimé(s)"
+                    memory_ops.append({"action": "delete_all_todos", "result": "success", "count": count})
+            
+            elif action == 'delete_all_processes':
+                items = get_items(type='process')
+                count = len(items)
+                if count == 0:
+                    result_message = "Aucun processus à supprimer."
+                    memory_ops.append({"action": "delete_all_processes", "result": "empty"})
+                else:
+                    for item in items:
+                        delete_item(item_id=item['id'])
+                    result_message = f"✓ {count} processus supprimé(s)"
+                    memory_ops.append({"action": "delete_all_processes", "result": "success", "count": count})
+            
+            elif action == 'delete_all_protocols':
+                items = get_items(type='protocol')
+                count = len(items)
+                if count == 0:
+                    result_message = "Aucun protocole à supprimer."
+                    memory_ops.append({"action": "delete_all_protocols", "result": "empty"})
+                else:
+                    for item in items:
+                        delete_item(item_id=item['id'])
+                    result_message = f"✓ {count} protocole(s) supprimé(s)"
+                    memory_ops.append({"action": "delete_all_protocols", "result": "success", "count": count})
+            
             else:
                 return (response_text, None, [])
             

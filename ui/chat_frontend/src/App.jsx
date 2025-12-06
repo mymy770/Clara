@@ -3,6 +3,7 @@ import SessionSidebarV2 from './components/SessionSidebarV2'
 import ChatArea from './components/ChatArea'
 import RightPanel from './components/RightPanel'
 import InternalPanel from './components/InternalPanel'
+import AgentStudio from './components/AgentStudio'
 import { loadSession, sendMessage } from './api'
 import { loadThemeFromLocalStorage, applyThemeToDocument } from './config/themeManager'
 
@@ -16,6 +17,7 @@ export default function App() {
   const [internalTodo, setInternalTodo] = useState(null)
   const [internalSteps, setInternalSteps] = useState(null)
   const [useAutogen, setUseAutogen] = useState(false) // Toggle mode Autogen
+  const [studioOpen, setStudioOpen] = useState(false) // Toggle Studio Clara
 
   // Charger le thème au démarrage
   useEffect(() => {
@@ -149,6 +151,7 @@ export default function App() {
           fontSize: '14px',
           fontWeight: '600',
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           gap: '8px',
           background: 'var(--header-bg)',
@@ -165,6 +168,25 @@ export default function App() {
             )}
           </span>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {useAutogen && (
+              <button
+                onClick={() => setStudioOpen(true)}
+                title="Ouvrir le Studio Clara (visualisation des agents)"
+                style={{
+                  padding: '4px 10px',
+                  background: '#3b82f6',
+                  color: 'white',
+                  border: '1px solid #2563eb',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                🤖 Studio
+              </button>
+            )}
             <button
               className="toggle-right-panel"
               onClick={() => setRightPanelOpen(!rightPanelOpen)}
@@ -233,6 +255,13 @@ export default function App() {
           onToggle={() => setInternalPanelOpen(!internalPanelOpen)}
         />
       )}
+
+      {/* Studio Clara - Visualisation des agents */}
+      <AgentStudio
+        sessionId={sessionId}
+        isOpen={studioOpen}
+        onToggle={() => setStudioOpen(false)}
+      />
     </div>
   )
 }
