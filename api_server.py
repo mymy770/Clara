@@ -35,6 +35,23 @@ from memory.memory_core import init_db
 from drivers.fs_driver import FSDriver
 from agents.helpers import set_fs_driver
 import json
+import warnings
+# Supprimer les warnings Pydantic d'Autogen
+warnings.filterwarnings('ignore', category=UserWarning, module='pydantic')
+
+# Import Autogen (optionnel, ne plante pas si non installé)
+try:
+    from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
+    from agents.autogen_hub import (
+        build_llm_config,
+        create_fs_agent,
+        create_memory_agent,
+        create_interpreter_agent,
+    )
+    AUTOGEN_AVAILABLE = True
+except ImportError:
+    AUTOGEN_AVAILABLE = False
+    logging.warning("Autogen non disponible. Le mode Autogen sera désactivé.")
 
 # Initialiser la base de données au démarrage
 init_db()

@@ -15,6 +15,7 @@ export default function App() {
   const [internalThoughts, setInternalThoughts] = useState(null)
   const [internalTodo, setInternalTodo] = useState(null)
   const [internalSteps, setInternalSteps] = useState(null)
+  const [useAutogen, setUseAutogen] = useState(false) // Toggle mode Autogen
 
   // Charger le thème au démarrage
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function App() {
     setIsThinking(true)
 
     try {
-      const response = await sendMessage(message, sessionId, false)
+      const response = await sendMessage(message, sessionId, false, useAutogen)
       
       // Extraire les données internes
       const internal = response.internal || {}

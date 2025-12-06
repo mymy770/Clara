@@ -2,8 +2,9 @@
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8001'
 
-export async function sendMessage(message, sessionId = null, debug = false) {
-  const response = await fetch(`${API_BASE}/chat`, {
+export async function sendMessage(message, sessionId = null, debug = false, useAutogen = false) {
+  const endpoint = useAutogen ? '/chat/autogen' : '/chat'
+  const response = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

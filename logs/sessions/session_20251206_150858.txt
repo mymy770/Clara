@@ -1,0 +1,13 @@
+=== Clara Session session_20251206_150858 ===
+Date: 2025-12-06 15:08:58
+==================================================
+
+[15:08:58] Utilisateur:
+bonjour
+
+[15:08:59] Clara:
+Bonjour !  
+
+Je suis Clara, ton assistante IA.  
+Comment puis-je t’aider aujourd’hui ?
+
