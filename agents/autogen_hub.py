@@ -56,6 +56,10 @@ def build_llm_config() -> Dict[str, Any]:
     }
 
 
+# Variables globales pour stocker les fonctions (nécessaire pour les références)
+_fs_functions = {}
+_memory_functions = {}
+
 def create_fs_agent(llm_config: Dict[str, Any], workspace_root: Optional[Path] = None) -> AssistantAgent:
     """Agent spécialisé filesystem. N'a pas de conversation directe avec l'humain."""
     if workspace_root is None:
@@ -128,7 +132,6 @@ def create_fs_agent(llm_config: Dict[str, Any], workspace_root: Optional[Path] =
             return f"⚠ Erreur listage {path} : {str(e)}"
     
     # Créer l'agent avec les tools
-    # Note: Autogen utilise register_for_execution pour les fonctions
     fs_agent = AssistantAgent(
         name="fs_agent",
         system_message="""Tu es un agent spécialisé filesystem.
@@ -139,9 +142,32 @@ Utilise les fonctions disponibles : create_dir, create_file, append_to_file, rea
         llm_config=llm_config,
     )
     
-    # Note: Les fonctions seront appelées via le système de tools d'Autogen
-    # Pour l'instant, on les expose via le system_message et l'agent les utilisera
-    # si Autogen supporte l'appel de fonctions Python directement
+    # Stocker les fonctions globalement pour référence
+    _fs_functions['create_dir'] = create_dir
+    _fs_functions['create_file'] = create_file
+    _fs_functions['append_to_file'] = append_to_file
+    _fs_functions['read_file'] = read_file
+    _fs_functions['move_path'] = move_path
+    _fs_functions['delete_path'] = delete_path
+    _fs_functions['list_dir'] = list_dir
+    
+    # Enregistrer les fonctions comme tools pour l'agent
+    fs_agent.register_for_execution(name="create_dir")(create_dir)
+    fs_agent.register_for_execution(name="create_file")(create_file)
+    fs_agent.register_for_execution(name="append_to_file")(append_to_file)
+    fs_agent.register_for_execution(name="read_file")(read_file)
+    fs_agent.register_for_execution(name="move_path")(move_path)
+    fs_agent.register_for_execution(name="delete_path")(delete_path)
+    fs_agent.register_for_execution(name="list_dir")(list_dir)
+    
+    # Enregistrer aussi pour le LLM (pour qu'il sache quelles fonctions appeler)
+    fs_agent.register_for_llm(name="create_dir", description=create_dir.__doc__)(create_dir)
+    fs_agent.register_for_llm(name="create_file", description=create_file.__doc__)(create_file)
+    fs_agent.register_for_llm(name="append_to_file", description=append_to_file.__doc__)(append_to_file)
+    fs_agent.register_for_llm(name="read_file", description=read_file.__doc__)(read_file)
+    fs_agent.register_for_llm(name="move_path", description=move_path.__doc__)(move_path)
+    fs_agent.register_for_llm(name="delete_path", description=delete_path.__doc__)(delete_path)
+    fs_agent.register_for_llm(name="list_dir", description=list_dir.__doc__)(list_dir)
     
     return fs_agent
 
@@ -317,9 +343,12 @@ Ton rôle :
 
 Si l'utilisateur n'envoie rien → tu ne dois rien produire.
 
-Tu peux appeler d'autres agents (fs_agent, memory_agent) quand c'est utile :
-- De créer, lire, écrire, lister, déplacer ou supprimer des fichiers/dossiers → appelle fs_agent
-- De sauvegarder, lister, rechercher des notes, todos, processus, protocoles, préférences → appelle memory_agent""",
+IMPORTANT : Tu es dans un GroupChat avec fs_agent et memory_agent.
+- Pour les opérations filesystem (créer dossier, fichier, lire, etc.) → mentionne fs_agent dans ta réponse et il exécutera l'action
+- Pour les opérations mémoire (sauvegarder note, todo, etc.) → mentionne memory_agent dans ta réponse et il exécutera l'action
+
+Quand l'utilisateur demande de créer un dossier ou un fichier, dis simplement à fs_agent de le faire.
+Ne dis PAS "je ne peux pas accéder au système de fichiers". Tu as fs_agent pour ça.""",
         llm_config=llm_config,
     )
     

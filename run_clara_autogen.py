@@ -15,7 +15,7 @@ from typing import Optional
 
 try:
     import autogen
-    from autogen import AssistantAgent, UserProxyAgent
+    from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
     # Désactiver comportements automatiques d'Autogen (si settings existe)
     try:
         from autogen import settings
@@ -82,6 +82,18 @@ def main():
         interpreter = create_interpreter_agent(llm_config, fs_agent, memory_agent)
         print("✓ InterpreterAgent créé")
         
+        # Créer un GroupChat pour permettre la communication entre agents
+        groupchat = GroupChat(
+            agents=[interpreter, fs_agent, memory_agent],
+            messages=[],
+            max_round=3,  # Limiter les tours pour éviter les boucles
+        )
+        manager = GroupChatManager(
+            groupchat=groupchat,
+            llm_config=llm_config,
+        )
+        print("✓ GroupChat créé")
+        
         # Créer un UserProxyAgent pour l'utilisateur
         user_proxy = UserProxyAgent(
             name="user_proxy",
@@ -132,18 +144,28 @@ def main():
                     sys.stdout = StringIO()
                     sys.stderr = StringIO()
                     
+                    # Utiliser le GroupChatManager au lieu de l'interpreter directement
                     response = user_proxy.initiate_chat(
-                        interpreter,
+                        manager,
                         message=user_input,
-                        max_turns=1,  # 1 tour suffit pour une réponse directe
+                        max_turns=2,  # 2 tours pour permettre la délégation aux agents spécialisés
                         silent=True,  # Désactiver l'affichage verbeux des échanges inter-agents
                     )
                     
                     # Restaurer stdout/stderr
                     sys.stdout = old_stdout
                     sys.stderr = old_stderr
-                    # Autogen renvoie un objet, on affiche soit un résumé, soit le dernier message
-                    if hasattr(response, "summary") and response.summary:
+                    
+                    # Extraire la réponse du GroupChatManager
+                    # Le GroupChatManager stocke les messages dans groupchat.messages
+                    if hasattr(manager, "groupchat") and hasattr(manager.groupchat, "messages") and manager.groupchat.messages:
+                        # Prendre le dernier message de l'interpreter ou du manager
+                        last_msg = manager.groupchat.messages[-1]
+                        if isinstance(last_msg, dict):
+                            final_response = last_msg.get("content", "")
+                        else:
+                            final_response = str(last_msg)
+                    elif hasattr(response, "summary") and response.summary:
                         final_response = response.summary
                     elif hasattr(response, "chat_history") and response.chat_history:
                         last = response.chat_history[-1]
