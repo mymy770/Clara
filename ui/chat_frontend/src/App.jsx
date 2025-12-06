@@ -131,6 +131,8 @@ export default function App() {
         currentSessionId={sessionId}
         onSelectSession={handleSelectSession}
         onNewSession={handleNewSession}
+        useAutogen={useAutogen}
+        onToggleAutogen={setUseAutogen}
       />
 
       {/* Zone centrale (Chat) */}

@@ -76,6 +76,58 @@ set_fs_driver(fs_driver)
 # Orchestrateur global (réutilisé pour toutes les requêtes)
 orchestrator = Orchestrator(fs_driver=fs_driver)
 
+# Instances Autogen globales (créées à la première utilisation)
+autogen_instances = {
+    'llm_config': None,
+    'fs_agent': None,
+    'memory_agent': None,
+    'interpreter': None,
+    'groupchat': None,
+    'manager': None,
+    'user_proxy': None,
+}
+
+def init_autogen_instances():
+    """Initialise les instances Autogen une seule fois"""
+    if not AUTOGEN_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Autogen non disponible")
+    
+    if autogen_instances['manager'] is None:
+        logging.info("Initialisation des agents Autogen...")
+        workspace_root = Path(__file__).resolve().parent
+        
+        llm_config = build_llm_config()
+        fs_agent = create_fs_agent(llm_config, workspace_root)
+        memory_agent = create_memory_agent(llm_config)
+        interpreter = create_interpreter_agent(llm_config, fs_agent, memory_agent)
+        
+        groupchat = GroupChat(
+            agents=[interpreter, fs_agent, memory_agent],
+            messages=[],
+            max_round=3,
+        )
+        manager = GroupChatManager(
+            groupchat=groupchat,
+            llm_config=llm_config,
+        )
+        user_proxy = UserProxyAgent(
+            name="user_proxy",
+            human_input_mode="NEVER",
+            max_consecutive_auto_reply=1,
+            code_execution_config=False,
+        )
+        
+        autogen_instances['llm_config'] = llm_config
+        autogen_instances['fs_agent'] = fs_agent
+        autogen_instances['memory_agent'] = memory_agent
+        autogen_instances['interpreter'] = interpreter
+        autogen_instances['groupchat'] = groupchat
+        autogen_instances['manager'] = manager
+        autogen_instances['user_proxy'] = user_proxy
+        logging.info("✓ Agents Autogen initialisés")
+    
+    return autogen_instances
+
 
 def generate_session_id():
     """Génère un ID de session unique"""

@@ -325,6 +325,25 @@ export default function SessionSidebarV2({ currentSessionId, onSelectSession, on
           >
             🗑️ Tout supprimer
           </button>
+          {onToggleAutogen && (
+            <button
+              onClick={() => onToggleAutogen(!useAutogen)}
+              style={{
+                padding: '6px 10px',
+                fontSize: '11px',
+                background: useAutogen ? 'var(--accent-color)' : 'var(--sidebar-bg)',
+                color: useAutogen ? '#fff' : 'var(--sidebar-text)',
+                border: `1px solid ${useAutogen ? 'var(--accent-color)' : 'var(--sidebar-border)'}`,
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: useAutogen ? 'bold' : 'normal',
+                marginRight: '4px',
+              }}
+              title={useAutogen ? 'Mode Autogen activé' : 'Mode Autogen désactivé'}
+            >
+              {useAutogen ? '🤖 Autogen ON' : '🤖 Autogen OFF'}
+            </button>
+          )}
           <button
             id="sidebar-settings-btn"
             className="sidebar-settings-btn"
