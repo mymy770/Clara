@@ -9,6 +9,7 @@ Définit les agents :
 
 import os
 import yaml
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dotenv import load_dotenv
@@ -397,8 +398,16 @@ Autogen gère automatiquement l'appel des fonctions via function calling OpenAI.
     )
     
     # Enregistrer toutes les fonctions pour le LLM
+    # IMPORTANT: register_for_llm doit être appelé AVANT la création de l'agent
+    # Ici on l'appelle après, donc on doit le faire manuellement
     for func_name, func in all_functions.items():
-        interpreter.register_for_llm(name=func_name, description=getattr(func, '__doc__', f"Function {func_name}"))(func)
+        try:
+            interpreter.register_for_llm(
+                name=func_name, 
+                description=getattr(func, '__doc__', f"Function {func_name}")
+            )(func)
+        except Exception as e:
+            logging.warning(f"Erreur enregistrement {func_name} pour LLM: {e}")
     
     return interpreter
 

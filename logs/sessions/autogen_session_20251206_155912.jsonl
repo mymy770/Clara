@@ -1,0 +1,2 @@
+{"timestamp": "2025-12-06T15:59:19.668804", "user_input": "enregistre une note: test vérification fonction appel", "agents_called": [], "tools_called": [], "error": null, "final_response": "Bonjour."}
+{"timestamp": "2025-12-06T15:59:26.269143", "user_input": "liste mes notes", "agents_called": [], "tools_called": [], "error": null, "final_response": "2 notes trouvées :\n- ID 7 : test vérification fonction appel...\n- ID 4 : Préférence: clarity_on_memory = User wants direct and explicit confirmation of what is really stored..."}

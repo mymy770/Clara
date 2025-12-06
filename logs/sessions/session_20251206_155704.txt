@@ -1,0 +1,50 @@
+=== Clara Session session_20251206_155704 ===
+Date: 2025-12-06 15:57:04
+==================================================
+
+[15:57:04] Utilisateur:
+slaut
+
+[15:57:06] Clara:
+Salut 🙂  
+Je suis Clara, ton assistante IA.  
+
+Je peux t’aider à :
+- prendre des notes, créer des todos,
+- gérer des contacts,
+- écrire/lire des fichiers, organiser des dossiers,
+- répondre à tes questions (travail, études, perso, etc.).
+
+Tu veux faire quoi aujourd’hui ?
+
+[15:57:09] Utilisateur:
+liste moi les todo
+
+[15:57:10] Clara:
+Voici tes todos en cours :
+
+1. [ID 3] Appeler ma mère à 20h10 ce soir  
+2. [ID 2] Appeler ma femme ce soir à 20h  
+
+Si tu veux, je peux en ajouter un nouveau, en modifier un, ou en supprimer un.
+
+✅ 2 todo(s) trouvé(s) :
+  - ID 3: Appeler ma mère à 20h10 ce soir...
+  - ID 2: Appeler ma femme ce soir à 20h...
+
+
+[15:57:29] Utilisateur:
+modifi le id 2 et rajoute appeler mes enfants
+
+[15:57:31] Clara:
+D’accord, je modifie le todo ID 2 pour y ajouter « appeler mes enfants ».
+
+```json
+{"memory_action": "update_todo", "todo_id": 2, "updates": {"content": "Appeler ma femme et mes enfants ce soir à 20h"}}
+```
+
+Le todo 2 est maintenant :  
+- Appeler ma femme et mes enfants ce soir à 20h  
+
+Tu veux que je change aussi l’heure ou c’est bon comme ça ?
+
