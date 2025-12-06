@@ -136,9 +136,10 @@ def create_fs_agent(llm_config: Dict[str, Any], workspace_root: Optional[Path] =
         name="fs_agent",
         system_message="""Tu es un agent spécialisé filesystem.
 Tu ne réponds jamais directement à l'utilisateur.
-Tu exécutes uniquement les actions demandées via tes tools,
-et tu retournes des résultats structurés (succès/échec + détails).
-Utilise les fonctions disponibles : create_dir, create_file, append_to_file, read_file, move_path, delete_path, list_dir.""",
+Quand l'interpreter ou un autre agent te demande de créer un dossier, un fichier, de lire un fichier, etc.,
+tu dois APPELER IMMÉDIATEMENT la fonction appropriée (create_dir, create_file, read_file, etc.) au lieu de juste répondre.
+Exécute l'action et retourne le résultat (succès/échec + détails).
+Fonctions disponibles : create_dir, create_file, append_to_file, read_file, move_path, delete_path, list_dir.""",
         llm_config=llm_config,
     )
     
