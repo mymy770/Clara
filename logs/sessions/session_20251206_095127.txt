@@ -1,0 +1,16 @@
+=== Clara Session session_20251206_095127 ===
+Date: 2025-12-06 09:52:25
+==================================================
+
+[09:52:25] Utilisateur:
+Lis le fichier test_fs/demo.txt.
+
+[09:52:26] Clara:
+{
+  "intent": "filesystem",
+  "action": "read_text",
+  "params": {
+    "path": "test_fs/demo.txt"
+  }
+}
+

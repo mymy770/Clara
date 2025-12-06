@@ -225,7 +225,10 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             cleaned_response, memory_result, memory_ops = self._process_memory_action(llm_raw_response)
             
             # Chercher une intention filesystem dans la réponse
-            fs_cleaned_response, fs_result = self._process_filesystem_action(cleaned_response)
+            fs_cleaned_response, fs_result, fs_ops = self._process_filesystem_action(cleaned_response)
+            
+            # Combiner les opérations mémoire et filesystem pour SYNC
+            all_ops = memory_ops + fs_ops
             
             # Si une action filesystem a été exécutée, utiliser la réponse nettoyée et ajouter le résultat
             if fs_result:
@@ -249,7 +252,7 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             internal_data = self._extract_internal_data(
                 llm_raw_response=llm_raw_response,
                 memory_result=memory_result, 
-                memory_ops=memory_ops
+                memory_ops=all_ops  # Inclure toutes les opérations (mémoire + FS)
             )
             
             # Logger le debug avec les données internes
@@ -260,7 +263,7 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                 usage=response['usage'],
                 error=None,
                 internal_data=internal_data,
-                memory_ops=memory_ops
+                memory_ops=all_ops  # Inclure toutes les opérations
             )
             
             # Retourner la réponse avec les données internes
@@ -580,7 +583,7 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
         Extrait et exécute une action filesystem depuis la réponse du LLM
         
         Returns:
-            tuple: (cleaned_response, result_message) ou (response_text, None) si pas d'action
+            tuple: (cleaned_response, result_message, fs_ops) ou (response_text, None, []) si pas d'action
         """
         import logging
         logger = logging.getLogger(__name__)
@@ -595,7 +598,7 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                 if fallback_match:
                     raw_json = fallback_match.group(1)
                 else:
-                    return (response_text, None)
+                    return (response_text, None, [])
             else:
                 raw_json = json_match.group(1)
             
@@ -604,33 +607,47 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                 intent_data = json.loads(raw_json)
             except json.JSONDecodeError as e:
                 logger.warning(f"Erreur parsing JSON filesystem: {e}")
-                return (response_text, None)
+                return (response_text, None, [])
             
             intent = intent_data.get('intent')
             if intent != 'filesystem':
-                return (response_text, None)
+                return (response_text, None, [])
             
             action = intent_data.get('action')
             params = intent_data.get('params', {})
             
             if not action:
-                return (response_text, None)
+                return (response_text, None, [])
+            
+            # Créer une entrée pour SYNC
+            fs_ops = [{
+                "action": f"FS {action}",
+                "result": "success",
+                "path": params.get('path', params.get('src', 'N/A'))
+            }]
             
             # Exécuter l'action filesystem
             fs_result = execute_fs_action(action, params)
             
             if fs_result.get('ok'):
-                # Construire un message lisible pour l'utilisateur
+                # Construire un message lisible pour l'utilisateur avec les résultats réels
                 if action == 'read_text':
                     content = fs_result.get('content', '')
-                    result_message = f"✓ Fichier lu ({len(content)} caractères)"
+                    # Inclure le contenu réel dans la réponse
+                    result_message = f"✓ Fichier lu ({len(content)} caractères) :\n\n{content}"
                 elif action == 'write_text':
                     result_message = f"✓ Fichier écrit : {params.get('path', '')}"
                 elif action == 'append_text':
                     result_message = f"✓ Contenu ajouté à : {params.get('path', '')}"
                 elif action == 'list_dir':
                     items = fs_result.get('items', [])
-                    result_message = f"✓ {len(items)} élément(s) trouvé(s)"
+                    if items:
+                        result_message = f"✓ {len(items)} élément(s) trouvé(s) :\n"
+                        for item in items[:20]:  # Limiter à 20 pour la lisibilité
+                            item_type = "📁" if item.get('is_dir') else "📄"
+                            result_message += f"  {item_type} {item.get('path', '')}\n"
+                    else:
+                        result_message = f"✓ Dossier vide : {params.get('path', '.')}"
                 elif action == 'make_dir':
                     result_message = f"✓ Dossier créé : {params.get('path', '')}"
                 elif action == 'move_path':
@@ -639,10 +656,20 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                     result_message = f"✓ Supprimé : {params.get('path', '')}"
                 elif action == 'stat_path':
                     info = fs_result.get('info', {})
-                    result_message = f"✓ Infos récupérées pour : {params.get('path', '')}"
+                    if info.get('exists'):
+                        size = info.get('size', 'N/A')
+                        is_dir = "dossier" if info.get('is_dir') else "fichier"
+                        result_message = f"✓ {is_dir.capitalize()} : {params.get('path', '')} ({size} octets)"
+                    else:
+                        result_message = f"⚠ Fichier introuvable : {params.get('path', '')}"
                 elif action == 'search_text':
                     results = fs_result.get('results', [])
-                    result_message = f"✓ {len(results)} résultat(s) trouvé(s)"
+                    if results:
+                        result_message = f"✓ {len(results)} résultat(s) trouvé(s) :\n"
+                        for r in results[:10]:  # Limiter à 10 résultats
+                            result_message += f"  📄 {r.get('path', '')} : {r.get('snippet', '')[:80]}...\n"
+                    else:
+                        result_message = f"✓ Aucun résultat trouvé pour '{params.get('query', '')}'"
                 else:
                     result_message = fs_result.get('message', '✓ Action filesystem exécutée')
             else:
@@ -659,11 +686,11 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             
             logger.info(f"filesystem_action_executed: action={action}, path={params.get('path', 'N/A')}")
             
-            return (cleaned, result_message)
+            return (cleaned, result_message, fs_ops)
             
         except Exception as e:
             logger.warning(f"Erreur dans _process_filesystem_action: {e}")
-            return (response_text, None)
+            return (response_text, None, [])
     
     def _check_memory_read_intent(self, user_message):
         """
@@ -815,18 +842,26 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             if step_count > 0:
                 internal['todo'] = f"{step_count} étape(s)"
         
-        # OBSERVE : Résultat final
-        # Si Clara a répondu (même avec une action mémoire), c'est toujours une "Réponse envoyée"
-        if llm_raw_response:
-            if memory_result:
-                # Il y a eu une action mémoire + réponse
-                if '⚠' in memory_result or 'erreur' in memory_result.lower():
-                    internal['steps'] = [f"⚠ Erreur"]
+        # OBSERVE/SYNC : Résultat final + opérations exécutées
+        steps_list = []
+        
+        # Ajouter les opérations mémoire
+        if memory_ops:
+            for op in memory_ops:
+                action_name = op.get('action', 'action')
+                result = op.get('result', 'success')
+                if result == 'success':
+                    steps_list.append(f"✓ {action_name}")
                 else:
-                    internal['steps'] = [f"✓ Réponse envoyée"]
-            else:
-                # Pas d'action mémoire, juste une réponse
-                internal['steps'] = ["✓ Réponse envoyée"]
+                    steps_list.append(f"⚠ {action_name}: {op.get('error', 'erreur')}")
+        
+        # Si pas d'opérations mais une réponse, indiquer que la réponse a été envoyée
+        if not steps_list:
+            if llm_raw_response:
+                steps_list.append("✓ Réponse envoyée")
+        
+        if steps_list:
+            internal['steps'] = steps_list
         
         return internal
     
