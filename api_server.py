@@ -590,14 +590,18 @@ async def get_session_thinking(session_id: str):
                         "text": f"💭 {thoughts}",
                         "type": "internal_thought"
                     })
-            
-            # Format alternatif (si thinking existe directement)
-            elif "thinking" in debug_data:
-                thinking = debug_data["thinking"]
-            elif "thoughts" in debug_data:
-                thinking = debug_data["thoughts"]
         
-        return {"thinking": thinking}
+        # Format alternatif (si thinking existe directement)
+        if isinstance(debug_data, dict):
+            if "thinking" in debug_data:
+                thinking.extend(debug_data["thinking"])
+            elif "thoughts" in debug_data:
+                thinking.extend(debug_data["thoughts"])
+        
+        # Trier par timestamp
+        thinking.sort(key=lambda x: x.get('timestamp', x.get('ts', '')))
+        
+        return {"thinking": thinking[-30:]}  # Dernières 30 réflexions
     except Exception as e:
         logging.exception(f"Erreur lecture thinking {session_id}: {e}")
         return {"thinking": []}
