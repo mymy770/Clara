@@ -1,0 +1,2 @@
+{"timestamp": "2025-12-06T15:50:54.360775", "user_input": "enregistre une note: test autogen avec toutes les fonctions dans interpreter", "agents_called": [], "tools_called": [], "error": null, "final_response": "👌"}
+{"timestamp": "2025-12-06T15:51:01.395963", "user_input": "liste mes notes", "agents_called": [], "tools_called": [], "error": null, "final_response": "2 notes trouvées :\n- ID 6 : test autogen avec toutes les fonctions dans interpreter...\n- ID 4 : Préférence: clarity_on_memory = User wants direct and explicit confirmation of what is vraiment stocké..."}

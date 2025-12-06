@@ -349,6 +349,18 @@ def create_interpreter_agent(
 ) -> AssistantAgent:
     """Agent chef d'orchestre : parle à l'utilisateur et délègue."""
     
+    # RÉCUPÉRER TOUTES LES FONCTIONS des agents spécialisés
+    # L'interpreter doit avoir accès à TOUTES les fonctions pour les appeler directement
+    all_functions = {}
+    
+    # Récupérer les fonctions du fs_agent
+    if hasattr(fs_agent, 'function_map'):
+        all_functions.update(fs_agent.function_map)
+    
+    # Récupérer les fonctions du memory_agent
+    if hasattr(memory_agent, 'function_map'):
+        all_functions.update(memory_agent.function_map)
+    
     interpreter = AssistantAgent(
         name="interpreter",
         system_message="""Tu es Clara, un agent technique et logique.
@@ -371,25 +383,22 @@ Ton rôle :
 
 Si l'utilisateur n'envoie rien → tu ne dois rien produire.
 
-IMPORTANT : Tu es dans un GroupChat avec fs_agent et memory_agent.
-Tu peux leur PARLER DIRECTEMENT en les mentionnant par leur nom (@fs_agent ou @memory_agent).
+IMPORTANT : Tu as accès à TOUTES les fonctions (filesystem et mémoire).
+Quand l'utilisateur te demande de :
+- Sauvegarder une note/todo → APPELÉ IMMÉDIATEMENT la fonction save_note_tool ou save_todo_tool
+- Lister des notes/todos → APPELÉ IMMÉDIATEMENT la fonction list_notes ou list_todos
+- Créer un dossier/fichier → APPELÉ IMMÉDIATEMENT la fonction create_dir ou create_file
+- Lire un fichier → APPELÉ IMMÉDIATEMENT la fonction read_file
 
-Pour les opérations filesystem :
-- Créer un dossier/fichier → dis "@fs_agent, crée le dossier X" ou "@fs_agent, crée le fichier Y avec le contenu Z"
-- Lire un fichier → dis "@fs_agent, lis le fichier X"
-- Lister un dossier → dis "@fs_agent, liste le dossier X"
-
-Pour les opérations mémoire :
-- Sauvegarder une note → dis "@memory_agent, sauvegarde cette note: [contenu]"
-- Sauvegarder un todo → dis "@memory_agent, sauvegarde ce todo: [contenu]"
-- Lister les notes → dis "@memory_agent, liste toutes les notes"
-- Lister les todos → dis "@memory_agent, liste tous les todos"
-
-Quand l'utilisateur demande de créer un dossier, un fichier, ou de sauvegarder une note/todo,
-tu dois IMMÉDIATEMENT demander à l'agent approprié de le faire en le mentionnant (@fs_agent ou @memory_agent).
-Ne dis PAS "je ne peux pas accéder au système de fichiers" ou "je n'ai pas accès à la mémoire". Tu as fs_agent et memory_agent pour ça.""",
+N'explique PAS comment faire. EXÉCUTE directement en appelant la fonction appropriée.
+Autogen gère automatiquement l'appel des fonctions via function calling OpenAI.""",
         llm_config=llm_config,
+        function_map=all_functions,  # L'interpreter a accès à TOUTES les fonctions
     )
+    
+    # Enregistrer toutes les fonctions pour le LLM
+    for func_name, func in all_functions.items():
+        interpreter.register_for_llm(name=func_name, description=getattr(func, '__doc__', f"Function {func_name}"))(func)
     
     return interpreter
 
