@@ -158,19 +158,54 @@ def main():
                     
                     # Extraire la réponse du GroupChatManager
                     # Le GroupChatManager stocke les messages dans groupchat.messages
+                    final_response = ""
                     if hasattr(manager, "groupchat") and hasattr(manager.groupchat, "messages") and manager.groupchat.messages:
-                        # Prendre le dernier message de l'interpreter ou du manager
-                        last_msg = manager.groupchat.messages[-1]
-                        if isinstance(last_msg, dict):
-                            final_response = last_msg.get("content", "")
-                        else:
-                            final_response = str(last_msg)
-                    elif hasattr(response, "summary") and response.summary:
-                        final_response = response.summary
-                    elif hasattr(response, "chat_history") and response.chat_history:
-                        last = response.chat_history[-1]
-                        final_response = last.get("content") if isinstance(last, dict) else str(last)
-                    else:
+                        # Chercher le dernier message de l'interpreter avec du contenu (pas vide)
+                        for msg in reversed(manager.groupchat.messages):
+                            # Les messages sont des objets avec des attributs name et content
+                            if hasattr(msg, "name") and msg.name == "interpreter":
+                                if hasattr(msg, "content") and msg.content and msg.content.strip():
+                                    final_response = msg.content.strip()
+                                    break
+                            # Fallback: si c'est un dict
+                            elif isinstance(msg, dict) and msg.get("name") == "interpreter":
+                                content = msg.get("content", "")
+                                if content and content.strip():
+                                    final_response = content.strip()
+                                    break
+                        
+                        # Si pas de message de l'interpreter avec contenu, prendre le dernier message non-user avec contenu
+                        if not final_response:
+                            for msg in reversed(manager.groupchat.messages):
+                                if hasattr(msg, "name") and msg.name != "user_proxy":
+                                    if hasattr(msg, "content") and msg.content and msg.content.strip():
+                                        final_response = msg.content.strip()
+                                        break
+                                elif isinstance(msg, dict) and msg.get("name") != "user_proxy":
+                                    content = msg.get("content", "")
+                                    if content and content.strip():
+                                        final_response = content.strip()
+                                        break
+                    
+                    # Fallbacks
+                    if not final_response:
+                        if hasattr(response, "summary") and response.summary:
+                            final_response = response.summary
+                        elif hasattr(response, "chat_history") and response.chat_history:
+                            # Chercher le dernier message avec contenu dans chat_history
+                            for msg in reversed(response.chat_history):
+                                if isinstance(msg, dict):
+                                    content = msg.get("content", "")
+                                    if content and content.strip():
+                                        final_response = content.strip()
+                                        break
+                                else:
+                                    content = str(msg)
+                                    if content and content.strip():
+                                        final_response = content.strip()
+                                        break
+                    
+                    if not final_response:
                         final_response = "(pas de réponse)"
                     print("\nClara:", final_response)
                     
