@@ -4,6 +4,10 @@ Point d'entrée CLI pour tester Clara en mode Autogen (multi-agents).
 Ne touche pas à l'UI ni à run_clara.py existant.
 """
 
+# Supprimer les warnings Pydantic d'Autogen avant tout import
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='pydantic')
+
 import json
 from pathlib import Path
 from datetime import datetime
