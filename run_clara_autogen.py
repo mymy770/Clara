@@ -114,14 +114,21 @@ def main():
                 error = None
                 final_response = ""
                 
-                # 3 — Envoyer au user_proxy
+                # 3 — Envoyer au user_proxy / interpreter avec un nombre de tours limité
                 try:
                     response = user_proxy.initiate_chat(
                         interpreter,
                         message=user_input,
                         max_turns=3
                     )
-                    final_response = response.summary or "(pas de réponse)"
+                    # Autogen renvoie un objet, on affiche soit un résumé, soit le dernier message
+                    if hasattr(response, "summary") and response.summary:
+                        final_response = response.summary
+                    elif hasattr(response, "chat_history") and response.chat_history:
+                        last = response.chat_history[-1]
+                        final_response = last.get("content") if isinstance(last, dict) else str(last)
+                    else:
+                        final_response = "(pas de réponse)"
                     print("\nClara:", final_response)
                     
                 except Exception as e:
