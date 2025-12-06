@@ -132,6 +132,8 @@ def create_fs_agent(llm_config: Dict[str, Any], workspace_root: Optional[Path] =
             return f"⚠ Erreur listage {path} : {str(e)}"
     
     # Créer l'agent avec les tools
+    # IMPORTANT: Dans Autogen, les fonctions doivent être passées via function_map
+    # pour que le LLM puisse les appeler via function calling
     fs_agent = AssistantAgent(
         name="fs_agent",
         system_message="""Tu es un agent spécialisé filesystem.
@@ -141,6 +143,15 @@ tu dois APPELER IMMÉDIATEMENT la fonction appropriée (create_dir, create_file,
 Exécute l'action et retourne le résultat (succès/échec + détails).
 Fonctions disponibles : create_dir, create_file, append_to_file, read_file, move_path, delete_path, list_dir.""",
         llm_config=llm_config,
+        function_map={
+            "create_dir": create_dir,
+            "create_file": create_file,
+            "append_to_file": append_to_file,
+            "read_file": read_file,
+            "move_path": move_path,
+            "delete_path": delete_path,
+            "list_dir": list_dir,
+        }
     )
     
     # Stocker les fonctions globalement pour référence
@@ -151,15 +162,6 @@ Fonctions disponibles : create_dir, create_file, append_to_file, read_file, move
     _fs_functions['move_path'] = move_path
     _fs_functions['delete_path'] = delete_path
     _fs_functions['list_dir'] = list_dir
-    
-    # Enregistrer les fonctions comme tools pour l'agent
-    fs_agent.register_for_execution(name="create_dir")(create_dir)
-    fs_agent.register_for_execution(name="create_file")(create_file)
-    fs_agent.register_for_execution(name="append_to_file")(append_to_file)
-    fs_agent.register_for_execution(name="read_file")(read_file)
-    fs_agent.register_for_execution(name="move_path")(move_path)
-    fs_agent.register_for_execution(name="delete_path")(delete_path)
-    fs_agent.register_for_execution(name="list_dir")(list_dir)
     
     # Enregistrer aussi pour le LLM (pour qu'il sache quelles fonctions appeler)
     fs_agent.register_for_llm(name="create_dir", description=create_dir.__doc__)(create_dir)
