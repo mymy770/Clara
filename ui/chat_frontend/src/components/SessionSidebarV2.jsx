@@ -3,7 +3,7 @@ import { listSessions, renameSession, deleteSession, deleteAllSessions, createSe
 import ConfirmModal from './ConfirmModal'
 import AppearanceSettings from './AppearanceSettings'
 
-export default function SessionSidebarV2({ currentSessionId, onSelectSession, onNewSession }) {
+export default function SessionSidebarV2({ currentSessionId, onSelectSession, onNewSession, useAutogen = false, onToggleAutogen = null }) {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
