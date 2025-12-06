@@ -12,6 +12,10 @@ from typing import Optional
 try:
     import autogen
     from autogen import AssistantAgent, UserProxyAgent
+    from autogen import settings
+    # Désactiver comportements automatiques d'Autogen
+    settings.disable_telemetry = True
+    settings.allow_non_api_models = True
 except ImportError:
     print("❌ pyautogen n'est pas installé.")
     print("   Installez-le avec: pip install pyautogen")
@@ -92,13 +96,16 @@ def main():
         
         while True:
             try:
-                user_input = input("Vous: ").strip()
+                user_input = input("\nVous: ").strip()
                 
-                if user_input.lower() in {"quit", "exit", "q"}:
-                    print("\nAu revoir ! 👋")
+                # 1 — Quit
+                if user_input.lower() in {"quit", "exit"}:
+                    print("🔚 Fermeture de Clara Autogen.")
                     break
                 
-                if not user_input:
+                # 2 — Input vide = ne rien envoyer au modèle
+                if user_input == "":
+                    print("(aucune entrée détectée)")
                     continue
                 
                 # Initialiser les listes de tracking
@@ -107,27 +114,19 @@ def main():
                 error = None
                 final_response = ""
                 
+                # 3 — Envoyer au user_proxy
                 try:
-                    # Envoyer la requête à l'interpreter via user_proxy
-                    # L'interpreter décidera d'appeler fs_agent ou memory_agent si nécessaire
-                    chat_result = user_proxy.initiate_chat(
-                        recipient=interpreter,
+                    response = user_proxy.initiate_chat(
+                        interpreter,
                         message=user_input,
-                        max_turns=5,  # Limiter les tours pour éviter les boucles
+                        max_turns=3
                     )
-                    
-                    # Extraire la réponse finale
-                    if chat_result.chat_history:
-                        final_response = chat_result.chat_history[-1].get("content", "")
-                    else:
-                        final_response = "Aucune réponse générée"
-                    
-                    # Afficher la réponse
-                    print(f"\nClara: {final_response}\n")
+                    final_response = response.summary or "(pas de réponse)"
+                    print("\nClara:", final_response)
                     
                 except Exception as e:
                     error = str(e)
-                    print(f"\n⚠ Erreur : {error}\n")
+                    print(f"❌ Erreur Autogen: {e}")
                     final_response = f"Erreur : {error}"
                 
                 # Logger l'interaction
