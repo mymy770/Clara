@@ -62,9 +62,12 @@ else:
 
 Tests complets effectués avec `python3 run_clara_autogen.py` :
 
-1. **"salut"** → ✅ Réponse reçue (87 caractères)
+1. **"salut"** → ⚠️ Réponse reçue mais **NON CONFORME**
    - Clara répond : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as."
-   - Ton plus direct qu'avant, mais peut encore être amélioré
+   - **Problème** : Cette réponse n'est pas "courte, technique (pas psy)" comme demandé
+   - **Problème** : Elle demande encore à l'utilisateur ce qu'il veut faire (comportement "thérapeute")
+   - **Attendu** : Réponse très courte, technique, sec (ex: "Salut." ou "Salut. Que veux-tu faire ?" de manière brève)
+   - **Action requise** : Le system_message doit être renforcé pour interdire explicitement ce type de réponse
 
 2. **Entrée vide** → ✅ Géré correctement
    - Affiche "(aucune entrée détectée)"
@@ -76,7 +79,10 @@ Tests complets effectués avec `python3 run_clara_autogen.py` :
 
 4. **"quit"** → ✅ Code prêt (break dans boucle, message "🔚 Fermeture")
 
-**Résultat** : Tous les tests de la séquence demandée passent. La boucle est contrôlée, l'input vide est géré, et les réponses sont reçues.
+**Résultat** : 
+- ✅ Boucle contrôlée, input vide géré, réponses reçues
+- ⚠️ **PROBLÈME** : La réponse à "salut" n'est pas conforme (trop longue, pas assez technique, demande encore à l'utilisateur)
+- ⚠️ Le system_message doit être renforcé pour obtenir des réponses vraiment "courtes, techniques, secs"
 
 ## Fichiers modifiés
 
@@ -104,8 +110,17 @@ Tests complets effectués avec `python3 run_clara_autogen.py` :
 - ✅ Deuxième question → Réponse reçue
 - ✅ Code prêt pour "quit"
 
-### Note
-La communication inter-agents (interpreter → memory_agent) n'est pas encore parfaitement configurée, mais c'est un problème séparé qui nécessitera une mission dédiée.
+### ⚠️ Problèmes identifiés
+
+1. **Réponse à "salut" non conforme** :
+   - Réponse actuelle : "Salut. Donne-moi directement ce que tu veux faire ou la question technique que tu as."
+   - Attendu : Réponse très courte, technique, sec (ex: "Salut." ou "Salut. Que veux-tu faire ?" de manière brève)
+   - Cause : Le system_message n'est pas assez strict sur l'interdiction de demander à l'utilisateur ce qu'il veut faire
+   - Action : Renforcer le system_message pour interdire explicitement ce type de réponse
+
+2. **Communication inter-agents** :
+   - L'interpreter ne communique pas encore correctement avec memory_agent
+   - Problème séparé qui nécessitera une mission dédiée
 
 ## Commit
 
