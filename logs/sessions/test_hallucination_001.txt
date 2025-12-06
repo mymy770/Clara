@@ -1,0 +1,12 @@
+=== Clara Session test_hallucination_001 ===
+Date: 2025-12-06 10:47:46
+==================================================
+
+[10:47:46] Utilisateur:
+Ajoute "Nouveau contenu" dans test_hallucination.txt
+
+[10:47:48] Clara:
+Je vais ajouter le texte demandé à la fin du fichier.
+
+✓ Contenu ajouté à : test_hallucination.txt
+

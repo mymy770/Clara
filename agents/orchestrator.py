@@ -201,6 +201,9 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             # PRÉ-VÉRIFICATION : Détecter si c'est une demande de lecture mémoire
             memory_context = self._check_memory_read_intent(user_message)
             
+            # PRÉ-VÉRIFICATION : Détecter si c'est une demande de lecture filesystem
+            fs_read_context = self._check_fs_read_intent(user_message)
+            
             # Ajouter le message utilisateur à l'historique
             self.conversation_history.append({
                 'role': 'user',
@@ -215,6 +218,13 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                 messages.append({
                     'role': 'system',
                     'content': f"DONNÉES MÉMOIRE RÉELLES :\n{memory_context}"
+                })
+            
+            # Si on a un contexte filesystem (fichier lu), l'ajouter au prompt
+            if fs_read_context:
+                messages.append({
+                    'role': 'system',
+                    'content': f"CONTENU FICHIER RÉEL LU :\n{fs_read_context}"
                 })
             
             # Appeler le LLM
@@ -754,6 +764,76 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
         except Exception as e:
             logger.warning(f"Erreur dans _process_filesystem_action: {e}")
             return (response_text, None, [])
+    
+    def _check_fs_read_intent(self, user_message):
+        """
+        Pré-vérifie si le message demande une lecture de fichier
+        Si oui, lit le fichier AVANT l'appel LLM pour éviter hallucinations
+        
+        Returns:
+            str: Contenu du fichier formaté, ou None
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        msg_lower = user_message.lower()
+        
+        # Détection basique d'intentions de lecture de fichier
+        keywords_read = ['lis', 'lire', 'lit', 'affiche', 'montre', 'voir', 'consulte', 'ouvre']
+        is_read_intent = any(kw in msg_lower for kw in keywords_read)
+        
+        if not is_read_intent:
+            return None
+        
+        # Chercher un chemin de fichier dans le message
+        # Patterns simples : "fichier X", "le fichier X", "X.txt", etc.
+        import re
+        from agents.helpers import execute_fs_action
+        
+        # Chercher des patterns de chemin
+        path_patterns = [
+            r'fichier\s+([^\s]+\.(txt|md|py|json|yaml|yml))',
+            r'([^\s]+\.(txt|md|py|json|yaml|yml))',
+            r'fichier\s+([a-zA-Z0-9_/.-]+)',
+        ]
+        
+        file_path = None
+        for pattern in path_patterns:
+            match = re.search(pattern, user_message, re.IGNORECASE)
+            if match:
+                file_path = match.group(1)
+                break
+        
+        # Si pas de chemin trouvé mais intention de lecture, chercher dans le contexte récent
+        if not file_path and is_read_intent:
+            # Chercher dans les 3 derniers messages de l'historique
+            for msg in reversed(self.conversation_history[-3:]):
+                if msg['role'] == 'user':
+                    for pattern in path_patterns:
+                        match = re.search(pattern, msg['content'], re.IGNORECASE)
+                        if match:
+                            file_path = match.group(1)
+                            break
+                    if file_path:
+                        break
+        
+        if not file_path:
+            return None
+        
+        # Essayer de lire le fichier
+        try:
+            result = execute_fs_action("read_text", {"path": file_path})
+            if result.get('ok'):
+                content = result.get('content', '')
+                logger.info(f"FS read pre-fetch: {file_path} ({len(content)} chars)")
+                return f"FICHIER '{file_path}' (lu réellement) :\n{content}"
+            else:
+                error = result.get('error', 'Erreur inconnue')
+                logger.warning(f"FS read pre-fetch failed: {file_path} - {error}")
+                return f"FICHIER '{file_path}' : Erreur lors de la lecture - {error}"
+        except Exception as e:
+            logger.warning(f"Erreur dans _check_fs_read_intent: {e}")
+            return None
     
     def _check_memory_read_intent(self, user_message):
         """
