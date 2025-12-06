@@ -390,63 +390,49 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
           ) : thinking.length === 0 ? (
             <p style={{ fontSize: '11px', color: '#999' }}>Aucune réflexion pour le moment</p>
           ) : (
-            thinking.map((thought, idx) => {
-              const phase = thought.phase || 'think'
-              const phaseLabel = {
-                'think': 'THINK',
-                'plan': 'PLAN',
-                'observe': 'OBSERVE',
-                'error_rethink': 'ERROR'
-              }[phase] || 'THINK'
-              
-              const phaseColors = {
-                'think': { border: '#007AFF', bg: 'rgba(0, 122, 255, 0.05)' },
-                'plan': { border: '#34c759', bg: 'rgba(52, 199, 89, 0.05)' },
-                'observe': { border: '#FF9500', bg: 'rgba(255, 149, 0, 0.05)' },
-                'error_rethink': { border: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
-              }[phase] || { border: '#007AFF', bg: 'rgba(0, 122, 255, 0.05)' }
-              
-              let displayText = thought.text || ''
-              if (phase === 'plan' && displayText.includes('Plan généré avec')) {
-                displayText = displayText + '\n→ Détails dans TODO ci-dessus'
-              }
+            thinking.slice(-20).reverse().map((thought, idx) => {
+              const thoughtType = thought.type || 'unknown'
+              const isPreFetch = thoughtType === 'pre_fetch'
+              const isLLMThought = thoughtType === 'llm_thought' || thoughtType === 'internal_thought'
+              const timestamp = thought.timestamp || thought.ts
               
               return (
                 <div
                   key={idx}
-                  className={`think-entry phase-${phase}`}
+                  className="think-entry"
                   style={{
                     padding: '8px',
-                    marginBottom: '8px',
-                    paddingBottom: '10px',
-                    borderRadius: '4px',
+                    marginBottom: '6px',
                     fontSize: '11px',
-                    lineHeight: '1.4',
-                    borderLeft: `3px solid ${phaseColors.border}`,
-                    background: phaseColors.bg,
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
+                    lineHeight: '1.5',
+                    color: 'var(--text-color)',
+                    borderBottom: idx < thinking.length - 1 ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
+                    background: isPreFetch ? 'rgba(0, 122, 255, 0.05)' : isLLMThought ? 'rgba(255, 193, 7, 0.05)' : 'transparent',
+                    borderLeft: isPreFetch ? '3px solid #007AFF' : isLLMThought ? '3px solid #FFC107' : 'none',
+                    paddingLeft: isPreFetch || isLLMThought ? '11px' : '8px',
                   }}
                 >
-                  {thought.ts && (
+                  {timestamp && (
                     <div className="think-time" style={{
-                      fontSize: '10px',
+                      fontSize: '9px',
                       color: 'var(--time-color)',
                       marginBottom: '4px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
                     }}>
-                      {formatTime(thought.ts)}
+                      <span>{formatTime(timestamp)}</span>
+                      {thoughtType && (
+                        <span style={{
+                          fontSize: '9px',
+                          opacity: 0.7,
+                          textTransform: 'uppercase',
+                        }}>
+                          {thoughtType === 'pre_fetch' ? '📖 Pré-lecture' : thoughtType === 'llm_thought' ? '💭 LLM' : '💭'}
+                        </span>
+                      )}
                     </div>
                   )}
-                  <div className="think-phase" style={{
-                    fontSize: '10px',
-                    fontWeight: '600',
-                    textTransform: 'uppercase',
-                    marginBottom: '4px',
-                    color: 'var(--text-color)',
-                    opacity: 0.8,
-                  }}>
-                    {phaseLabel}
-                  </div>
                   <div className="think-text" style={{
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
