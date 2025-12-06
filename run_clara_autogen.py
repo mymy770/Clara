@@ -86,7 +86,7 @@ def main():
         user_proxy = UserProxyAgent(
             name="user_proxy",
             human_input_mode="NEVER",  # Mode automatique (pas d'input humain pendant l'exécution)
-            max_consecutive_auto_reply=10,
+            max_consecutive_auto_reply=1,  # 1 seule réponse automatique
             code_execution_config=False,  # Pas d'exécution de code pour l'instant
         )
         
@@ -127,7 +127,8 @@ def main():
                     response = user_proxy.initiate_chat(
                         interpreter,
                         message=user_input,
-                        max_turns=3
+                        max_turns=1,  # 1 tour suffit pour une réponse directe
+                        silent=True,  # Désactiver l'affichage verbeux des échanges inter-agents
                     )
                     # Autogen renvoie un objet, on affiche soit un résumé, soit le dernier message
                     if hasattr(response, "summary") and response.summary:
