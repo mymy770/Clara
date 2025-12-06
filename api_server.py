@@ -255,7 +255,8 @@ async def chat_autogen(request: ChatRequest):
         sys.stdout, sys.stderr = StringIO(), StringIO()
         
         try:
-            response = user_proxy.initiate_chat(manager, message=request.message, max_turns=2, silent=True)
+            # Augmenter max_turns pour permettre l'exécution des fonctions
+            response = user_proxy.initiate_chat(manager, message=request.message, max_turns=5, silent=True)
             sys.stdout, sys.stderr = old_stdout, old_stderr
             
             final_response = ""

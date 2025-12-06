@@ -1,0 +1,10 @@
+=== Clara Session test_maxturns ===
+Date: 2025-12-06 16:00:18
+==================================================
+
+[16:00:18] Utilisateur:
+enregistre une note: test max turns 5
+
+[16:00:27] Clara:
+Noté.
+
