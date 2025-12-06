@@ -12,3 +12,6 @@ fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 
 # Database (SQLite is built-in, no external dependency needed)
+
+# Autogen (multi-agents)
+pyautogen>=0.2.0
