@@ -300,19 +300,44 @@ def create_memory_agent(llm_config: Dict[str, Any], db_path: str = "memory/memor
             return f"⚠ Erreur recherche : {str(e)}"
     
     # Créer l'agent avec les tools
+    # IMPORTANT: Dans Autogen, les fonctions doivent être passées via function_map
+    # pour que le LLM puisse les appeler via function calling
     memory_agent = AssistantAgent(
         name="memory_agent",
         system_message="""Tu es un agent spécialisé mémoire.
 Tu ne réponds jamais directement à l'utilisateur.
-Tu exécutes uniquement les actions demandées via tes tools,
-et tu retournes des résultats structurés (succès/échec + détails).
-Utilise les fonctions disponibles : save_note, list_notes, save_todo, list_todos, save_process, list_processes, save_protocol, list_protocols, save_preference, list_preferences, search_memory.""",
+Quand l'interpreter ou un autre agent te demande de sauvegarder une note, un todo, ou de lister des éléments,
+tu dois APPELER IMMÉDIATEMENT la fonction appropriée (save_note_tool, list_notes, etc.) au lieu de juste répondre.
+Exécute l'action et retourne le résultat (succès/échec + détails).
+Fonctions disponibles : save_note_tool, list_notes, save_todo_tool, list_todos, save_process_tool, list_processes, save_protocol_tool, list_protocols, save_preference_tool, list_preferences_tool, search_memory.""",
         llm_config=llm_config,
+        function_map={
+            "save_note_tool": save_note_tool,
+            "list_notes": list_notes,
+            "save_todo_tool": save_todo_tool,
+            "list_todos": list_todos,
+            "save_process_tool": save_process_tool,
+            "list_processes": list_processes,
+            "save_protocol_tool": save_protocol_tool,
+            "list_protocols": list_protocols,
+            "save_preference_tool": save_preference_tool,
+            "list_preferences_tool": list_preferences_tool,
+            "search_memory": search_memory,
+        }
     )
     
-    # Note: Les fonctions seront appelées via le système de tools d'Autogen
-    # Pour l'instant, on les expose via le system_message et l'agent les utilisera
-    # si Autogen supporte l'appel de fonctions Python directement
+    # Enregistrer aussi pour le LLM (pour qu'il sache quelles fonctions appeler)
+    memory_agent.register_for_llm(name="save_note_tool", description=save_note_tool.__doc__)(save_note_tool)
+    memory_agent.register_for_llm(name="list_notes", description=list_notes.__doc__)(list_notes)
+    memory_agent.register_for_llm(name="save_todo_tool", description=save_todo_tool.__doc__)(save_todo_tool)
+    memory_agent.register_for_llm(name="list_todos", description=list_todos.__doc__)(list_todos)
+    memory_agent.register_for_llm(name="save_process_tool", description=save_process_tool.__doc__)(save_process_tool)
+    memory_agent.register_for_llm(name="list_processes", description=list_processes.__doc__)(list_processes)
+    memory_agent.register_for_llm(name="save_protocol_tool", description=save_protocol_tool.__doc__)(save_protocol_tool)
+    memory_agent.register_for_llm(name="list_protocols", description=list_protocols.__doc__)(list_protocols)
+    memory_agent.register_for_llm(name="save_preference_tool", description=save_preference_tool.__doc__)(save_preference_tool)
+    memory_agent.register_for_llm(name="list_preferences_tool", description=list_preferences_tool.__doc__)(list_preferences_tool)
+    memory_agent.register_for_llm(name="search_memory", description=search_memory.__doc__)(search_memory)
     
     return memory_agent
 

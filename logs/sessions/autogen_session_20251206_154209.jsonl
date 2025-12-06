@@ -1,0 +1,2 @@
+{"timestamp": "2025-12-06T15:42:19.506714", "user_input": "enregistre une note: test autogen avec function_map", "agents_called": [], "tools_called": [], "error": null, "final_response": "Note enregistrée."}
+{"timestamp": "2025-12-06T15:42:26.221759", "user_input": "liste mes notes", "agents_called": [], "tools_called": [], "error": null, "final_response": "@memory_agent, liste toutes les notes"}
