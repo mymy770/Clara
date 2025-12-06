@@ -45,6 +45,33 @@ class DebugLogger:
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         self.log_file = self.logs_dir / f"{session_id}.json"
         self.entries = []
+        self.execution_log = []  # Log détaillé de toutes les exécutions
+    
+    def log_execution(self, step_type, action, params=None, result=None, error=None, timestamp=None):
+        """
+        Log une étape d'exécution détaillée
+        
+        Args:
+            step_type: Type d'étape ('fs_action', 'memory_action', 'llm_call', 'pre_fetch', etc.)
+            action: Nom de l'action (ex: 'read_text', 'save_note')
+            params: Paramètres passés à l'action
+            result: Résultat retourné
+            error: Erreur éventuelle
+            timestamp: Timestamp (auto si None)
+        """
+        if timestamp is None:
+            timestamp = datetime.now().isoformat()
+        
+        log_entry = {
+            'timestamp': timestamp,
+            'type': step_type,
+            'action': action,
+            'params': params,
+            'result': result,
+            'error': error
+        }
+        self.execution_log.append(log_entry)
+        self._write()
     
     def log_interaction(self, user_input, prompt_messages, llm_response, usage, error=None, 
                        internal_data=None, memory_ops=None):
@@ -68,7 +95,8 @@ class DebugLogger:
             'usage': usage,
             'error': error,
             'internal_data': internal_data or {},
-            'memory_ops': memory_ops or []
+            'memory_ops': memory_ops or [],
+            'execution_log': self.execution_log[-10:] if self.execution_log else []  # Dernières 10 exécutions
         }
         self.entries.append(entry)
         self._write()
@@ -78,6 +106,7 @@ class DebugLogger:
         with open(self.log_file, 'w', encoding='utf-8') as f:
             json.dump({
                 'session_id': self.session_id,
-                'interactions': self.entries
+                'interactions': self.entries,
+                'full_execution_log': self.execution_log  # Log complet de toutes les exécutions
             }, f, indent=2, ensure_ascii=False)
 

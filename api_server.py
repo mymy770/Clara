@@ -426,7 +426,7 @@ async def get_session_todos(session_id: str):
 async def get_session_logs(session_id: str):
     """
     Récupère les commandes de code (process) d'une session depuis le fichier de debug
-    Affiche les lignes de code pures qu'elle va exécuter
+    Affiche les lignes de code pures qu'elle va exécuter avec tous les détails
     """
     debug_file = Path(f"logs/debug/{session_id}.json")
     
@@ -437,62 +437,80 @@ async def get_session_logs(session_id: str):
         with open(debug_file, 'r', encoding='utf-8') as f:
             debug_data = json.load(f)
         
-        # Extraire les commandes de code depuis memory_ops
         logs = []
-        if isinstance(debug_data, dict):
-            # Format DebugLogger: {"session_id": "...", "interactions": [...]}
-            if "interactions" in debug_data:
-                for interaction in debug_data["interactions"]:
-                    memory_ops = interaction.get("memory_ops", [])
-                    for op in memory_ops:
-                        action = op.get('action', 'unknown')
-                        # Convertir l'action en ligne de code
-                        if action == 'save_note':
-                            code = "save_note(content=..., tags=...)"
-                        elif action == 'list_notes':
-                            code = "get_items(type='note', limit=50)"
-                        elif action == 'search_notes':
-                            code = "search_items(query=..., type='note', limit=50)"
-                        elif action == 'save_todo':
-                            code = "save_todo(content=..., tags=...)"
-                        elif action == 'list_todos':
-                            code = "get_items(type='todo', limit=50)"
-                        elif action == 'search_todos':
-                            code = "search_items(query=..., type='todo', limit=50)"
-                        elif action == 'save_process':
-                            code = "save_process(content=..., tags=...)"
-                        elif action == 'list_processes':
-                            code = "get_items(type='process', limit=50)"
-                        elif action == 'save_protocol':
-                            code = "save_protocol(content=..., tags=...)"
-                        elif action == 'list_protocols':
-                            code = "get_items(type='protocol', limit=50)"
-                        elif action == 'save_contact':
-                            code = "save_contact(contact={...})"
-                        elif action == 'update_contact':
-                            code = "update_contact(contact_id=..., updates={...})"
-                        elif action == 'list_contacts':
-                            code = "get_all_contacts(limit=50)"
-                        elif action == 'search_contacts':
-                            code = "find_contacts(query=...)"
-                        elif action == 'set_preference':
-                            code = "save_preference({scope, key, value, ...})"
-                        elif action == 'delete_item':
-                            code = "delete_item(item_id=...)"
-                        else:
-                            code = f"{action}(...)"
-                        
-                        log_entry = {
-                            "timestamp": interaction.get("timestamp"),
-                            "text": code,
-                        }
-                        logs.append(log_entry)
-            elif "logs" in debug_data:
-                logs = debug_data["logs"]
-            elif isinstance(debug_data.get("entries"), list):
-                logs = debug_data["entries"]
         
-        return {"logs": logs}
+        # D'abord, utiliser execution_log si disponible (log détaillé)
+        if isinstance(debug_data, dict) and "full_execution_log" in debug_data:
+            for exec_entry in debug_data["full_execution_log"]:
+                step_type = exec_entry.get('type', 'unknown')
+                action = exec_entry.get('action', 'unknown')
+                params = exec_entry.get('params', {})
+                result = exec_entry.get('result')
+                error = exec_entry.get('error')
+                
+                # Formater selon le type
+                if step_type == 'fs_action':
+                    # Formater les paramètres
+                    params_str = ", ".join([f"{k}={repr(v)[:50]}" for k, v in params.items()])
+                    code = f"execute_fs_action('{action}', {{{params_str}}})"
+                    
+                    if error:
+                        code += f"\n  ❌ ERREUR: {error}"
+                    elif result and result.get('ok'):
+                        code += f"\n  ✓ Résultat: {result.get('message', 'OK')}"
+                    else:
+                        code += f"\n  ⚠ Résultat: {result}"
+                        
+                elif step_type == 'memory_action':
+                    code = f"{action}({params})"
+                    if error:
+                        code += f"\n  ❌ ERREUR: {error}"
+                    elif result:
+                        code += f"\n  ✓ Résultat: {result}"
+                        
+                elif step_type == 'llm_call':
+                    code = f"llm.generate(model='{params.get('model', 'unknown')}', messages={params.get('messages_count', 0)})"
+                    if result:
+                        code += f"\n  ✓ Tokens: {result.get('usage', {}).get('total_tokens', 'N/A') if isinstance(result.get('usage'), dict) else 'N/A'}"
+                
+                logs.append({
+                    "timestamp": exec_entry.get('timestamp'),
+                    "text": code,
+                    "type": step_type,
+                    "action": action,
+                    "success": error is None
+                })
+        
+        # Sinon, fallback sur memory_ops (ancien format)
+        elif isinstance(debug_data, dict) and "interactions" in debug_data:
+            for interaction in debug_data["interactions"]:
+                memory_ops = interaction.get("memory_ops", [])
+                for op in memory_ops:
+                    action = op.get('action', 'unknown')
+                    params = op.get('params', {})
+                    
+                    # Formater selon le type d'action
+                    if action.startswith('FS '):
+                        fs_action = action.replace('FS ', '')
+                        params_str = ", ".join([f"{k}={repr(v)[:50]}" for k, v in params.items()])
+                        code = f"execute_fs_action('{fs_action}', {{{params_str}}})"
+                        if op.get('result') == 'error':
+                            code += f"\n  ❌ ERREUR: {op.get('error', 'Erreur inconnue')}"
+                        else:
+                            code += f"\n  ✓ {op.get('result', 'success')}"
+                    else:
+                        # Actions mémoire
+                        code = f"{action}({params})"
+                    
+                    logs.append({
+                        "timestamp": interaction.get("timestamp"),
+                        "text": code,
+                        "type": "memory_action" if not action.startswith('FS ') else "fs_action",
+                        "action": action,
+                        "success": op.get('result') != 'error'
+                    })
+        
+        return {"logs": logs[-50:]}  # Dernières 50 exécutions
     except Exception as e:
         logging.exception(f"Erreur lecture logs {session_id}: {e}")
         return {"logs": []}
@@ -502,7 +520,7 @@ async def get_session_logs(session_id: str):
 async def get_session_thinking(session_id: str):
     """
     Récupère les pensées (thinking) d'une session depuis le fichier de debug
-    Format: thoughts (réflexion), todo (plan), steps (étapes avec résultats)
+    Affiche les vraies réflexions du LLM et les pré-fetches
     """
     debug_file = Path(f"logs/debug/{session_id}.json")
     
@@ -513,54 +531,65 @@ async def get_session_thinking(session_id: str):
         with open(debug_file, 'r', encoding='utf-8') as f:
             debug_data = json.load(f)
         
-        # Extraire les thinking depuis debug_data
         thinking = []
-        if isinstance(debug_data, dict):
-            # Format DebugLogger: {"session_id": "...", "interactions": [...]}
-            if "interactions" in debug_data:
-                for interaction in debug_data["interactions"]:
-                    internal_data = interaction.get("internal_data", {})
-                    timestamp = interaction.get("timestamp")
+        
+        # D'abord, utiliser execution_log pour les pré-fetches (vraies données lues)
+        if isinstance(debug_data, dict) and "full_execution_log" in debug_data:
+            for exec_entry in debug_data["full_execution_log"]:
+                step_type = exec_entry.get('type', 'unknown')
+                
+                if step_type == 'fs_pre_fetch':
+                    action = exec_entry.get('action', 'unknown')
+                    params = exec_entry.get('params', {})
+                    result = exec_entry.get('result')
+                    error = exec_entry.get('error')
                     
-                    # Phase "think" : réflexion (thoughts)
-                    thoughts = internal_data.get("thoughts")
-                    if thoughts:
-                        thinking.append({
-                            "phase": "think",
-                            "text": thoughts,
-                            "ts": timestamp
-                        })
+                    if error:
+                        text = f"⚠ Pré-lecture {action}({params.get('path', 'N/A')}) : ERREUR - {error}"
+                    elif result and result.get('ok'):
+                        content = result.get('content', '')
+                        text = f"📖 Pré-lecture {action}({params.get('path', 'N/A')}) :\n{content[:500]}"
+                    else:
+                        text = f"📖 Pré-lecture {action}({params.get('path', 'N/A')}) : Aucun résultat"
                     
-                    # Phase "plan" : plan d'action (todo)
-                    todo = internal_data.get("todo")
-                    if todo:
-                        thinking.append({
-                            "phase": "plan",
-                            "text": todo,
-                            "ts": timestamp
-                        })
+                    thinking.append({
+                        "timestamp": exec_entry.get('timestamp'),
+                        "text": text,
+                        "type": "pre_fetch"
+                    })
+        
+        # Ensuite, ajouter les thoughts du LLM depuis internal_data
+        if isinstance(debug_data, dict) and "interactions" in debug_data:
+            for interaction in debug_data["interactions"]:
+                # Extraire la réflexion brute du LLM (premières lignes avant JSON)
+                llm_response = interaction.get("llm_response", "")
+                if llm_response:
+                    # Prendre les premières lignes avant tout JSON
+                    lines = llm_response.split('\n')
+                    thought_lines = []
+                    for line in lines:
+                        if '```json' in line or (line.strip().startswith('{') and '"intent"' in line):
+                            break
+                        thought_lines.append(line)
                     
-                    # Phase "observe" : étapes exécutées avec résultats (steps)
-                    steps = internal_data.get("steps")
-                    if steps:
-                        for step in steps:
+                    if thought_lines:
+                        thoughts_text = '\n'.join(thought_lines).strip()
+                        if thoughts_text:
                             thinking.append({
-                                "phase": "observe",
-                                "text": step if isinstance(step, str) else str(step),
-                                "ts": timestamp
+                                "timestamp": interaction.get("timestamp"),
+                                "text": f"💭 Réflexion LLM :\n{thoughts_text}",
+                                "type": "llm_thought"
                             })
-                    
-                    # Si pas de steps mais qu'il y a des memory_ops, les utiliser comme observe
-                    if not steps:
-                        memory_ops = interaction.get("memory_ops", [])
-                        for op in memory_ops:
-                            result_text = op.get("message", op.get("result", ""))
-                            if result_text:
-                                thinking.append({
-                                    "phase": "observe",
-                                    "text": f"{op.get('action', 'action')}: {result_text}",
-                                    "ts": timestamp
-                                })
+                
+                # Ajouter aussi internal_data.thoughts si disponible
+                internal_data = interaction.get("internal_data", {})
+                thoughts = internal_data.get("thoughts")
+                if thoughts and isinstance(thoughts, str) and thoughts.strip():
+                    thinking.append({
+                        "timestamp": interaction.get("timestamp"),
+                        "text": f"💭 {thoughts}",
+                        "type": "internal_thought"
+                    })
             
             # Format alternatif (si thinking existe directement)
             elif "thinking" in debug_data:

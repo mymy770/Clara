@@ -197,6 +197,9 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
         Returns:
             str: Réponse de Clara
         """
+        # Stocker la référence au logger pour les pré-fetches
+        self._debug_logger_ref = debug_logger
+        
         try:
             # PRÉ-VÉRIFICATION : Détecter si c'est une demande de lecture mémoire
             memory_context = self._check_memory_read_intent(user_message)
@@ -227,9 +230,27 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                     'content': f"CONTENU FICHIER RÉEL LU :\n{fs_read_context}"
                 })
             
+            # Logger l'appel LLM
+            debug_logger.log_execution(
+                step_type='llm_call',
+                action='generate',
+                params={'model': self.llm_driver.model, 'messages_count': len(messages)},
+                result=None,
+                error=None
+            )
+            
             # Appeler le LLM
             response = self.llm_driver.generate(messages)
             llm_raw_response = response['text']  # Réponse brute du LLM
+            
+            # Logger le résultat LLM
+            debug_logger.log_execution(
+                step_type='llm_call',
+                action='generate',
+                params={'model': self.llm_driver.model},
+                result={'response_length': len(llm_raw_response), 'usage': response.get('usage')},
+                error=None
+            )
             
             # Chercher une intention mémoire dans la réponse (pour les actions d'écriture)
             cleaned_response, memory_result, memory_ops = self._process_memory_action(llm_raw_response)
@@ -667,17 +688,53 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             if not action:
                 return (response_text, None, [])
             
+            # Logger l'appel avant exécution
+            debug_logger.log_execution(
+                step_type='fs_action',
+                action=action,
+                params=params,
+                result=None,
+                error=None
+            )
+            
             # Créer une entrée pour SYNC
             fs_ops = [{
                 "action": f"FS {action}",
                 "result": "success",
-                "path": params.get('path', params.get('src', 'N/A'))
+                "path": params.get('path', params.get('src', 'N/A')),
+                "params": params,  # Ajouter les paramètres complets
+                "timestamp": datetime.now().isoformat()
             }]
             
             # Exécuter l'action filesystem
-            fs_result = execute_fs_action(action, params)
+            try:
+                fs_result = execute_fs_action(action, params)
+                
+                # Logger le résultat
+                debug_logger.log_execution(
+                    step_type='fs_action',
+                    action=action,
+                    params=params,
+                    result=fs_result,
+                    error=None
+                )
+            except Exception as e:
+                # Logger l'erreur
+                error_msg = str(e)
+                debug_logger.log_execution(
+                    step_type='fs_action',
+                    action=action,
+                    params=params,
+                    result=None,
+                    error=error_msg
+                )
+                fs_result = {"ok": False, "error": error_msg}
             
             if fs_result.get('ok'):
+                # Mettre à jour fs_ops avec le résultat réel
+                fs_ops[0]['result'] = 'success'
+                fs_ops[0]['result_data'] = fs_result
+                
                 # Construire un message lisible pour l'utilisateur avec les résultats réels
                 if action == 'read_text':
                     content = fs_result.get('content', '')
@@ -723,6 +780,9 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             else:
                 error = fs_result.get('error', 'Erreur inconnue')
                 result_message = f"⚠ Erreur filesystem : {error}"
+                # Mettre à jour fs_ops avec l'erreur
+                fs_ops[0]['result'] = 'error'
+                fs_ops[0]['error'] = error
             
             # Nettoyer la réponse (enlever le bloc JSON)
             if json_match:
@@ -822,7 +882,28 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
         
         # Essayer de lire le fichier
         try:
+            # Logger la pré-lecture
+            if hasattr(self, '_debug_logger_ref') and self._debug_logger_ref:
+                self._debug_logger_ref.log_execution(
+                    step_type='fs_pre_fetch',
+                    action='read_text',
+                    params={"path": file_path},
+                    result=None,
+                    error=None
+                )
+            
             result = execute_fs_action("read_text", {"path": file_path})
+            
+            # Logger le résultat de la pré-lecture
+            if hasattr(self, '_debug_logger_ref') and self._debug_logger_ref:
+                self._debug_logger_ref.log_execution(
+                    step_type='fs_pre_fetch',
+                    action='read_text',
+                    params={"path": file_path},
+                    result=result,
+                    error=None
+                )
+            
             if result.get('ok'):
                 content = result.get('content', '')
                 logger.info(f"FS read pre-fetch: {file_path} ({len(content)} chars)")
@@ -833,6 +914,14 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
                 return f"FICHIER '{file_path}' : Erreur lors de la lecture - {error}"
         except Exception as e:
             logger.warning(f"Erreur dans _check_fs_read_intent: {e}")
+            if hasattr(self, '_debug_logger_ref') and self._debug_logger_ref:
+                self._debug_logger_ref.log_execution(
+                    step_type='fs_pre_fetch',
+                    action='read_text',
+                    params={"path": file_path},
+                    result=None,
+                    error=str(e)
+                )
             return None
     
     def _check_memory_read_intent(self, user_message):

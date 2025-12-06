@@ -285,10 +285,12 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
               ) : logs.length === 0 ? (
                 <p style={{ fontSize: '11px', color: '#999' }}>Aucune action pour le moment</p>
               ) : (
-                logs.slice(-20).reverse().map((log, idx) => {
+                logs.slice(-30).reverse().map((log, idx) => {
                   const text = log.text || ''
-                  const isError = text.includes('ERROR') || text.includes('error')
-                  const isSuccess = text.includes('sent:') || text.includes('created') || text.includes('success')
+                  const isError = !log.success || text.includes('❌') || text.includes('ERREUR') || text.toLowerCase().includes('error')
+                  const isSuccess = log.success && (text.includes('✓') || text.includes('Résultat:') || text.includes('success'))
+                  const actionType = log.type || 'unknown'
+                  
                   return (
                     <div
                       key={idx}
@@ -309,13 +311,26 @@ export default function RightPanel({ sessionId, isOpen, onToggle }) {
                           fontSize: '10px',
                           color: 'var(--time-color)',
                           marginBottom: '4px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
                         }}>
-                          {formatTime(log.timestamp)}
+                          <span>{formatTime(log.timestamp)}</span>
+                          {actionType && (
+                            <span style={{
+                              fontSize: '9px',
+                              opacity: 0.7,
+                              textTransform: 'uppercase',
+                            }}>
+                              {actionType}
+                            </span>
+                          )}
                         </div>
                       )}
                       <div className="process-text" style={{
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
+                        lineHeight: '1.5',
                       }}>
                         {escapeHtml(text)}
                       </div>
