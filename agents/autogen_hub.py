@@ -227,9 +227,13 @@ def create_memory_agent(llm_config: Dict[str, Any], db_path: str = "memory/memor
     def update_todo_tool(todo_id: int, content: Optional[str] = None, tags: Optional[list] = None) -> str:
         """Met à jour un todo existant. Retourne un message de succès ou d'erreur.
         
+        IMPORTANT : Le paramètre 'content' doit contenir le CONTENU COMPLET du todo après modification.
+        Si l'utilisateur veut "ajouter" quelque chose, tu dois d'abord lire le contenu existant,
+        puis construire le nouveau contenu complet avant d'appeler cette fonction.
+        
         Args:
             todo_id: ID du todo à mettre à jour
-            content: Nouveau contenu (optionnel)
+            content: Nouveau contenu COMPLET (remplace l'ancien, ne l'ajoute pas)
             tags: Nouveaux tags (optionnel)
         """
         try:
@@ -239,6 +243,9 @@ def create_memory_agent(llm_config: Dict[str, Any], db_path: str = "memory/memor
             todo_exists = any(t['id'] == todo_id for t in existing)
             if not todo_exists:
                 return f"⚠ Todo ID {todo_id} non trouvé"
+            
+            if content is None:
+                return f"⚠ Aucun contenu fourni pour la mise à jour du todo ID {todo_id}"
             
             success = update_item(item_id=todo_id, content=content, tags=tags)
             if success:
@@ -422,6 +429,13 @@ Quand l'utilisateur te demande de :
 - Lister des notes/todos → APPELÉ IMMÉDIATEMENT la fonction list_notes ou list_todos
 - Créer un dossier/fichier → APPELÉ IMMÉDIATEMENT la fonction create_dir ou create_file
 - Lire un fichier → APPELÉ IMMÉDIATEMENT la fonction read_file
+- MODIFIER un todo/note → TU DOIS D'ABORD lire le contenu existant avec list_todos/list_notes, puis construire le nouveau contenu complet, puis appeler update_todo_tool avec le contenu complet
+
+RÈGLE CRITIQUE pour les modifications :
+- Si l'utilisateur dit "ajoute X au todo Y" ou "modifie le todo Y pour ajouter X" :
+  1. Appelle d'abord list_todos() pour voir le contenu actuel du todo Y
+  2. Construis le nouveau contenu en combinant l'ancien + le nouvel élément
+  3. Appelle update_todo_tool(todo_id=Y, content="ancien contenu + nouvel élément")
 
 N'explique PAS comment faire. EXÉCUTE directement en appelant la fonction appropriée.
 Autogen gère automatiquement l'appel des fonctions via function calling OpenAI.""",
