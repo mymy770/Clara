@@ -256,7 +256,7 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             cleaned_response, memory_result, memory_ops = self._process_memory_action(llm_raw_response)
             
             # Chercher une intention filesystem dans la réponse
-            fs_cleaned_response, fs_result, fs_ops = self._process_filesystem_action(cleaned_response)
+            fs_cleaned_response, fs_result, fs_ops = self._process_filesystem_action(cleaned_response, debug_logger)
             
             # Combiner les opérations mémoire et filesystem pour SYNC
             all_ops = memory_ops + fs_ops
@@ -609,9 +609,13 @@ Tu peux converser, gérer des notes/todos/processus/protocoles en mémoire, et t
             logger.warning(f"Erreur dans _process_memory_action: {e}")
             return (response_text, None, [])
     
-    def _process_filesystem_action(self, response_text):
+    def _process_filesystem_action(self, response_text, debug_logger):
         """
         Extrait et exécute une action filesystem depuis la réponse du LLM
+        
+        Args:
+            response_text: Réponse brute du LLM
+            debug_logger: Logger de debug pour enregistrer les exécutions
         
         Returns:
             tuple: (cleaned_response, result_message, fs_ops) ou (response_text, None, []) si pas d'action
